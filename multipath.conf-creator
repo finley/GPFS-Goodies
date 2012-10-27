@@ -1,0 +1,252 @@
+#!/usr/bin/perl -w
+
+#
+# Originally created by: Jarrod Johnson <jbjohnso@us.ibm.com> as "getluns.pl"
+#
+
+#
+# 2012.10.16 Brian Elliott Finley <bfinley@us.ibm.com>
+# - added invocation options and help output
+# 2012.10.18 Brian Elliott Finley <bfinley@us.ibm.com>
+# - added additional info in resultant configuration
+#
+
+
+use strict;
+use Getopt::Long;
+use File::Basename;
+
+GetOptions(
+    "help"          => \my $help,
+    "auto-detect"   => \my $auto_detect,
+    "out-file=s"    => \my $out_file,
+) or usage() and exit(1);
+
+if( ! defined $auto_detect and ! defined $ARGV[0] ) {
+    usage();
+    print "\n";
+    print qq(-->  Make sure you specify one of "--auto-detect" or "a list of controllers".\n);
+    print "\n";
+    exit 1;
+} 
+
+if ( ! defined $out_file ) {
+    usage();
+    exit 1;
+}
+
+if ( defined $help ) {
+    usage();
+    exit 0;
+}
+
+
+my @controllers;
+if( defined $auto_detect ) {
+    my $cmd = "SMcli -d -v";
+    open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
+    while(<INPUT>) {
+        next if(m/^SMcli completed successfully/);
+        next if(m/^(\s|$)/);
+
+        if( m/(\S+)\s+.*/ ) {
+            my $controller = $1;
+            push @controllers, $controller;
+        };
+    }
+    close(INPUT);
+} else {
+    push @controllers, @ARGV;
+}
+
+my $quantity = scalar @controllers;
+print "Looks like we're dealing with $quantity controllers. Let's get going:\n";
+
+my %aliases;
+foreach my $controller (@controllers) {
+    
+    my $lun_name;
+    my $key;
+
+    print "  Querying $controller\n";
+
+    my $cmd = qq(SMcli -n $controller -c 'show logicalDrives;');
+    open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
+    while(<INPUT>) {
+
+        #
+        # Get the LUN's Name (from the SMclient perspective)
+        #
+        if (/Logical Drive name:\s*(\S*)/) {
+
+            my $lun_name = $1;
+
+            $key = "${controller}_${lun_name}";
+
+            $aliases{$key}->{controller} = $controller;
+            $aliases{$key}->{lun_name} = $lun_name;
+
+        }
+        #
+        # Get the LUN's WWID
+        #
+        elsif (/Logical Drive ID:\s*(\S*)/) {
+
+            my $wwid = $1;
+
+            $wwid =~ s/^/3/;
+            $wwid =~ s/://g;
+
+            $aliases{$key}->{wwid} = $wwid;
+
+        }
+        #
+        # Get the LUN's ID (Instance number -- Ie.: lun0)
+        #
+        elsif (/LUN:\s*(\S*)/) {
+
+            my $lun_number = $1;
+
+            $aliases{$key}->{lun_number} = $lun_number;
+
+        }
+        #
+        # Get the LUN's ownership (at the raid controller level) 
+        #
+        elsif (/Preferred owner:.*slot\s*(\S*)/) {
+
+            my $owner = lc($1);
+
+            $aliases{$key}->{owner} = $owner;
+
+        }
+
+    }
+    close(INPUT);
+}
+
+
+########################################################################
+#
+# BEGIN write out the multipath.conf file
+#
+my $file = $out_file;
+open(FILE,">$file") or die("Couldn't open $file for writing");
+print FILE <<'EOF';
+defaults {
+    user_friendly_names yes
+}
+
+multipaths {
+EOF
+
+foreach my $key (sort keys %aliases) {
+
+
+    # multipath {
+    #   # Controller Name:  pershing-ctrl-14-3
+    #   # Raid Controller:  a
+    #   # LUN Name:         PA14_3_0
+    #   # LUN Number:       0
+    #   wwid  360080e50002e34b8000002fd506c631e
+    #   alias pershing_ctrl_14_3a_lun0
+    # }
+
+    my $controller = $aliases{$key}->{controller};
+    my $lun_name = $aliases{$key}->{lun_name};
+    my $lun_number = $aliases{$key}->{lun_number};
+    my $owner = $aliases{$key}->{owner};
+
+    my $alias = "${controller}${owner}_lun${lun_number}";
+
+    my $wwid = $aliases{$key}->{wwid};
+
+    #
+    # (10:18:23 AM) Scott Fadden (GPFS): 
+    # typeset bannedFromDeviceNames='/?$&*()'   
+    # typeset bannedFromDiskNames='.<>{}/?`~!@#$%^&*()+=-' 
+    #
+    # GPFS Doesn't like hyphens in NSD disk names
+    #
+    $alias =~ s/-/_/g;
+
+    print FILE "    multipath {\n";
+    print FILE "        #\n";
+    print FILE "        # Controller Name:  $controller\n";
+    print FILE "        # Raid Controller:  $owner\n";
+    print FILE "        # LUN Name:         $lun_name\n";
+    print FILE "        # LUN Number:       $lun_number\n";
+    print FILE "        #\n";
+    print FILE "        alias $alias\n";
+    print FILE "        wwid  $wwid\n";
+    print FILE "    }\n";
+}
+
+print FILE "}\n";
+close(FILE);
+#
+# END write out the multipath.conf file
+#
+########################################################################
+
+print "Done!  You can find your fresh multipath.conf file here:\n";
+print "\n";
+print "  $out_file\n";
+print "\n";
+print << 'EOF';
+Your next step is to copy it out to /etc/multipath.conf on all of the
+storage servers connected to these storage controllers.  Then execute
+the following command to have them read in the new config (yes, we do it
+twice):
+
+    #
+    # WARNING!  Make sure you have performed an "mmshutdown" on each NSD
+    # server prior to copying out the new file and doing the reconfigure
+    # below.  If there are any differences between this config and your
+    # prior config, taking that precaution will ensure you don't provoke
+    # any corruption in any pre-existing GPFS filesystems.
+    #
+    # If you have NSD servers in building blocks as HA pairs, you should be
+    # able to do this on one server at a time (mmshutdown, reconfigure,
+    # mmstartup).  But, you _must_ use your own judgement -- don't
+    # blindly follow this part of these instructions.  (You can blindly
+    # follow the new file creation part. ;-)
+    #
+
+    multipathd -k'reconfigure' ; multipathd -k'reconfigure'
+
+
+You can see the results with these commands (and others):
+
+    ls /dev/mapper/
+    multipath -ll
+
+EOF
+
+exit 0;
+                                                                
+
+sub usage {
+    my $progname = basename($0);
+print << "EOF";
+
+Usage:  $progname  --out-file FILE [ --auto-detect | controller1 controller2 controller3 ...]
+
+    All options can be abbreviated to minimum uniqeness.
+
+    --auto-detect
+
+        This command will use the output from SMcli -v -d to determine the list
+        of controllers to use.
+
+    --out-file FILE
+
+        The name of your resultant multipath.conf file.  It doesn't
+        actually have to be called multipath.conf here...
+
+        Ie.:  --out-file /tmp/multipath.conf.test_run
+
+
+EOF
+    return 1;
+}

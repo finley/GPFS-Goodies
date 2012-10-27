@@ -1,0 +1,17 @@
+#
+# Created by: Jarrod Johnson
+#
+# Tweaked by: Brian Finley
+# - Added comments and DS3512 section
+#
+# DCS3700
+#
+SUBSYSTEM=="block", SUBSYSTEMS=="scsi", ATTRS{model}=="1818*", RUN+="/bin/sh -c '/bin/echo 4096 > /sys/block/%k/queue/max_sectors_kb;/bin/echo 512 > /sys/block/%k/queue/nr_requests;/bin/echo 4096 > /sys/block/%k/queue/read_ahead_kb;echo noop > /sys/block/%k/queue/scheduler'"
+#
+# DS3512
+#
+SUBSYSTEM=="block", SUBSYSTEMS=="scsi", ATTRS{model}=="1746*", RUN+="/bin/sh -c '/bin/echo 4096 > /sys/block/%k/queue/max_sectors_kb;/bin/echo 512 > /sys/block/%k/queue/nr_requests;/bin/echo 4096 > /sys/block/%k/queue/read_ahead_kb;/bin/echo 512 > /sys/block/%k/queue/nr_requests;/bin/echo 128 > /sys/block/%k/device/queue_depth;/bin/echo noop > /sys/block/%k/queue/scheduler'"
+#
+# Any and all /dev/dm-* devices.
+#
+SUBSYSTEM=="block", KERNEL=="dm-*",RUN+="/bin/sh -c '/bin/echo 4096 > /sys/block/%k/queue/max_sectors_kb;/bin/echo 512 > /sys/block/%k/queue/nr_requests;/bin/echo 4096 > /sys/block/%k/queue/read_ahead_kb;echo noop > /sys/block/%k/queue/scheduler'"	

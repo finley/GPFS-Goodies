@@ -1,0 +1,69 @@
+#!/bin/ksh
+
+#
+# 2012.10.27 Brian Finley <bfinley@us.ibm.com>.
+# - Modified from the stock example provided with the GPFS distribution
+#
+
+#
+# nsddevices file 
+#
+#   Used to tell GPFS to use our fresh multipath devices instead of the
+#   /dev/dm-* devices.
+#
+#   Key benefits: 
+#
+#   - Allows you to match your NSD names directly to your multipath
+#     device names, which is quite handy for troubleshooting a running
+#     filesystem.
+#
+#   - Dramatically simplifies the "mmcrnsd" process.
+#
+#     Use of this file can eliminate much confusion at mmcrnsd time.
+#     With /dev/dm-* devices, and multiple NSD servers that can both see
+#     the same LUNs, each NSD server may end up with a different
+#     /dev/dm-* name for the same LUN (Ie.: lun1 is /dev/dm-7 on server1
+#     and /dev/dm-12 on server2).  
+#
+#     As the mmcrnsd command performs it's LUN initialization from the
+#     primary NSD server indicated, and one wants to balance shared LUNs
+#     across connected NSD servers, this can cause significant confusion
+#     at best.  At worst, it can lead to human error resulting in the
+#     initialization of an NSD server's local disk (Ie.: /dev/dm-7 is
+#     actually /dev/sda on server2).  It can also lead to the mistaken
+#     belief that LUNs are balanced across NSD servers, when in fact,
+#     they're not. ;-)
+#
+#     Use of this file is not a requirement, but provides significant
+#     benefit by addressing these issues.
+#
+
+
+##############################################################################
+#
+# When properly installed, this script is invoked by the 
+# /usr/lpp/mmfs/bin/mmdevdiscover script.  
+#
+# INSTALLATION GUIDELINES FOR THIS SCRIPT:
+#
+#   a) Use /usr/lpp/mmfs/samples/nsddevices.sample as a configuration guideline
+#   b) Copy this script to /var/mmfs/etc/nsddevices on each NSD server
+#   c) Make it executable: "chmod +x /var/mmfs/etc/nsddevices"
+#
+##############################################################################
+
+CONTROLLER_REGEX='[ab]_lun[0-9]+'
+for dev in $( /bin/ls /dev/mapper | egrep $CONTROLLER_REGEX )
+do
+   echo mapper/$dev dmm
+done
+
+# Bypass the GPFS disk discovery (/usr/lpp/mmfs/bin/mmdevdiscover),
+return 0
+
+# If you wanted to continue with the GPFS disk discovery steps, you
+# could uncomment this next line (and comment out the one above).  But
+# you probably don't want to do that...
+#
+#return 1
+
