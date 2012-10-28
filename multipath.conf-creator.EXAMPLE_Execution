@@ -1,0 +1,114 @@
+#
+# 2012.10.27 Brian Finley <bfinley@us.ibm.com>
+# - executed on the NCAR storage cluster's primary managment node
+#
+
+[root@glademgt1 ~]# ./multipath.conf-creator -a -o /tmp/multipath.conf.test_run
+Looks like we're dealing with 76 controllers. Let's get going:
+  Querying dcs10
+  Querying dcs11
+  Querying dcs12
+  Querying dcs13
+  Querying dcs14
+  Querying dcs15
+  Querying dcs16
+  Querying dcs17
+  Querying dcs18
+  Querying dcs19
+  Querying dcs1
+  Querying dcs20
+  Querying dcs21
+  Querying dcs22
+  Querying dcs23
+  Querying dcs24
+  Querying dcs25
+  Querying dcs26
+  Querying dcs27
+  Querying dcs28
+  Querying dcs29
+  Querying dcs2
+  Querying dcs3
+  Querying dcs4
+  Querying dcs5
+  Querying dcs6
+  Querying dcs7
+  Querying dcs8
+  Querying dcs71
+  Querying dcs51
+  Querying dcs60
+  Querying dcs67
+  Querying dcs56
+  Querying dcs76
+  Querying dcs44
+  Querying dcs73
+  Querying dcs57
+  Querying dcs30
+  Querying dcs46
+  Querying dcs37
+  Querying dcs39
+  Querying dcs55
+  Querying dcs36
+  Querying dcs38
+  Querying dcs69
+  Querying dcs41
+  Querying dcs53
+  Querying dcs52
+  Querying dcs40
+  Querying dcs66
+  Querying dcs45
+  Querying dcs54
+  Querying dcs65
+  Querying dcs33
+  Querying dcs34
+  Querying dcs42
+  Querying dcs48
+  Querying dcs32
+  Querying dcs68
+  Querying dcs64
+  Querying dcs72
+  Querying dcs9
+  Querying dcs61
+  Querying dcs31
+  Querying dcs35
+  Querying dcs43
+  Querying dcs47
+  Querying dcs49
+  Querying dcs50
+  Querying dcs58
+  Querying dcs59
+  Querying dcs62
+  Querying dcs63
+  Querying dcs74
+  Querying dcs75
+  Querying dcs70
+Done!  You can find your fresh multipath.conf file here:
+
+  /tmp/multipath.conf.test_run
+
+Your next step is to copy it out to /etc/multipath.conf on all of the
+storage servers connected to these storage controllers.  Then execute
+the following command to have them read in the new config (yes, we do it
+twice):
+
+    #
+    # WARNING!  Make sure you have performed an "mmshutdown" on each NSD
+    # server prior to copying out the new file and doing the reconfigure
+    # below.  If there are any differences between this config and your
+    # prior config, taking that precaution will ensure you don't provoke
+    # any corruption in any pre-existing GPFS filesystems.
+    #
+    # If you have NSD servers in building blocks as HA pairs, you should be
+    # able to do this on one server at a time (mmshutdown, reconfigure,
+    # mmstartup).  But, you _must_ use your own judgement -- don't
+    # blindly follow this part of these instructions.  (You can blindly
+    # follow the new file creation part. ;-)
+    #
+
+    multipathd -k'reconfigure' ; multipathd -k'reconfigure'
+
+
+You can see the results with these commands (and others):
+
+    ls /dev/mapper/
+    multipath -ll
+

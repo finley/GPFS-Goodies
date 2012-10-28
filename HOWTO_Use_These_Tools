@@ -1,0 +1,43 @@
+#
+# 2012.10.27 Brian Elliott Finley <bfinley@us.ibm.com>
+# - created
+#
+
+#
+# A very quick and brief HOWTO use the tools in this directory.
+#
+
+Step 0:
+    
+    mmshutdown 
+
+    #
+    # Use your own judgement, but if you're not sure, shutdown the
+    # filesystem before changing configuration files on your NSD
+    # servers.
+    #
+
+
+Step 1:
+    
+    Copy ./var/mmfs/etc/nsddevices out to /var/mmfs/etc/nsddevices on
+    each NSD server.
+
+
+Step 2:
+
+    Copy ./etc/udev/rules.d/70-ibm-storage.rules out to
+    /etc/udev/rules.d/70-ibm-storage.rules on each NSD server.
+
+
+Step 3:
+
+    Execute multipath.conf-creator on the machine where you have
+    SMclient installed.
+
+
+Step 4:
+
+    Do what the output from multipath.conf-creator says. ;-)
+
+
