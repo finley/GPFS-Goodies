@@ -9,6 +9,8 @@
 # - added invocation options and help output
 # 2012.10.18 Brian Elliott Finley <bfinley@us.ibm.com>
 # - added additional info in resultant configuration
+# 2013.02.14 Brian Elliott Finley <bfinley@us.ibm.com>
+# - added blacklist feature
 #
 
 
@@ -20,6 +22,8 @@ GetOptions(
     "help"          => \my $help,
     "auto-detect"   => \my $auto_detect,
     "out-file=s"    => \my $out_file,
+    "blacklist=s"   => \my $blacklist,
+    "no-blacklist"  => \my $no_blacklist,
 ) or usage() and exit(1);
 
 if( ! defined $auto_detect and ! defined $ARGV[0] ) {
@@ -30,14 +34,37 @@ if( ! defined $auto_detect and ! defined $ARGV[0] ) {
     exit 1;
 } 
 
+if( defined $blacklist and (($blacklist =~ m/^\-+n/) or (defined $no_blacklist)) ) {
+    usage();
+    print "\n";
+    print qq(-->  You can specify either "--blacklist" or "--no-blacklist" but not both."\n);
+    print "\n";
+    exit 1;
+} 
+
 if ( ! defined $out_file ) {
     usage();
+    print "\n";
+    print qq(-->  Please specify "--out-file FILE".\n);
+    print "\n";
     exit 1;
 }
 
 if ( defined $help ) {
     usage();
     exit 0;
+}
+
+my @blacklist_devices;
+if( defined $no_blacklist ) {
+    undef @blacklist_devices;
+
+} elsif( defined $blacklist ) {
+    @blacklist_devices = split(/,/, $blacklist);
+
+} else {
+    # If we got to here, then we default to adding sda to the blacklist
+    @blacklist_devices = 'sda';
 }
 
 
@@ -132,14 +159,37 @@ foreach my $controller (@controllers) {
 #
 my $file = $out_file;
 open(FILE,">$file") or die("Couldn't open $file for writing");
-print FILE <<'EOF';
-defaults {
-    user_friendly_names yes
+
+#
+# Default entries
+#
+print FILE qq(defaults {\n);
+print FILE qq(    user_friendly_names yes\n);
+print FILE qq(}\n);
+
+print FILE qq(\n);
+
+#
+# Blacklist entries
+#
+unless(defined $no_blacklist) {
+
+    print FILE qq(blacklist {\n);
+    print FILE qq(    # See "man perlre" to better understand this regular expression.\n);
+
+    foreach my $device (@blacklist_devices) {
+        print FILE qq(    devnode "^) . $device . qq([0-9]+"\n);
+    }
+
+    print FILE qq(}\n);
+
+    print FILE qq(\n);
 }
 
-multipaths {
-EOF
-
+#
+# Multipath entries
+#
+print FILE qq(multipaths {\n);
 foreach my $key (sort keys %aliases) {
 
 
@@ -196,8 +246,7 @@ print "\n";
 print << 'EOF';
 Your next step is to copy it out to /etc/multipath.conf on all of the
 storage servers connected to these storage controllers.  Then execute
-the following command to have them read in the new config (yes, we do it
-twice):
+the multipathd command to re-read the configuration file:
 
     #
     # WARNING!  Make sure you have performed an "mmshutdown" on each NSD
@@ -213,7 +262,14 @@ twice):
     # follow the new file creation part. ;-)
     #
 
-    multipathd -k'reconfigure' ; multipathd -k'reconfigure'
+    multipathd -k'reconfigure' 
+    multipathd -k'reconfigure'
+
+    #
+    # Yes -- do it twice.  With the first invocation, it's possible that
+    # not all device mapper name changes will show up in the
+    # /dev/mapper/ directory.
+    #
 
 
 You can see the results with these commands (and others):
@@ -230,22 +286,40 @@ sub usage {
     my $progname = basename($0);
 print << "EOF";
 
-Usage:  $progname  --out-file FILE [ --auto-detect | controller1 controller2 controller3 ...]
+Usage:  $progname [OPTION...] --out-file FILE [ --auto-detect | controller1 controller2... ]
 
     All options can be abbreviated to minimum uniqeness.
 
     --auto-detect
 
         This command will use the output from SMcli -v -d to determine the list
-        of controllers to use.
+        of controllers to use.  Highly recomended.
+
 
     --out-file FILE
 
         The name of your resultant multipath.conf file.  It doesn't
         actually have to be called multipath.conf here...
 
-        Ie.:  --out-file /tmp/multipath.conf.test_run
+        Example:  --out-file /tmp/multipath.conf.test_run
 
+
+    --blacklist DISK[,DISK,DISK] 
+
+        A comma delimited list of disks to blacklist.  
+        
+        If no --blacklist entry is specified, "sda" will automatically
+        be added to the blacklist as the default.  If you specify a
+        blacklist it overrides the default (doesn't add to it).  So if
+        you specify a blacklist, and want to include sda, it must be in
+        your comma delimited list.
+        
+        Example:  --blacklist sdi,sdb,sdm
+        
+
+    --no-blacklist
+
+        Don't blacklist any disks -- not even "sda".
 
 EOF
     return 1;
