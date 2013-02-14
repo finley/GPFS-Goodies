@@ -1,10 +1,15 @@
 #
 # 2012.10.27 Brian Finley <bfinley@us.ibm.com>
-# - created by multipath.conf-creator on the NCAR storage cluster's primary managment node
+# - created by multipath.conf-creator on a storage cluster's primary managment node
 #
 
 defaults {
     user_friendly_names yes
+}
+
+blacklist {
+    # See "man perlre" to better understand this regular expression.
+    devnode "^sda[0-9]+"
 }
 
 multipaths {

@@ -1,6 +1,6 @@
 #
 # 2012.10.27 Brian Finley <bfinley@us.ibm.com>
-# - executed on the NCAR storage cluster's primary managment node
+# - executed on a storage cluster's primary managment node
 #
 
 [root@glademgt1 ~]# ./multipath.conf-creator -a -o /tmp/multipath.conf.test_run
@@ -87,8 +87,7 @@ Done!  You can find your fresh multipath.conf file here:
 
 Your next step is to copy it out to /etc/multipath.conf on all of the
 storage servers connected to these storage controllers.  Then execute
-the following command to have them read in the new config (yes, we do it
-twice):
+the multipathd command to re-read the configuration file:
 
     #
     # WARNING!  Make sure you have performed an "mmshutdown" on each NSD
@@ -104,7 +103,14 @@ twice):
     # follow the new file creation part. ;-)
     #
 
-    multipathd -k'reconfigure' ; multipathd -k'reconfigure'
+    multipathd -k'reconfigure' 
+    multipathd -k'reconfigure'
+
+    #
+    # Yes -- do it twice.  With the first invocation, it's possible that
+    # not all device mapper name changes will show up in the
+    # /dev/mapper/ directory.
+    #
 
 
 You can see the results with these commands (and others):
