@@ -47,3 +47,19 @@ Step 4:
     Do what the output from multipath.conf-creator says. ;-)
 
 
+Step 5:
+
+    Copy ./etc/modprobe.d/scsi_dh_alua.conf out to
+    /etc/modprobe.d/scsi_dh_alua.conf on each NSD server, then re-build
+    the initrd.  On RedHat 6, this is done via "dracut" command with
+    something like this:
+
+    #
+    # Backup original initrd
+    cp /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.orig
+
+    #
+    # Create a new one
+    dracut -f /boot/initramfs-$(uname -r).img $(uname -r)
+
+
