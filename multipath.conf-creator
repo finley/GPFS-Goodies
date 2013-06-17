@@ -11,7 +11,8 @@
 # - added additional info in resultant configuration
 # 2013.02.14 Brian Elliott Finley <bfinley@us.ibm.com>
 # - added blacklist feature
-#
+# 2013.06.14 Brian Elliott Finley <bfinley@us.ibm.com>
+# - modify blacklist to use vendor/product info instead of disk name
 
 
 use strict;
@@ -22,7 +23,7 @@ GetOptions(
     "help"          => \my $help,
     "auto-detect"   => \my $auto_detect,
     "out-file=s"    => \my $out_file,
-    "blacklist=s"   => \my $blacklist,
+    #"blacklist=s"   => \my $blacklist,
     "no-blacklist"  => \my $no_blacklist,
 ) or usage() and exit(1);
 
@@ -34,13 +35,13 @@ if( ! defined $auto_detect and ! defined $ARGV[0] ) {
     exit 1;
 } 
 
-if( defined $blacklist and (($blacklist =~ m/^\-+n/) or (defined $no_blacklist)) ) {
-    usage();
-    print "\n";
-    print qq(-->  You can specify either "--blacklist" or "--no-blacklist" but not both."\n);
-    print "\n";
-    exit 1;
-} 
+#if( defined $blacklist and (($blacklist =~ m/^\-+n/) or (defined $no_blacklist)) ) {
+#    usage();
+#    print "\n";
+#    print qq(-->  You can specify either "--blacklist" or "--no-blacklist" but not both."\n);
+#    print "\n";
+#    exit 1;
+#} 
 
 if ( ! defined $out_file ) {
     usage();
@@ -55,17 +56,17 @@ if ( defined $help ) {
     exit 0;
 }
 
-my @blacklist_devices;
-if( defined $no_blacklist ) {
-    undef @blacklist_devices;
-
-} elsif( defined $blacklist ) {
-    @blacklist_devices = split(/,/, $blacklist);
-
-} else {
-    # If we got to here, then we default to adding sda to the blacklist
-    @blacklist_devices = 'sda';
-}
+#my @blacklist_devices;
+#if( defined $no_blacklist ) {
+#    undef @blacklist_devices;
+#
+#} elsif( defined $blacklist ) {
+#    @blacklist_devices = split(/,/, $blacklist);
+#
+#} else {
+#    # If we got to here, then we default to adding sda to the blacklist
+#    @blacklist_devices = 'sda';
+#}
 
 
 my @controllers;
@@ -174,15 +175,45 @@ print FILE qq(\n);
 #
 unless(defined $no_blacklist) {
 
-    print FILE qq(blacklist {\n);
-    print FILE qq(    # See "man perlre" to better understand this regular expression.\n);
+    my @blacklist_entries = ("LSI,Logical Volume");
 
-    foreach my $device (@blacklist_devices) {
-        print FILE qq(    devnode "^) . $device . qq([0-9]+"\n);
+    #
+    # How to determine which device to blacklist on a node:
+    #
+    #   Figure out which device is your root device (sda in this case)
+    #   and use lsscsi to find out how it's classified.  Pay attention
+    #   to the vendor and product information as indicated below.  These
+    #   are the two pieces we use to blacklist root devices across a
+    #   class of machines (Ie.: all of your storage servers with the
+    #   exact same hardware configuration).
+    #
+    #   [root@storage06 ~]# lsscsi  | grep -w sda
+    #   [0:1:0:0]    disk    LSI      Logical Volume   3000  /dev/sda 
+    #
+    #                        ^^^      ^^^^^^^^^^^^^^
+    #                         |         |
+    #                         |         --- product 
+    #                         --- vendor
+    #
+    # XXXX Note to self: at some point, accept a user provided blacklist
+    # entry of the form:
+    #
+    #   --blacklist "vendor,product"
+    #   --blacklist "LSI,Logical Volume" --blacklist "MyRaid,Illogical Volume"
+    #
+
+    print FILE qq(blacklist {\n);
+    foreach my $entry (@blacklist_entries) {
+        my ($vendor, $product) = split(/,/, $entry, 2);
+
+        print FILE qq(    device {\n);
+        print FILE qq(        vendor    "$vendor"\n);
+        print FILE qq(        product   "$product"\n);
+        print FILE qq(    }\n);
+
     }
 
     print FILE qq(}\n);
-
     print FILE qq(\n);
 }
 
@@ -304,23 +335,28 @@ Usage:  $progname [OPTION...] --out-file FILE [ --auto-detect | controller1 cont
         Example:  --out-file /tmp/multipath.conf.test_run
 
 
-    --blacklist DISK[,DISK,DISK] 
-
-        A comma delimited list of disks to blacklist.  
-        
-        If no --blacklist entry is specified, "sda" will automatically
-        be added to the blacklist as the default.  If you specify a
-        blacklist it overrides the default (doesn't add to it).  So if
-        you specify a blacklist, and want to include sda, it must be in
-        your comma delimited list.
-        
-        Example:  --blacklist sdi,sdb,sdm
-        
-
     --no-blacklist
 
-        Don't blacklist any disks -- not even "sda".
+        Don't blacklist any disks.  By default, this tool will create a
+        multipath.conf file that blacklists the local disks.  
+        
+        Please verify before rebooting your nodes by running 
+        'multipath -v3' and examining the output for blacklisted devices.
+
 
 EOF
     return 1;
+#XXXX    --blacklist DISK[,DISK,DISK] 
+#
+#        A comma delimited list of disks to blacklist.  
+#        
+#        If no --blacklist entry is specified, "sda" will automatically
+#        be added to the blacklist as the default.  If you specify a
+#        blacklist it overrides the default (doesn't add to it).  So if
+#        you specify a blacklist, and want to include sda, it must be in
+#        your comma delimited list.
+#        
+#        Example:  --blacklist sdi,sdb,sdm
+#        
+#
 }
