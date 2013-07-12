@@ -1,7 +1,7 @@
-Add an --alua and an --mpp option to add something like this:
+Add sections to the multipath.conf file automatically with entries for
+1818 and 1718...
 
 devices {
-    # These settings are appropriate for ALUA
     device {
         vendor "IBM"
         product "1818"
