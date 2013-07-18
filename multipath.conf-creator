@@ -13,6 +13,10 @@
 # - added blacklist feature
 # 2013.06.14 Brian Elliott Finley <bfinley@us.ibm.com>
 # - modify blacklist to use vendor/product info instead of disk name
+# 2013.07.18 Brian Elliott Finley <bfinley@us.ibm.com>
+# - add section entries for DCS3700 and DS35xx subsystems
+# - handle case where subsystem name has spaces
+# - handle case where SMCli or subsystem doesn't return a "lun number"
 
 
 use strict;
@@ -77,7 +81,7 @@ if( defined $auto_detect ) {
         next if(m/^SMcli completed successfully/);
         next if(m/^(\s|$)/);
 
-        if( m/(\S+)\s+.*/ ) {
+        if( m/([\w ]*)\t+.*/ ) {
             my $controller = $1;
             push @controllers, $controller;
         };
@@ -96,9 +100,9 @@ foreach my $controller (@controllers) {
     my $lun_name;
     my $key;
 
-    print "  Querying $controller\n";
+    print qq(  Querying "$controller"\n);
 
-    my $cmd = qq(SMcli -n $controller -c 'show logicalDrives;');
+    my $cmd = qq(SMcli -n "$controller" -c 'show logicalDrives;');
     open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
     while(<INPUT>) {
 
@@ -139,6 +143,16 @@ foreach my $controller (@controllers) {
 
         }
         #
+        # Get the LUN's SSID
+        #
+        elsif (/\s+Subsystem ID \(SSID\):\s+(\d+)/) {
+
+            my $ssid = $1;
+
+            $aliases{$key}->{ssid} = $ssid;
+
+        }
+        #
         # Get the LUN's ownership (at the raid controller level) 
         #
         elsif (/Preferred owner:.*slot\s*(\S*)/) {
@@ -175,7 +189,9 @@ print FILE qq(\n);
 #
 unless(defined $no_blacklist) {
 
-    my @blacklist_entries = ("LSI,Logical Volume");
+    my @blacklist_entries;
+    push @blacklist_entries, 'LSI,Logical Volume';
+    push @blacklist_entries, '*,Universal Xport';
 
     #
     # How to determine which device to blacklist on a node:
@@ -234,11 +250,19 @@ foreach my $key (sort keys %aliases) {
     # }
 
     my $controller = $aliases{$key}->{controller};
-    my $lun_name = $aliases{$key}->{lun_name};
-    my $lun_number = $aliases{$key}->{lun_number};
     my $owner = $aliases{$key}->{owner};
+    my $lun_name = $aliases{$key}->{lun_name} if( defined $aliases{$key}->{lun_name} );
+    my $lun_number = $aliases{$key}->{lun_number} if( defined $aliases{$key}->{lun_number} );
+    my $ssid = $aliases{$key}->{ssid} if( defined $aliases{$key}->{ssid} );
 
-    my $alias = "${controller}${owner}_lun${lun_number}";
+    my $lun;
+    if(defined $lun_number) {
+        $lun = $lun_number;
+    } else {
+        $lun = $ssid;
+    }
+
+    my $alias = "${controller}${owner}_lun${lun}";
 
     my $wwid = $aliases{$key}->{wwid};
 
@@ -250,13 +274,19 @@ foreach my $key (sort keys %aliases) {
     # GPFS Doesn't like hyphens in NSD disk names
     #
     $alias =~ s/-/_/g;
+    #
+    # And spaces introduced (perhaps by a controller name) are right
+    # out!
+    #
+    $alias =~ s/ /_/g;
 
     print FILE "    multipath {\n";
     print FILE "        #\n";
-    print FILE "        # Controller Name:  $controller\n";
-    print FILE "        # Raid Controller:  $owner\n";
-    print FILE "        # LUN Name:         $lun_name\n";
-    print FILE "        # LUN Number:       $lun_number\n";
+    print FILE "        # Controller Name:      $controller\n";
+    print FILE "        # Raid Controller:      $owner\n";
+    print FILE "        # LUN Name:             $lun_name\n"    if( defined $lun_name);
+    print FILE "        # LUN Number:           $lun_number\n"  if( defined $lun_number);
+    print FILE "        # Subsystem ID (SSID):  $ssid\n"    if( defined $ssid);
     print FILE "        #\n";
     print FILE "        alias $alias\n";
     print FILE "        wwid  $wwid\n";
