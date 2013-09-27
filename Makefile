@@ -10,8 +10,8 @@ all: tarball
 
 .PHONY += install
 install: version_executables
-	mkdir -p ${PREFIX}/usr/bin/
-	install -m 755 bin/* ${PREFIX}/usr/bin/
+	mkdir -p ${PREFIX}/usr/sbin/
+	install -m 755 sbin/* ${PREFIX}/usr/sbin/
 	
 	mkdir -p ${PREFIX}/usr/share/${PKG_NAME}/etc/modprobe.d/
 	install -m 644 etc/modprobe.d/* ${PREFIX}/usr/share/${PKG_NAME}/etc/modprobe.d/

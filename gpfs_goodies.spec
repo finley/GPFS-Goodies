@@ -29,8 +29,7 @@ Includes:
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/bin
-#mkdir -p $RPM_BUILD_ROOT/usr/share/man/man8
+mkdir -p $RPM_BUILD_ROOT/
 make PREFIX=$RPM_BUILD_ROOT install
 
 %clean
@@ -38,6 +37,9 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
+#%config(noreplace) /etc/myconffile.conf
+%{PREFIX}/usr/sbin/
+%{PREFIX}/usr/share/
 
 %changelog
 * Fri Sep 20 2013 Brian Elliott Finley <bfinley@us.ibm.com>
