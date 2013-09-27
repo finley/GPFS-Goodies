@@ -5,6 +5,7 @@ Release: 1
 Source: %{name}-%{version}.tar.bz2
 BuildRoot: /tmp/%{name}-buildroot
 BuildArchitectures: noarch
+Requires: lsscsi
 License: EPL
 
 
@@ -38,8 +39,8 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 #%config(noreplace) /etc/myconffile.conf
-%{PREFIX}/usr/sbin/
-%{PREFIX}/usr/share/
+%{_prefix}/sbin/
+%{_prefix}/share/
 
 %changelog
 * Fri Sep 20 2013 Brian Elliott Finley <bfinley@us.ibm.com>
