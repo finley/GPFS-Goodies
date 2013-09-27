@@ -1,0 +1,4576 @@
+#
+# 2012.10.27 Brian Finley <bfinley@us.ibm.com>
+# - created by multipath.conf-creator on a storage cluster's primary managment node
+#
+
+defaults {
+    user_friendly_names yes
+}
+
+blacklist {
+    # See "man perlre" to better understand this regular expression.
+    devnode "^sda[0-9]+"
+}
+
+multipaths {
+    multipath {
+        #
+        # Controller Name:  dcs10
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs10a_lun0
+        wwid  360080e50002e6e88000003bc501ba4d5
+    }
+    multipath {
+        #
+        # Controller Name:  dcs10
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs10b_lun1
+        wwid  360080e50002e6ed2000003ad501ba4a0
+    }
+    multipath {
+        #
+        # Controller Name:  dcs10
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs10a_lun2
+        wwid  360080e50002e6e88000003c0501ba4e1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs10
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs10b_lun3
+        wwid  360080e50002e6ed2000003b1501ba4ac
+    }
+    multipath {
+        #
+        # Controller Name:  dcs10
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs10a_lun4
+        wwid  360080e50002e6e88000003c4501ba4ef
+    }
+    multipath {
+        #
+        # Controller Name:  dcs10
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs10b_lun5
+        wwid  360080e50002e6ed2000003b5501ba4ba
+    }
+    multipath {
+        #
+        # Controller Name:  dcs11
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs11a_lun0
+        wwid  360080e50002e862a000004fa501ba55f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs11
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs11b_lun1
+        wwid  360080e50002e8752000004ee501ba572
+    }
+    multipath {
+        #
+        # Controller Name:  dcs11
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs11a_lun2
+        wwid  360080e50002e862a000004fe501ba56c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs11
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs11b_lun3
+        wwid  360080e50002e8752000004f2501ba57d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs11
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs11a_lun4
+        wwid  360080e50002e862a00000502501ba578
+    }
+    multipath {
+        #
+        # Controller Name:  dcs11
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs11b_lun5
+        wwid  360080e50002e8752000004f6501ba58b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs12
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs12a_lun0
+        wwid  360080e50002e6b0400000507501ba630
+    }
+    multipath {
+        #
+        # Controller Name:  dcs12
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs12b_lun1
+        wwid  360080e50002e7212000005db501ba584
+    }
+    multipath {
+        #
+        # Controller Name:  dcs12
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs12a_lun2
+        wwid  360080e50002e6b040000050b501ba63f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs12
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs12b_lun3
+        wwid  360080e50002e7212000005df501ba591
+    }
+    multipath {
+        #
+        # Controller Name:  dcs12
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs12a_lun4
+        wwid  360080e50002e6b040000050f501ba64b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs12
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs12b_lun5
+        wwid  360080e50002e7212000005e3501ba59f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs13
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs13a_lun0
+        wwid  360080e50002e6cd200000856501ba468
+    }
+    multipath {
+        #
+        # Controller Name:  dcs13
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs13b_lun1
+        wwid  360080e50002e86b200000804501ba66a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs13
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs13a_lun2
+        wwid  360080e50002e6cd20000085a501ba477
+    }
+    multipath {
+        #
+        # Controller Name:  dcs13
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs13b_lun3
+        wwid  360080e50002e86b200000808501ba678
+    }
+    multipath {
+        #
+        # Controller Name:  dcs13
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs13a_lun4
+        wwid  360080e50002e6cd20000085e501ba487
+    }
+    multipath {
+        #
+        # Controller Name:  dcs13
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs13b_lun5
+        wwid  360080e50002e86b20000080c501ba688
+    }
+    multipath {
+        #
+        # Controller Name:  dcs14
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs14a_lun0
+        wwid  360080e50002e88440000036e501ba708
+    }
+    multipath {
+        #
+        # Controller Name:  dcs14
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs14b_lun1
+        wwid  360080e50002e6b2000000389501ba70f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs14
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs14a_lun2
+        wwid  360080e50002e884400000372501ba716
+    }
+    multipath {
+        #
+        # Controller Name:  dcs14
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs14b_lun3
+        wwid  360080e50002e6b200000038d501ba71c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs14
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs14a_lun4
+        wwid  360080e50002e884400000376501ba723
+    }
+    multipath {
+        #
+        # Controller Name:  dcs14
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs14b_lun5
+        wwid  360080e50002e6b2000000391501ba72a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs15
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs15a_lun0
+        wwid  360080e50002e70f8000002fb501ba7a3
+    }
+    multipath {
+        #
+        # Controller Name:  dcs15
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs15b_lun1
+        wwid  360080e50002e6c82000002ed501ba7b3
+    }
+    multipath {
+        #
+        # Controller Name:  dcs15
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs15a_lun2
+        wwid  360080e50002e70f8000002ff501ba7b1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs15
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs15b_lun3
+        wwid  360080e50002e6c82000002f1501ba7bf
+    }
+    multipath {
+        #
+        # Controller Name:  dcs15
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs15a_lun4
+        wwid  360080e50002e70f800000303501ba7be
+    }
+    multipath {
+        #
+        # Controller Name:  dcs15
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs15b_lun5
+        wwid  360080e50002e6c82000002f5501ba7cc
+    }
+    multipath {
+        #
+        # Controller Name:  dcs16
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs16a_lun0
+        wwid  360080e50002e7c84000006b0501ba85c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs16
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs16b_lun1
+        wwid  360080e50002e84ac0000064f501ba7a1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs16
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs16a_lun2
+        wwid  360080e50002e7c84000006b4501ba86a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs16
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs16b_lun3
+        wwid  360080e50002e84ac00000653501ba7ad
+    }
+    multipath {
+        #
+        # Controller Name:  dcs16
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs16a_lun4
+        wwid  360080e50002e7c84000006b8501ba876
+    }
+    multipath {
+        #
+        # Controller Name:  dcs16
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs16b_lun5
+        wwid  360080e50002e84ac00000657501ba7b9
+    }
+    multipath {
+        #
+        # Controller Name:  dcs17
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs17a_lun0
+        wwid  360080e50002e662c0000038e501ba6ee
+    }
+    multipath {
+        #
+        # Controller Name:  dcs17
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs17b_lun1
+        wwid  360080e50002e874a000003a4501ba76f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs17
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs17a_lun2
+        wwid  360080e50002e662c00000392501ba6fc
+    }
+    multipath {
+        #
+        # Controller Name:  dcs17
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs17b_lun3
+        wwid  360080e50002e874a000003a8501ba77a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs17
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs17a_lun4
+        wwid  360080e50002e662c00000396501ba708
+    }
+    multipath {
+        #
+        # Controller Name:  dcs17
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs17b_lun5
+        wwid  360080e50002e874a000003ac501ba78a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs18
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs18a_lun0
+        wwid  360080e50002e640000000567501ba955
+    }
+    multipath {
+        #
+        # Controller Name:  dcs18
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs18b_lun1
+        wwid  360080e50002e64a200000572501ba8e3
+    }
+    multipath {
+        #
+        # Controller Name:  dcs18
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs18a_lun2
+        wwid  360080e50002e64000000056b501ba962
+    }
+    multipath {
+        #
+        # Controller Name:  dcs18
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs18b_lun3
+        wwid  360080e50002e64a200000576501ba8ef
+    }
+    multipath {
+        #
+        # Controller Name:  dcs18
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs18a_lun4
+        wwid  360080e50002e64000000056f501ba96f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs18
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs18b_lun5
+        wwid  360080e50002e64a20000057a501ba8fd
+    }
+    multipath {
+        #
+        # Controller Name:  dcs19
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs19a_lun0
+        wwid  360080e50002e737200000510501ba98c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs19
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs19b_lun1
+        wwid  360080e50002e5f7e00000503501ba949
+    }
+    multipath {
+        #
+        # Controller Name:  dcs19
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs19a_lun2
+        wwid  360080e50002e737200000514501ba999
+    }
+    multipath {
+        #
+        # Controller Name:  dcs19
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs19b_lun3
+        wwid  360080e50002e5f7e00000507501ba954
+    }
+    multipath {
+        #
+        # Controller Name:  dcs19
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs19a_lun4
+        wwid  360080e50002e737200000518501ba9a5
+    }
+    multipath {
+        #
+        # Controller Name:  dcs19
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs19b_lun5
+        wwid  360080e50002e5f7e0000050b501ba961
+    }
+    multipath {
+        #
+        # Controller Name:  dcs1
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs1a_lun0
+        wwid  360080e50002e6df2000003f7501b9ef7
+    }
+    multipath {
+        #
+        # Controller Name:  dcs1
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs1b_lun1
+        wwid  360080e50002e6e5a000003e7501b9f3a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs1
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs1a_lun2
+        wwid  360080e50002e6df2000003fb501b9f04
+    }
+    multipath {
+        #
+        # Controller Name:  dcs1
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs1b_lun3
+        wwid  360080e50002e6e5a000003eb501b9f46
+    }
+    multipath {
+        #
+        # Controller Name:  dcs1
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs1a_lun4
+        wwid  360080e50002e6df2000003ff501b9f10
+    }
+    multipath {
+        #
+        # Controller Name:  dcs1
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs1b_lun5
+        wwid  360080e50002e6e5a000003ef501b9f53
+    }
+    multipath {
+        #
+        # Controller Name:  dcs20
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs20a_lun0
+        wwid  360080e50002e6dd20000049a501baa02
+    }
+    multipath {
+        #
+        # Controller Name:  dcs20
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs20b_lun1
+        wwid  360080e50002e6f5e00000490501ba9fe
+    }
+    multipath {
+        #
+        # Controller Name:  dcs20
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs20a_lun2
+        wwid  360080e50002e6dd20000049e501baa0e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs20
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs20b_lun3
+        wwid  360080e50002e6f5e00000494501baa0a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs20
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs20a_lun4
+        wwid  360080e50002e6dd2000004a2501baa1b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs20
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs20b_lun5
+        wwid  360080e50002e6f5e00000498501baa18
+    }
+    multipath {
+        #
+        # Controller Name:  dcs21
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs21a_lun0
+        wwid  360080e50002e2ea600000418501ba8e0
+    }
+    multipath {
+        #
+        # Controller Name:  dcs21
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs21b_lun1
+        wwid  360080e50002e2aea00000416501baa50
+    }
+    multipath {
+        #
+        # Controller Name:  dcs21
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs21a_lun2
+        wwid  360080e50002e2ea60000041c501ba8ee
+    }
+    multipath {
+        #
+        # Controller Name:  dcs21
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs21b_lun3
+        wwid  360080e50002e2aea0000041a501baa5c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs21
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs21a_lun4
+        wwid  360080e50002e2ea600000420501ba8fa
+    }
+    multipath {
+        #
+        # Controller Name:  dcs21
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs21b_lun5
+        wwid  360080e50002e2aea0000041e501baa69
+    }
+    multipath {
+        #
+        # Controller Name:  dcs22
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs22a_lun0
+        wwid  360080e50002ddf5600000436501bab59
+    }
+    multipath {
+        #
+        # Controller Name:  dcs22
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs22b_lun1
+        wwid  360080e50002dc54400000440501baae8
+    }
+    multipath {
+        #
+        # Controller Name:  dcs22
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs22a_lun2
+        wwid  360080e50002ddf560000043a501bab69
+    }
+    multipath {
+        #
+        # Controller Name:  dcs22
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs22b_lun3
+        wwid  360080e50002dc54400000444501baaf6
+    }
+    multipath {
+        #
+        # Controller Name:  dcs22
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs22a_lun4
+        wwid  360080e50002ddf560000043e501bab77
+    }
+    multipath {
+        #
+        # Controller Name:  dcs22
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs22b_lun5
+        wwid  360080e50002dc54400000448501bab03
+    }
+    multipath {
+        #
+        # Controller Name:  dcs23
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs23a_lun0
+        wwid  360080e50002e878400000353501babf0
+    }
+    multipath {
+        #
+        # Controller Name:  dcs23
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs23b_lun1
+        wwid  360080e50002e61940000034e501bac15
+    }
+    multipath {
+        #
+        # Controller Name:  dcs23
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs23a_lun2
+        wwid  360080e50002e878400000357501babfd
+    }
+    multipath {
+        #
+        # Controller Name:  dcs23
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs23b_lun3
+        wwid  360080e50002e619400000352501bac21
+    }
+    multipath {
+        #
+        # Controller Name:  dcs23
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs23a_lun4
+        wwid  360080e50002e87840000035b501bac0a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs23
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs23b_lun5
+        wwid  360080e50002e619400000356501bac2e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs24
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs24a_lun0
+        wwid  360080e50002d6e080000086f501bac30
+    }
+    multipath {
+        #
+        # Controller Name:  dcs24
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs24b_lun1
+        wwid  360080e50002e406a000004be501bacab
+    }
+    multipath {
+        #
+        # Controller Name:  dcs24
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs24a_lun2
+        wwid  360080e50002d6e0800000873501bac3e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs24
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs24b_lun3
+        wwid  360080e50002e406a000004c2501bacb7
+    }
+    multipath {
+        #
+        # Controller Name:  dcs24
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs24a_lun4
+        wwid  360080e50002d6e0800000877501bac4a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs24
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs24b_lun5
+        wwid  360080e50002e406a000004c6501bacc5
+    }
+    multipath {
+        #
+        # Controller Name:  dcs25
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs25a_lun0
+        wwid  360080e50002df28400000b46501bacf2
+    }
+    multipath {
+        #
+        # Controller Name:  dcs25
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs25b_lun1
+        wwid  360080e50002e350e000003b3501bacc8
+    }
+    multipath {
+        #
+        # Controller Name:  dcs25
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs25a_lun2
+        wwid  360080e50002df28400000b4a501bacff
+    }
+    multipath {
+        #
+        # Controller Name:  dcs25
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs25b_lun3
+        wwid  360080e50002e350e000003b7501bacd3
+    }
+    multipath {
+        #
+        # Controller Name:  dcs25
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs25a_lun4
+        wwid  360080e50002df28400000b4e501bad0c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs25
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs25b_lun5
+        wwid  360080e50002e350e000003bb501bace1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs26
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs26a_lun0
+        wwid  360080e50002e881c00000545501bac20
+    }
+    multipath {
+        #
+        # Controller Name:  dcs26
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs26b_lun1
+        wwid  360080e50002e3e3600000541501babc6
+    }
+    multipath {
+        #
+        # Controller Name:  dcs26
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs26a_lun2
+        wwid  360080e50002e881c00000549501bac2d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs26
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs26b_lun3
+        wwid  360080e50002e3e3600000545501babd4
+    }
+    multipath {
+        #
+        # Controller Name:  dcs26
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs26a_lun4
+        wwid  360080e50002e881c0000054d501bac3b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs26
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs26b_lun5
+        wwid  360080e50002e3e3600000549501babe1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs27
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs27a_lun0
+        wwid  360080e50002e6dae00000439501bae28
+    }
+    multipath {
+        #
+        # Controller Name:  dcs27
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs27b_lun1
+        wwid  360080e50002e6c7400000429501bae48
+    }
+    multipath {
+        #
+        # Controller Name:  dcs27
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs27a_lun2
+        wwid  360080e50002e6dae0000043d501bae35
+    }
+    multipath {
+        #
+        # Controller Name:  dcs27
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs27b_lun3
+        wwid  360080e50002e6c740000042d501bae54
+    }
+    multipath {
+        #
+        # Controller Name:  dcs27
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs27a_lun4
+        wwid  360080e50002e6dae00000441501bae43
+    }
+    multipath {
+        #
+        # Controller Name:  dcs27
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs27b_lun5
+        wwid  360080e50002e6c7400000431501bae62
+    }
+    multipath {
+        #
+        # Controller Name:  dcs28
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs28a_lun0
+        wwid  360080e50002e4e0000000d34501bae30
+    }
+    multipath {
+        #
+        # Controller Name:  dcs28
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs28b_lun1
+        wwid  360080e50002e7cbc0000071e501baeb9
+    }
+    multipath {
+        #
+        # Controller Name:  dcs28
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs28a_lun2
+        wwid  360080e50002e4e0000000d38501bae3d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs28
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs28b_lun3
+        wwid  360080e50002e7cbc00000722501baec5
+    }
+    multipath {
+        #
+        # Controller Name:  dcs28
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs28a_lun4
+        wwid  360080e50002e4e0000000d3c501bae4a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs28
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs28b_lun5
+        wwid  360080e50002e7cbc00000726501baed3
+    }
+    multipath {
+        #
+        # Controller Name:  dcs29
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs29a_lun0
+        wwid  360080e50002e685e0000031a501baf2a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs29
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs29b_lun1
+        wwid  360080e50002e6ce8000002eb501baf28
+    }
+    multipath {
+        #
+        # Controller Name:  dcs29
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs29a_lun2
+        wwid  360080e50002e685e0000031e501baf37
+    }
+    multipath {
+        #
+        # Controller Name:  dcs29
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs29b_lun3
+        wwid  360080e50002e6ce8000002ef501baf34
+    }
+    multipath {
+        #
+        # Controller Name:  dcs29
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs29a_lun4
+        wwid  360080e50002e685e00000322501baf44
+    }
+    multipath {
+        #
+        # Controller Name:  dcs29
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs29b_lun5
+        wwid  360080e50002e6ce8000002f3501baf42
+    }
+    multipath {
+        #
+        # Controller Name:  dcs2
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs2a_lun0
+        wwid  360080e50002e73120000055d501b9f32
+    }
+    multipath {
+        #
+        # Controller Name:  dcs2
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs2b_lun1
+        wwid  360080e50002e63d8000005e3501b9f9a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs2
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs2a_lun2
+        wwid  360080e50002e731200000561501b9f43
+    }
+    multipath {
+        #
+        # Controller Name:  dcs2
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs2b_lun3
+        wwid  360080e50002e63d8000005e7501b9fac
+    }
+    multipath {
+        #
+        # Controller Name:  dcs2
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs2a_lun4
+        wwid  360080e50002e731200000565501b9f56
+    }
+    multipath {
+        #
+        # Controller Name:  dcs2
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs2b_lun5
+        wwid  360080e50002e63d8000005eb501b9fc2
+    }
+    multipath {
+        #
+        # Controller Name:  dcs30
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs30a_lun0
+        wwid  360080e50002e5cea00000312501bafb5
+    }
+    multipath {
+        #
+        # Controller Name:  dcs30
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs30b_lun1
+        wwid  360080e50002e70b2000002fa501baf84
+    }
+    multipath {
+        #
+        # Controller Name:  dcs30
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs30a_lun2
+        wwid  360080e50002e5cea00000316501bafc2
+    }
+    multipath {
+        #
+        # Controller Name:  dcs30
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs30b_lun3
+        wwid  360080e50002e70b2000002fe501baf90
+    }
+    multipath {
+        #
+        # Controller Name:  dcs30
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs30a_lun4
+        wwid  360080e50002e5cea0000031a501bafcf
+    }
+    multipath {
+        #
+        # Controller Name:  dcs30
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs30b_lun5
+        wwid  360080e50002e70b200000302501baf9f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs31
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs31a_lun0
+        wwid  360080e50002e2b2a00000cbd501bafcc
+    }
+    multipath {
+        #
+        # Controller Name:  dcs31
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs31b_lun1
+        wwid  360080e50002e2b0800000c5d501bb00a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs31
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs31a_lun2
+        wwid  360080e50002e2b2a00000cc1501bafd9
+    }
+    multipath {
+        #
+        # Controller Name:  dcs31
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs31b_lun3
+        wwid  360080e50002e2b0800000c61501bb018
+    }
+    multipath {
+        #
+        # Controller Name:  dcs31
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs31a_lun4
+        wwid  360080e50002e2b2a00000cc5501bafe7
+    }
+    multipath {
+        #
+        # Controller Name:  dcs31
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs31b_lun5
+        wwid  360080e50002e2b0800000c65501bb025
+    }
+    multipath {
+        #
+        # Controller Name:  dcs32
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs32a_lun0
+        wwid  360080e50002e7af40000030e501bb19c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs32
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs32b_lun1
+        wwid  360080e50002e684600000306501bb116
+    }
+    multipath {
+        #
+        # Controller Name:  dcs32
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs32a_lun2
+        wwid  360080e50002e7af400000312501bb1aa
+    }
+    multipath {
+        #
+        # Controller Name:  dcs32
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs32b_lun3
+        wwid  360080e50002e68460000030a501bb122
+    }
+    multipath {
+        #
+        # Controller Name:  dcs32
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs32a_lun4
+        wwid  360080e50002e7af400000316501bb1b7
+    }
+    multipath {
+        #
+        # Controller Name:  dcs32
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs32b_lun5
+        wwid  360080e50002e68460000030e501bb131
+    }
+    multipath {
+        #
+        # Controller Name:  dcs33
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs33a_lun0
+        wwid  360080e50002d701000000f89501bb1d0
+    }
+    multipath {
+        #
+        # Controller Name:  dcs33
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs33b_lun1
+        wwid  360080e50002e1a4a0000126d501bb0dd
+    }
+    multipath {
+        #
+        # Controller Name:  dcs33
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs33a_lun2
+        wwid  360080e50002d701000000f8d501bb1de
+    }
+    multipath {
+        #
+        # Controller Name:  dcs33
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs33b_lun3
+        wwid  360080e50002e1a4a00001271501bb0ea
+    }
+    multipath {
+        #
+        # Controller Name:  dcs33
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs33a_lun4
+        wwid  360080e50002d701000000f91501bb1ed
+    }
+    multipath {
+        #
+        # Controller Name:  dcs33
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs33b_lun5
+        wwid  360080e50002e1a4a00001275501bb0fa
+    }
+    multipath {
+        #
+        # Controller Name:  dcs34
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs34a_lun0
+        wwid  360080e50002d22e2000002b6501bb0e4
+    }
+    multipath {
+        #
+        # Controller Name:  dcs34
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs34b_lun1
+        wwid  360080e50002de2c2000002be501bb0ac
+    }
+    multipath {
+        #
+        # Controller Name:  dcs34
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs34a_lun2
+        wwid  360080e50002d22e2000002ba501bb0f3
+    }
+    multipath {
+        #
+        # Controller Name:  dcs34
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs34b_lun3
+        wwid  360080e50002de2c2000002c2501bb0bb
+    }
+    multipath {
+        #
+        # Controller Name:  dcs34
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs34a_lun4
+        wwid  360080e50002d22e2000002be501bb100
+    }
+    multipath {
+        #
+        # Controller Name:  dcs34
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs34b_lun5
+        wwid  360080e50002de2c2000002c6501bb0c7
+    }
+    multipath {
+        #
+        # Controller Name:  dcs35
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs35a_lun0
+        wwid  360080e50002d8f360000047a501bb29a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs35
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs35b_lun1
+        wwid  360080e50002d948400000484501bb2ae
+    }
+    multipath {
+        #
+        # Controller Name:  dcs35
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs35a_lun2
+        wwid  360080e50002d8f360000047e501bb2a7
+    }
+    multipath {
+        #
+        # Controller Name:  dcs35
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs35b_lun3
+        wwid  360080e50002d948400000488501bb2ba
+    }
+    multipath {
+        #
+        # Controller Name:  dcs35
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs35a_lun4
+        wwid  360080e50002d8f3600000482501bb2b4
+    }
+    multipath {
+        #
+        # Controller Name:  dcs35
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs35b_lun5
+        wwid  360080e50002d94840000048c501bb2c7
+    }
+    multipath {
+        #
+        # Controller Name:  dcs36
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs36a_lun0
+        wwid  360080e50002ded1c00000586501bb2d2
+    }
+    multipath {
+        #
+        # Controller Name:  dcs36
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs36b_lun1
+        wwid  360080e50002d6c0c00000594501bb427
+    }
+    multipath {
+        #
+        # Controller Name:  dcs36
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs36a_lun2
+        wwid  360080e50002ded1c0000058a501bb2df
+    }
+    multipath {
+        #
+        # Controller Name:  dcs36
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs36b_lun3
+        wwid  360080e50002d6c0c00000598501bb433
+    }
+    multipath {
+        #
+        # Controller Name:  dcs36
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs36a_lun4
+        wwid  360080e50002ded1c0000058e501bb2ec
+    }
+    multipath {
+        #
+        # Controller Name:  dcs36
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs36b_lun5
+        wwid  360080e50002d6c0c0000059c501bb440
+    }
+    multipath {
+        #
+        # Controller Name:  dcs37
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs37a_lun0
+        wwid  360080e50002d2782000004bb501bb322
+    }
+    multipath {
+        #
+        # Controller Name:  dcs37
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs37b_lun1
+        wwid  360080e50002d62d4000004c7501bb3a4
+    }
+    multipath {
+        #
+        # Controller Name:  dcs37
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs37a_lun2
+        wwid  360080e50002d2782000004bf501bb32f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs37
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs37b_lun3
+        wwid  360080e50002d62d4000004cb501bb3b1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs37
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs37a_lun4
+        wwid  360080e50002d2782000004c3501bb33e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs37
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs37b_lun5
+        wwid  360080e50002d62d4000004cf501bb3c0
+    }
+    multipath {
+        #
+        # Controller Name:  dcs38
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs38a_lun0
+        wwid  360080e50002ded36000002c3501bb459
+    }
+    multipath {
+        #
+        # Controller Name:  dcs38
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs38b_lun1
+        wwid  360080e50002d21b2000002c0501bb3d5
+    }
+    multipath {
+        #
+        # Controller Name:  dcs38
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs38a_lun2
+        wwid  360080e50002ded36000002c7501bb467
+    }
+    multipath {
+        #
+        # Controller Name:  dcs38
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs38b_lun3
+        wwid  360080e50002d21b2000002c4501bb3e2
+    }
+    multipath {
+        #
+        # Controller Name:  dcs38
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs38a_lun4
+        wwid  360080e50002ded36000002cb501bb474
+    }
+    multipath {
+        #
+        # Controller Name:  dcs38
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs38b_lun5
+        wwid  360080e50002d21b2000002c8501bb3f0
+    }
+    multipath {
+        #
+        # Controller Name:  dcs39
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs39a_lun0
+        wwid  360080e50002dec680000054b501bb4a6
+    }
+    multipath {
+        #
+        # Controller Name:  dcs39
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs39b_lun1
+        wwid  360080e50002decbe0000062a501bb4b2
+    }
+    multipath {
+        #
+        # Controller Name:  dcs39
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs39a_lun2
+        wwid  360080e50002dec680000054f501bb4b3
+    }
+    multipath {
+        #
+        # Controller Name:  dcs39
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs39b_lun3
+        wwid  360080e50002decbe0000062e501bb4bf
+    }
+    multipath {
+        #
+        # Controller Name:  dcs39
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs39a_lun4
+        wwid  360080e50002dec6800000553501bb4c0
+    }
+    multipath {
+        #
+        # Controller Name:  dcs39
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs39b_lun5
+        wwid  360080e50002decbe00000632501bb4cc
+    }
+    multipath {
+        #
+        # Controller Name:  dcs3
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs3a_lun0
+        wwid  360080e50002d921c00000d9a501ba011
+    }
+    multipath {
+        #
+        # Controller Name:  dcs3
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs3b_lun1
+        wwid  360080e50002e87de00000cd1501ba07e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs3
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs3a_lun2
+        wwid  360080e50002d921c00000d9e501ba01e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs3
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs3b_lun3
+        wwid  360080e50002e87de00000cd5501ba08a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs3
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs3a_lun4
+        wwid  360080e50002d921c00000da2501ba02a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs3
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs3b_lun5
+        wwid  360080e50002e87de00000cd9501ba098
+    }
+    multipath {
+        #
+        # Controller Name:  dcs40
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs40a_lun0
+        wwid  360080e50002d33ba00000577501bb51c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs40
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs40b_lun1
+        wwid  360080e50002d34b000000556501bb5a8
+    }
+    multipath {
+        #
+        # Controller Name:  dcs40
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs40a_lun2
+        wwid  360080e50002d33ba0000057b501bb52a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs40
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs40b_lun3
+        wwid  360080e50002d34b00000055a501bb5b4
+    }
+    multipath {
+        #
+        # Controller Name:  dcs40
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs40a_lun4
+        wwid  360080e50002d33ba0000057f501bb536
+    }
+    multipath {
+        #
+        # Controller Name:  dcs40
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs40b_lun5
+        wwid  360080e50002d34b00000055e501bb5c2
+    }
+    multipath {
+        #
+        # Controller Name:  dcs41
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs41a_lun0
+        wwid  360080e50002d439a0000084b501bb484
+    }
+    multipath {
+        #
+        # Controller Name:  dcs41
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs41b_lun1
+        wwid  360080e50002d6502000006bb501ba6a5
+    }
+    multipath {
+        #
+        # Controller Name:  dcs41
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs41a_lun2
+        wwid  360080e50002d439a0000084e501bb491
+    }
+    multipath {
+        #
+        # Controller Name:  dcs41
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs41b_lun3
+        wwid  360080e50002d6502000006be501ba6b0
+    }
+    multipath {
+        #
+        # Controller Name:  dcs41
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs41a_lun4
+        wwid  360080e50002d439a00000851501bb49d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs41
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs41b_lun5
+        wwid  360080e50002d6502000006c1501ba6be
+    }
+    multipath {
+        #
+        # Controller Name:  dcs42
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs42a_lun0
+        wwid  360080e50002d3ef8000002c1501bb60e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs42
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs42b_lun1
+        wwid  360080e50002d3f34000002bb501bb629
+    }
+    multipath {
+        #
+        # Controller Name:  dcs42
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs42a_lun2
+        wwid  360080e50002d3ef8000002c5501bb61c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs42
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs42b_lun3
+        wwid  360080e50002d3f34000002bf501bb635
+    }
+    multipath {
+        #
+        # Controller Name:  dcs42
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs42a_lun4
+        wwid  360080e50002d3ef8000002c9501bb628
+    }
+    multipath {
+        #
+        # Controller Name:  dcs42
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs42b_lun5
+        wwid  360080e50002d3f34000002c3501bb643
+    }
+    multipath {
+        #
+        # Controller Name:  dcs43
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs43a_lun0
+        wwid  360080e50002d3522000003dd501bb73d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs43
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs43b_lun1
+        wwid  360080e50002d2306000003c9501bb6a3
+    }
+    multipath {
+        #
+        # Controller Name:  dcs43
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs43a_lun2
+        wwid  360080e50002d3522000003e1501bb758
+    }
+    multipath {
+        #
+        # Controller Name:  dcs43
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs43b_lun3
+        wwid  360080e50002d2306000003cd501bb6c6
+    }
+    multipath {
+        #
+        # Controller Name:  dcs43
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs43a_lun4
+        wwid  360080e50002d3522000003e5501bb788
+    }
+    multipath {
+        #
+        # Controller Name:  dcs43
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs43b_lun5
+        wwid  360080e50002d2306000003d1501bb6f8
+    }
+    multipath {
+        #
+        # Controller Name:  dcs44
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs44a_lun0
+        wwid  360080e50002d8ee6000002ae501bb81c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs44
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs44b_lun1
+        wwid  360080e50002d9028000002b0501bb856
+    }
+    multipath {
+        #
+        # Controller Name:  dcs44
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs44a_lun2
+        wwid  360080e50002d8ee6000002b2501bb82a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs44
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs44b_lun3
+        wwid  360080e50002d9028000002b4501bb862
+    }
+    multipath {
+        #
+        # Controller Name:  dcs44
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs44a_lun4
+        wwid  360080e50002d8ee6000002b6501bb836
+    }
+    multipath {
+        #
+        # Controller Name:  dcs44
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs44b_lun5
+        wwid  360080e50002d9028000002b8501bb86f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs45
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs45a_lun0
+        wwid  360080e50002decc8000002cd501bbe52
+    }
+    multipath {
+        #
+        # Controller Name:  dcs45
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs45b_lun1
+        wwid  360080e50002d2cac000002d7501bbd5b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs45
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs45a_lun2
+        wwid  360080e50002decc8000002d1501bbe5f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs45
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs45b_lun3
+        wwid  360080e50002d2cac000002db501bbd67
+    }
+    multipath {
+        #
+        # Controller Name:  dcs45
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs45a_lun4
+        wwid  360080e50002decc8000002d5501bbe6c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs45
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs45b_lun5
+        wwid  360080e50002d2cac000002df501bbd75
+    }
+    multipath {
+        #
+        # Controller Name:  dcs46
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs46a_lun0
+        wwid  360080e50002e1f1400000303501bbe37
+    }
+    multipath {
+        #
+        # Controller Name:  dcs46
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs46b_lun1
+        wwid  360080e50002e1c8800000301501bbe0c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs46
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs46a_lun2
+        wwid  360080e50002e1f1400000307501bbe44
+    }
+    multipath {
+        #
+        # Controller Name:  dcs46
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs46b_lun3
+        wwid  360080e50002e1c8800000305501bbe18
+    }
+    multipath {
+        #
+        # Controller Name:  dcs46
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs46a_lun4
+        wwid  360080e50002e1f140000030b501bbe50
+    }
+    multipath {
+        #
+        # Controller Name:  dcs46
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs46b_lun5
+        wwid  360080e50002e1c8800000309501bbe25
+    }
+    multipath {
+        #
+        # Controller Name:  dcs47
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs47a_lun0
+        wwid  360080e50002dd2e8000003c2501bbeea
+    }
+    multipath {
+        #
+        # Controller Name:  dcs47
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs47b_lun1
+        wwid  360080e50002decf6000003c5501bbf55
+    }
+    multipath {
+        #
+        # Controller Name:  dcs47
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs47a_lun2
+        wwid  360080e50002dd2e8000003c6501bbef8
+    }
+    multipath {
+        #
+        # Controller Name:  dcs47
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs47b_lun3
+        wwid  360080e50002decf6000003c9501bbf62
+    }
+    multipath {
+        #
+        # Controller Name:  dcs47
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs47a_lun4
+        wwid  360080e50002dd2e8000003ca501bbf05
+    }
+    multipath {
+        #
+        # Controller Name:  dcs47
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs47b_lun5
+        wwid  360080e50002decf6000003cd501bbf70
+    }
+    multipath {
+        #
+        # Controller Name:  dcs48
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs48a_lun0
+        wwid  360080e50002dd46e000008cf501bc08e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs48
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs48b_lun1
+        wwid  360080e50002ddc1a0000092f501bc017
+    }
+    multipath {
+        #
+        # Controller Name:  dcs48
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs48a_lun2
+        wwid  360080e50002dd46e000008d3501bc09b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs48
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs48b_lun3
+        wwid  360080e50002ddc1a00000933501bc023
+    }
+    multipath {
+        #
+        # Controller Name:  dcs48
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs48a_lun4
+        wwid  360080e50002dd46e000008d7501bc0a8
+    }
+    multipath {
+        #
+        # Controller Name:  dcs48
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs48b_lun5
+        wwid  360080e50002ddc1a00000937501bc030
+    }
+    multipath {
+        #
+        # Controller Name:  dcs49
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs49a_lun0
+        wwid  360080e50002e68160000045d501bbeca
+    }
+    multipath {
+        #
+        # Controller Name:  dcs49
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs49b_lun1
+        wwid  360080e50002e7cb2000003c7501bbfbc
+    }
+    multipath {
+        #
+        # Controller Name:  dcs49
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs49a_lun2
+        wwid  360080e50002e681600000461501bbed7
+    }
+    multipath {
+        #
+        # Controller Name:  dcs49
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs49b_lun3
+        wwid  360080e50002e7cb2000003cb501bbfc9
+    }
+    multipath {
+        #
+        # Controller Name:  dcs49
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs49a_lun4
+        wwid  360080e50002e681600000465501bbee4
+    }
+    multipath {
+        #
+        # Controller Name:  dcs49
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs49b_lun5
+        wwid  360080e50002e7cb2000003cf501bbfd6
+    }
+    multipath {
+        #
+        # Controller Name:  dcs4
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs4a_lun0
+        wwid  360080e50002dde26000007a6501ba001
+    }
+    multipath {
+        #
+        # Controller Name:  dcs4
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs4b_lun1
+        wwid  360080e50002e6544000003cf501b9fe9
+    }
+    multipath {
+        #
+        # Controller Name:  dcs4
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs4a_lun2
+        wwid  360080e50002dde26000007aa501ba00e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs4
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs4b_lun3
+        wwid  360080e50002e6544000003d3501b9ff5
+    }
+    multipath {
+        #
+        # Controller Name:  dcs4
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs4a_lun4
+        wwid  360080e50002dde26000007ae501ba01b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs4
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs4b_lun5
+        wwid  360080e50002e6544000003d7501ba003
+    }
+    multipath {
+        #
+        # Controller Name:  dcs50
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs50a_lun0
+        wwid  360080e50002df27e0000045b501bc093
+    }
+    multipath {
+        #
+        # Controller Name:  dcs50
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs50b_lun1
+        wwid  360080e50002ded060000044f501bc14f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs50
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs50a_lun2
+        wwid  360080e50002df27e0000045f501bc0a0
+    }
+    multipath {
+        #
+        # Controller Name:  dcs50
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs50b_lun3
+        wwid  360080e50002ded0600000453501bc15b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs50
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs50a_lun4
+        wwid  360080e50002df27e00000463501bc0ad
+    }
+    multipath {
+        #
+        # Controller Name:  dcs50
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs50b_lun5
+        wwid  360080e50002ded0600000457501bc169
+    }
+    multipath {
+        #
+        # Controller Name:  dcs51
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs51a_lun0
+        wwid  360080e50002de030000020b7501bc1bf
+    }
+    multipath {
+        #
+        # Controller Name:  dcs51
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs51b_lun1
+        wwid  360080e50002ddcda00001f5e501bc190
+    }
+    multipath {
+        #
+        # Controller Name:  dcs51
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs51a_lun2
+        wwid  360080e50002de030000020bb501bc1cc
+    }
+    multipath {
+        #
+        # Controller Name:  dcs51
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs51b_lun3
+        wwid  360080e50002ddcda00001f62501bc19c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs51
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs51a_lun4
+        wwid  360080e50002de030000020bf501bc1d9
+    }
+    multipath {
+        #
+        # Controller Name:  dcs51
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs51b_lun5
+        wwid  360080e50002ddcda00001f66501bc1aa
+    }
+    multipath {
+        #
+        # Controller Name:  dcs52
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs52a_lun0
+        wwid  360080e50002e6bda000002e4501bc290
+    }
+    multipath {
+        #
+        # Controller Name:  dcs52
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs52b_lun1
+        wwid  360080e50002e701a0000032f501bc296
+    }
+    multipath {
+        #
+        # Controller Name:  dcs52
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs52a_lun2
+        wwid  360080e50002e6bda000002e8501bc29e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs52
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs52b_lun3
+        wwid  360080e50002e701a00000333501bc2a3
+    }
+    multipath {
+        #
+        # Controller Name:  dcs52
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs52a_lun4
+        wwid  360080e50002e6bda000002ec501bc2ab
+    }
+    multipath {
+        #
+        # Controller Name:  dcs52
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs52b_lun5
+        wwid  360080e50002e701a00000337501bc2b1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs53
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs53a_lun0
+        wwid  360080e50002d30ae000002c3501bc2ae
+    }
+    multipath {
+        #
+        # Controller Name:  dcs53
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs53b_lun1
+        wwid  360080e50002d2232000002cb501bc2a2
+    }
+    multipath {
+        #
+        # Controller Name:  dcs53
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs53a_lun2
+        wwid  360080e50002d30ae000002c7501bc2bb
+    }
+    multipath {
+        #
+        # Controller Name:  dcs53
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs53b_lun3
+        wwid  360080e50002d2232000002cf501bc2ae
+    }
+    multipath {
+        #
+        # Controller Name:  dcs53
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs53a_lun4
+        wwid  360080e50002d30ae000002cb501bc2c8
+    }
+    multipath {
+        #
+        # Controller Name:  dcs53
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs53b_lun5
+        wwid  360080e50002d2232000002d3501bc2bb
+    }
+    multipath {
+        #
+        # Controller Name:  dcs54
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs54a_lun0
+        wwid  360080e50002d441e00000361501bc288
+    }
+    multipath {
+        #
+        # Controller Name:  dcs54
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs54b_lun1
+        wwid  360080e50002d3fdc0000035c501bb473
+    }
+    multipath {
+        #
+        # Controller Name:  dcs54
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs54a_lun2
+        wwid  360080e50002d441e00000365501bc295
+    }
+    multipath {
+        #
+        # Controller Name:  dcs54
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs54b_lun3
+        wwid  360080e50002d3fdc00000360501bb47f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs54
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs54a_lun4
+        wwid  360080e50002d441e00000369501bc2a2
+    }
+    multipath {
+        #
+        # Controller Name:  dcs54
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs54b_lun5
+        wwid  360080e50002d3fdc00000364501bb48e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs55
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs55a_lun0
+        wwid  360080e50002dc75e000003b2501bc3b1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs55
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs55b_lun1
+        wwid  360080e50002dbf3200000418501bc33a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs55
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs55a_lun2
+        wwid  360080e50002dc75e000003b6501bc3be
+    }
+    multipath {
+        #
+        # Controller Name:  dcs55
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs55b_lun3
+        wwid  360080e50002dbf320000041c501bc346
+    }
+    multipath {
+        #
+        # Controller Name:  dcs55
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs55a_lun4
+        wwid  360080e50002dc75e000003ba501bc3cb
+    }
+    multipath {
+        #
+        # Controller Name:  dcs55
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs55b_lun5
+        wwid  360080e50002dbf3200000420501bc356
+    }
+    multipath {
+        #
+        # Controller Name:  dcs56
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs56a_lun0
+        wwid  360080e50002de194000002db501bc31f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs56
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs56b_lun1
+        wwid  360080e50002ddb90000002cb501bc53d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs56
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs56a_lun2
+        wwid  360080e50002de194000002df501bc32d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs56
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs56b_lun3
+        wwid  360080e50002ddb90000002cf501bc549
+    }
+    multipath {
+        #
+        # Controller Name:  dcs56
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs56a_lun4
+        wwid  360080e50002de194000002e3501bc339
+    }
+    multipath {
+        #
+        # Controller Name:  dcs56
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs56b_lun5
+        wwid  360080e50002ddb90000002d3501bc556
+    }
+    multipath {
+        #
+        # Controller Name:  dcs57
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs57a_lun0
+        wwid  360080e50002df2b0000005a6501bc513
+    }
+    multipath {
+        #
+        # Controller Name:  dcs57
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs57b_lun1
+        wwid  360080e50002dd630000005b4501bc4f9
+    }
+    multipath {
+        #
+        # Controller Name:  dcs57
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs57a_lun2
+        wwid  360080e50002df2b0000005aa501bc520
+    }
+    multipath {
+        #
+        # Controller Name:  dcs57
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs57b_lun3
+        wwid  360080e50002dd630000005b8501bc506
+    }
+    multipath {
+        #
+        # Controller Name:  dcs57
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs57a_lun4
+        wwid  360080e50002df2b0000005ae501bc52d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs57
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs57b_lun5
+        wwid  360080e50002dd630000005bc501bc514
+    }
+    multipath {
+        #
+        # Controller Name:  dcs58
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs58a_lun0
+        wwid  360080e50002dc2ce00001f85501bb75d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs58
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs58b_lun1
+        wwid  360080e50002dc3ca00001e2e501bb73c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs58
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs58a_lun2
+        wwid  360080e50002dc2ce00001f89501bb769
+    }
+    multipath {
+        #
+        # Controller Name:  dcs58
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs58b_lun3
+        wwid  360080e50002dc3ca00001e32501bb748
+    }
+    multipath {
+        #
+        # Controller Name:  dcs58
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs58a_lun4
+        wwid  360080e50002dc2ce00001f8d501bb776
+    }
+    multipath {
+        #
+        # Controller Name:  dcs58
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs58b_lun5
+        wwid  360080e50002dc3ca00001e36501bb755
+    }
+    multipath {
+        #
+        # Controller Name:  dcs59
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs59a_lun0
+        wwid  360080e50002de9c40000058e501bc53e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs59
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs59b_lun1
+        wwid  360080e50002dd8f80000059a501bc680
+    }
+    multipath {
+        #
+        # Controller Name:  dcs59
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs59a_lun2
+        wwid  360080e50002de9c400000592501bc54b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs59
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs59b_lun3
+        wwid  360080e50002dd8f80000059e501bc68c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs59
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs59a_lun4
+        wwid  360080e50002de9c400000596501bc558
+    }
+    multipath {
+        #
+        # Controller Name:  dcs59
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs59b_lun5
+        wwid  360080e50002dd8f8000005a2501bc699
+    }
+    multipath {
+        #
+        # Controller Name:  dcs5
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs5a_lun0
+        wwid  360080e50002d8e38000005de501ba0b2
+    }
+    multipath {
+        #
+        # Controller Name:  dcs5
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs5b_lun1
+        wwid  360080e50002dda60000005b7501ba028
+    }
+    multipath {
+        #
+        # Controller Name:  dcs5
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs5a_lun2
+        wwid  360080e50002d8e38000005e2501ba0bf
+    }
+    multipath {
+        #
+        # Controller Name:  dcs5
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs5b_lun3
+        wwid  360080e50002dda60000005bb501ba034
+    }
+    multipath {
+        #
+        # Controller Name:  dcs5
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs5a_lun4
+        wwid  360080e50002d8e38000005e6501ba0cd
+    }
+    multipath {
+        #
+        # Controller Name:  dcs5
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs5b_lun5
+        wwid  360080e50002dda60000005bf501ba043
+    }
+    multipath {
+        #
+        # Controller Name:  dcs60
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs60a_lun0
+        wwid  360080e50002d659e0000097e501bc714
+    }
+    multipath {
+        #
+        # Controller Name:  dcs60
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs60b_lun1
+        wwid  360080e50002e840000000545501bc60e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs60
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs60a_lun2
+        wwid  360080e50002d659e00000982501bc721
+    }
+    multipath {
+        #
+        # Controller Name:  dcs60
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs60b_lun3
+        wwid  360080e50002e840000000549501bc61a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs60
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs60a_lun4
+        wwid  360080e50002d659e00000986501bc72d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs60
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs60b_lun5
+        wwid  360080e50002e84000000054d501bc629
+    }
+    multipath {
+        #
+        # Controller Name:  dcs61
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs61a_lun0
+        wwid  360080e50002df2a6000003b0501bc7e4
+    }
+    multipath {
+        #
+        # Controller Name:  dcs61
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs61b_lun1
+        wwid  360080e50002df1b4000002b4501bb901
+    }
+    multipath {
+        #
+        # Controller Name:  dcs61
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs61a_lun2
+        wwid  360080e50002df2a6000003b4501bc7f1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs61
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs61b_lun3
+        wwid  360080e50002df1b4000002b8501bb90c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs61
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs61a_lun4
+        wwid  360080e50002df2a6000003b8501bc7fd
+    }
+    multipath {
+        #
+        # Controller Name:  dcs61
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs61b_lun5
+        wwid  360080e50002df1b4000002bc501bb91b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs62
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs62a_lun0
+        wwid  360080e50002d92b200000603501bc83f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs62
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs62b_lun1
+        wwid  360080e50002d33ee0000062f501bc7f1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs62
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs62a_lun2
+        wwid  360080e50002d92b200000607501bc84d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs62
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs62b_lun3
+        wwid  360080e50002d33ee00000633501bc7fd
+    }
+    multipath {
+        #
+        # Controller Name:  dcs62
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs62a_lun4
+        wwid  360080e50002d92b20000060b501bc859
+    }
+    multipath {
+        #
+        # Controller Name:  dcs62
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs62b_lun5
+        wwid  360080e50002d33ee00000637501bc80b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs63
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs63a_lun0
+        wwid  360080e50002d26b800000413501bc844
+    }
+    multipath {
+        #
+        # Controller Name:  dcs63
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs63b_lun1
+        wwid  360080e50002dec98000003fd501bc7cd
+    }
+    multipath {
+        #
+        # Controller Name:  dcs63
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs63a_lun2
+        wwid  360080e50002d26b800000417501bc852
+    }
+    multipath {
+        #
+        # Controller Name:  dcs63
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs63b_lun3
+        wwid  360080e50002dec9800000401501bc7d9
+    }
+    multipath {
+        #
+        # Controller Name:  dcs63
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs63a_lun4
+        wwid  360080e50002d26b80000041b501bc85f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs63
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs63b_lun5
+        wwid  360080e50002dec9800000405501bc7e8
+    }
+    multipath {
+        #
+        # Controller Name:  dcs64
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs64a_lun0
+        wwid  360080e50002dd45a000003bc501bc9ec
+    }
+    multipath {
+        #
+        # Controller Name:  dcs64
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs64b_lun1
+        wwid  360080e50002e2b20000003b0501bc8f9
+    }
+    multipath {
+        #
+        # Controller Name:  dcs64
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs64a_lun2
+        wwid  360080e50002dd45a000003c0501bc9f9
+    }
+    multipath {
+        #
+        # Controller Name:  dcs64
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs64b_lun3
+        wwid  360080e50002e2b20000003b4501bc905
+    }
+    multipath {
+        #
+        # Controller Name:  dcs64
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs64a_lun4
+        wwid  360080e50002dd45a000003c4501bca05
+    }
+    multipath {
+        #
+        # Controller Name:  dcs64
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs64b_lun5
+        wwid  360080e50002e2b20000003b8501bc912
+    }
+    multipath {
+        #
+        # Controller Name:  dcs65
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs65a_lun0
+        wwid  360080e50002d309a000009a4501bc947
+    }
+    multipath {
+        #
+        # Controller Name:  dcs65
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs65b_lun1
+        wwid  360080e50002d7180000009e6501bca40
+    }
+    multipath {
+        #
+        # Controller Name:  dcs65
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs65a_lun2
+        wwid  360080e50002d309a000009a8501bc955
+    }
+    multipath {
+        #
+        # Controller Name:  dcs65
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs65b_lun3
+        wwid  360080e50002d7180000009ea501bca4c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs65
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs65a_lun4
+        wwid  360080e50002d309a000009ac501bc962
+    }
+    multipath {
+        #
+        # Controller Name:  dcs65
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs65b_lun5
+        wwid  360080e50002d7180000009ee501bca59
+    }
+    multipath {
+        #
+        # Controller Name:  dcs66
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs66a_lun0
+        wwid  360080e50002ddef600000412501bc8c1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs66
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs66b_lun1
+        wwid  360080e50002d2d9c0000040a501bca47
+    }
+    multipath {
+        #
+        # Controller Name:  dcs66
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs66a_lun2
+        wwid  360080e50002ddef600000416501bc8ce
+    }
+    multipath {
+        #
+        # Controller Name:  dcs66
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs66b_lun3
+        wwid  360080e50002d2d9c0000040e501bca53
+    }
+    multipath {
+        #
+        # Controller Name:  dcs66
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs66a_lun4
+        wwid  360080e50002ddef60000041a501bc8da
+    }
+    multipath {
+        #
+        # Controller Name:  dcs66
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs66b_lun5
+        wwid  360080e50002d2d9c00000412501bca61
+    }
+    multipath {
+        #
+        # Controller Name:  dcs67
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs67a_lun0
+        wwid  360080e50002d33e200000587501bca8c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs67
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs67b_lun1
+        wwid  360080e50002d22cc000005b7501bca76
+    }
+    multipath {
+        #
+        # Controller Name:  dcs67
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs67a_lun2
+        wwid  360080e50002d33e20000058b501bca9a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs67
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs67b_lun3
+        wwid  360080e50002d22cc000005bb501bca83
+    }
+    multipath {
+        #
+        # Controller Name:  dcs67
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs67a_lun4
+        wwid  360080e50002d33e20000058f501bcaa7
+    }
+    multipath {
+        #
+        # Controller Name:  dcs67
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs67b_lun5
+        wwid  360080e50002d22cc000005bf501bca92
+    }
+    multipath {
+        #
+        # Controller Name:  dcs68
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs68a_lun0
+        wwid  360080e50002d703e0000040b501bcb5f
+    }
+    multipath {
+        #
+        # Controller Name:  dcs68
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs68b_lun1
+        wwid  360080e50002d6f9e00000406501bcb72
+    }
+    multipath {
+        #
+        # Controller Name:  dcs68
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs68a_lun2
+        wwid  360080e50002d703e0000040f501bcb6c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs68
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs68b_lun3
+        wwid  360080e50002d6f9e0000040a501bcb7e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs68
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs68a_lun4
+        wwid  360080e50002d703e00000413501bcb79
+    }
+    multipath {
+        #
+        # Controller Name:  dcs68
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs68b_lun5
+        wwid  360080e50002d6f9e0000040e501bcb8c
+    }
+    multipath {
+        #
+        # Controller Name:  dcs69
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs69a_lun0
+        wwid  360080e50002dc878000006e5501bbce8
+    }
+    multipath {
+        #
+        # Controller Name:  dcs69
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs69b_lun1
+        wwid  360080e50002de39e0000070c501bcb41
+    }
+    multipath {
+        #
+        # Controller Name:  dcs69
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs69a_lun2
+        wwid  360080e50002dc878000006e9501bbcf6
+    }
+    multipath {
+        #
+        # Controller Name:  dcs69
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs69b_lun3
+        wwid  360080e50002de39e00000710501bcb4d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs69
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs69a_lun4
+        wwid  360080e50002dc878000006ed501bbd02
+    }
+    multipath {
+        #
+        # Controller Name:  dcs69
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs69b_lun5
+        wwid  360080e50002de39e00000714501bcb5b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs6
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs6a_lun0
+        wwid  360080e50002e64c200000848501ba00a
+    }
+    multipath {
+        #
+        # Controller Name:  dcs6
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs6b_lun1
+        wwid  360080e50002e72620000039c501ba134
+    }
+    multipath {
+        #
+        # Controller Name:  dcs6
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs6a_lun2
+        wwid  360080e50002e64c20000084c501ba017
+    }
+    multipath {
+        #
+        # Controller Name:  dcs6
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs6b_lun3
+        wwid  360080e50002e7262000003a0501ba141
+    }
+    multipath {
+        #
+        # Controller Name:  dcs6
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs6a_lun4
+        wwid  360080e50002e64c200000850501ba025
+    }
+    multipath {
+        #
+        # Controller Name:  dcs6
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs6b_lun5
+        wwid  360080e50002e7262000003a4501ba14e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs70
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs70a_lun0
+        wwid  360080e50002dec8e00000403501bbe62
+    }
+    multipath {
+        #
+        # Controller Name:  dcs70
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs70b_lun1
+        wwid  360080e50002decfc000003fd501bccd9
+    }
+    multipath {
+        #
+        # Controller Name:  dcs70
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs70a_lun2
+        wwid  360080e50002dec8e00000407501bbe71
+    }
+    multipath {
+        #
+        # Controller Name:  dcs70
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs70b_lun3
+        wwid  360080e50002decfc00000401501bcce6
+    }
+    multipath {
+        #
+        # Controller Name:  dcs70
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs70a_lun4
+        wwid  360080e50002dec8e0000040b501bbe7d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs70
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs70b_lun5
+        wwid  360080e50002decfc00000405501bccf4
+    }
+    multipath {
+        #
+        # Controller Name:  dcs71
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs71a_lun0
+        wwid  360080e500024ee56000004a5501bcd5d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs71
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs71b_lun1
+        wwid  360080e50002d667e000004a9501bcd95
+    }
+    multipath {
+        #
+        # Controller Name:  dcs71
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs71a_lun2
+        wwid  360080e500024ee56000004a9501bcd6d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs71
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs71b_lun3
+        wwid  360080e50002d667e000004ad501bcda3
+    }
+    multipath {
+        #
+        # Controller Name:  dcs71
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs71a_lun4
+        wwid  360080e500024ee56000004ad501bcd7b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs71
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs71b_lun5
+        wwid  360080e50002d667e000004b1501bcdb1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs72
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs72a_lun0
+        wwid  360080e50002d94780000068b501bcdb5
+    }
+    multipath {
+        #
+        # Controller Name:  dcs72
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs72b_lun1
+        wwid  360080e50002d96660000066c501bcd94
+    }
+    multipath {
+        #
+        # Controller Name:  dcs72
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs72a_lun2
+        wwid  360080e50002d94780000068f501bcdc3
+    }
+    multipath {
+        #
+        # Controller Name:  dcs72
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs72b_lun3
+        wwid  360080e50002d966600000670501bcda0
+    }
+    multipath {
+        #
+        # Controller Name:  dcs72
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs72a_lun4
+        wwid  360080e50002d947800000693501bcdcf
+    }
+    multipath {
+        #
+        # Controller Name:  dcs72
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs72b_lun5
+        wwid  360080e50002d966600000674501bcdad
+    }
+    multipath {
+        #
+        # Controller Name:  dcs73
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs73a_lun0
+        wwid  360080e50002d8ec600000505506b6ac5
+    }
+    multipath {
+        #
+        # Controller Name:  dcs73
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs73b_lun1
+        wwid  360080e50002d78b4000004c2506b6b69
+    }
+    multipath {
+        #
+        # Controller Name:  dcs73
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs73a_lun2
+        wwid  360080e50002d8ec600000509506b6ad1
+    }
+    multipath {
+        #
+        # Controller Name:  dcs73
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs73b_lun3
+        wwid  360080e50002d78b4000004c6506b6b74
+    }
+    multipath {
+        #
+        # Controller Name:  dcs73
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs73a_lun4
+        wwid  360080e50002d8ec60000050d506b6add
+    }
+    multipath {
+        #
+        # Controller Name:  dcs73
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs73b_lun5
+        wwid  360080e50002d78b4000004ca506b6b81
+    }
+    multipath {
+        #
+        # Controller Name:  dcs74
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs74a_lun0
+        wwid  360080e50002d6f3a0000036e506b6b75
+    }
+    multipath {
+        #
+        # Controller Name:  dcs74
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs74b_lun1
+        wwid  360080e50002d27bc0000037a506b6b28
+    }
+    multipath {
+        #
+        # Controller Name:  dcs74
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs74a_lun2
+        wwid  360080e50002d6f3a00000372506b6b81
+    }
+    multipath {
+        #
+        # Controller Name:  dcs74
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs74b_lun3
+        wwid  360080e50002d27bc0000037e506b6b33
+    }
+    multipath {
+        #
+        # Controller Name:  dcs74
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs74a_lun4
+        wwid  360080e50002d6f3a00000376506b6b8e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs74
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs74b_lun5
+        wwid  360080e50002d27bc00000382506b6b41
+    }
+    multipath {
+        #
+        # Controller Name:  dcs75
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs75a_lun0
+        wwid  360080e50002df2c8000005e0506b6a86
+    }
+    multipath {
+        #
+        # Controller Name:  dcs75
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs75b_lun1
+        wwid  360080e50002e34be000005e3506b6aed
+    }
+    multipath {
+        #
+        # Controller Name:  dcs75
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs75a_lun2
+        wwid  360080e50002df2c8000005e4506b6a93
+    }
+    multipath {
+        #
+        # Controller Name:  dcs75
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs75b_lun3
+        wwid  360080e50002e34be000005e7506b6af8
+    }
+    multipath {
+        #
+        # Controller Name:  dcs75
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs75a_lun4
+        wwid  360080e50002df2c8000005e8506b6aa0
+    }
+    multipath {
+        #
+        # Controller Name:  dcs75
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs75b_lun5
+        wwid  360080e50002e34be000005eb506b6b06
+    }
+    multipath {
+        #
+        # Controller Name:  dcs76
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs76a_lun0
+        wwid  360080e50002e20f00000097e506b6c04
+    }
+    multipath {
+        #
+        # Controller Name:  dcs76
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs76b_lun1
+        wwid  360080e50002dbdf600000bcf506b6bee
+    }
+    multipath {
+        #
+        # Controller Name:  dcs76
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs76a_lun2
+        wwid  360080e50002e20f000000982506b6c12
+    }
+    multipath {
+        #
+        # Controller Name:  dcs76
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs76b_lun3
+        wwid  360080e50002dbdf600000bd3506b6bfa
+    }
+    multipath {
+        #
+        # Controller Name:  dcs76
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs76a_lun4
+        wwid  360080e50002e20f000000986506b6c1e
+    }
+    multipath {
+        #
+        # Controller Name:  dcs76
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs76b_lun5
+        wwid  360080e50002dbdf600000bd7506b6c06
+    }
+    multipath {
+        #
+        # Controller Name:  dcs7
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs7a_lun0
+        wwid  360080e50002e58d8000003dd501ba203
+    }
+    multipath {
+        #
+        # Controller Name:  dcs7
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs7b_lun1
+        wwid  360080e50002e6e6c000003c2501ba281
+    }
+    multipath {
+        #
+        # Controller Name:  dcs7
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs7a_lun2
+        wwid  360080e50002e58d8000003e1501ba210
+    }
+    multipath {
+        #
+        # Controller Name:  dcs7
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs7b_lun3
+        wwid  360080e50002e6e6c000003c6501ba28d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs7
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs7a_lun4
+        wwid  360080e50002e58d8000003e5501ba21d
+    }
+    multipath {
+        #
+        # Controller Name:  dcs7
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs7b_lun5
+        wwid  360080e50002e6e6c000003ca501ba29b
+    }
+    multipath {
+        #
+        # Controller Name:  dcs8
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs8a_lun0
+        wwid  360080e50002e6e5400000423501ba278
+    }
+    multipath {
+        #
+        # Controller Name:  dcs8
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs8b_lun1
+        wwid  360080e50002e70f00000041d501ba2df
+    }
+    multipath {
+        #
+        # Controller Name:  dcs8
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs8a_lun2
+        wwid  360080e50002e6e5400000427501ba287
+    }
+    multipath {
+        #
+        # Controller Name:  dcs8
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs8b_lun3
+        wwid  360080e50002e70f000000421501ba2eb
+    }
+    multipath {
+        #
+        # Controller Name:  dcs8
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs8a_lun4
+        wwid  360080e50002e6e540000042b501ba293
+    }
+    multipath {
+        #
+        # Controller Name:  dcs8
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs8b_lun5
+        wwid  360080e50002e70f000000425501ba2f8
+    }
+    multipath {
+        #
+        # Controller Name:  dcs9
+        # Raid Controller:  a
+        # LUN Name:         0
+        # LUN Number:       0
+        #
+        alias dcs9a_lun0
+        wwid  360080e50002e332600000c4a501ba335
+    }
+    multipath {
+        #
+        # Controller Name:  dcs9
+        # Raid Controller:  b
+        # LUN Name:         1
+        # LUN Number:       1
+        #
+        alias dcs9b_lun1
+        wwid  360080e50002e7e7000000c19501ba1ef
+    }
+    multipath {
+        #
+        # Controller Name:  dcs9
+        # Raid Controller:  a
+        # LUN Name:         2
+        # LUN Number:       2
+        #
+        alias dcs9a_lun2
+        wwid  360080e50002e332600000c4e501ba354
+    }
+    multipath {
+        #
+        # Controller Name:  dcs9
+        # Raid Controller:  b
+        # LUN Name:         3
+        # LUN Number:       3
+        #
+        alias dcs9b_lun3
+        wwid  360080e50002e7e7000000c1d501ba212
+    }
+    multipath {
+        #
+        # Controller Name:  dcs9
+        # Raid Controller:  a
+        # LUN Name:         4
+        # LUN Number:       4
+        #
+        alias dcs9a_lun4
+        wwid  360080e50002e332600000c52501ba379
+    }
+    multipath {
+        #
+        # Controller Name:  dcs9
+        # Raid Controller:  b
+        # LUN Name:         5
+        # LUN Number:       5
+        #
+        alias dcs9b_lun5
+        wwid  360080e50002e7e7000000c21501ba230
+    }
+}

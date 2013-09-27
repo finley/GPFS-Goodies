@@ -1,0 +1,488 @@
+#!/usr/bin/perl -w
+
+#
+# Originally created by: Jarrod Johnson <jbjohnso@us.ibm.com> as "getluns.pl"
+#
+
+#
+# 2012.10.16 Brian Elliott Finley <bfinley@us.ibm.com>
+# - added invocation options and help output
+# 2012.10.18 Brian Elliott Finley <bfinley@us.ibm.com>
+# - added additional info in resultant configuration
+# 2013.02.14 Brian Elliott Finley <bfinley@us.ibm.com>
+# - added blacklist feature
+# 2013.06.14 Brian Elliott Finley <bfinley@us.ibm.com>
+# - modify blacklist to use vendor/product info instead of disk name
+# 2013.07.18 Brian Elliott Finley <bfinley@us.ibm.com>
+# - add section entries for DCS3700 and DS35xx subsystems
+# - handle case where subsystem name has spaces
+# - handle case where SMCli or subsystem doesn't return a "lun number"
+# 2013.09.22 Brian Elliott Finley <bfinley@us.ibm.com>
+# - add --version output
+
+
+
+use strict;
+use Getopt::Long;
+use File::Basename;
+
+my $progname = basename($0);
+my $version_string = 'v7';
+
+GetOptions(
+    "help"          => \my $help,
+    "version"       => \my $version,
+    "auto-detect"   => \my $auto_detect,
+    "out-file=s"    => \my $out_file,
+    #"blacklist=s"   => \my $blacklist,
+    "no-blacklist"  => \my $no_blacklist,
+) or usage() and exit(1);
+
+if ( defined $help ) {
+    usage();
+    exit 0;
+}
+
+if ( defined $version ) {
+    version();
+    exit 0;
+}
+
+if( ! defined $auto_detect and ! defined $ARGV[0] ) {
+    usage();
+    print "\n";
+    print qq(-->  Make sure you specify one of "--auto-detect" or "a list of controllers".\n);
+    print "\n";
+    exit 1;
+} 
+
+#if( defined $blacklist and (($blacklist =~ m/^\-+n/) or (defined $no_blacklist)) ) {
+#    usage();
+#    print "\n";
+#    print qq(-->  You can specify either "--blacklist" or "--no-blacklist" but not both."\n);
+#    print "\n";
+#    exit 1;
+#} 
+
+if ( ! defined $out_file ) {
+    usage();
+    print "\n";
+    print qq(-->  Please specify "--out-file FILE".\n);
+    print "\n";
+    exit 1;
+}
+
+
+
+#my @blacklist_devices;
+#if( defined $no_blacklist ) {
+#    undef @blacklist_devices;
+#
+#} elsif( defined $blacklist ) {
+#    @blacklist_devices = split(/,/, $blacklist);
+#
+#} else {
+#    # If we got to here, then we default to adding sda to the blacklist
+#    @blacklist_devices = 'sda';
+#}
+
+
+my @controllers;
+if( defined $auto_detect ) {
+    my $cmd = "SMcli -d -v";
+    open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
+    while(<INPUT>) {
+        next if(m/^SMcli completed successfully/);
+        next if(m/^(\s|$)/);
+
+        if( m/([\w ]*)\t+.*/ ) {
+            my $controller = $1;
+            push @controllers, $controller;
+        };
+    }
+    close(INPUT);
+} else {
+    push @controllers, @ARGV;
+}
+
+my $quantity = scalar @controllers;
+print "Looks like we're dealing with $quantity controllers. Let's get going:\n";
+
+my %aliases;
+foreach my $controller (@controllers) {
+    
+    my $lun_name;
+    my $key;
+
+    print qq(  Querying "$controller"\n);
+
+    my $cmd = qq(SMcli -n "$controller" -c 'show logicalDrives;');
+    open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
+    while(<INPUT>) {
+
+        #
+        # Get the LUN's Name (from the SMclient perspective)
+        #
+        if (/Logical Drive name:\s*(\S*)/) {
+
+            my $lun_name = $1;
+
+            $key = "${controller}_${lun_name}";
+
+            $aliases{$key}->{controller} = $controller;
+            $aliases{$key}->{lun_name} = $lun_name;
+
+        }
+        #
+        # Get the LUN's WWID
+        #
+        elsif (/Logical Drive ID:\s*(\S*)/) {
+
+            my $wwid = $1;
+
+            $wwid =~ s/^/3/;
+            $wwid =~ s/://g;
+
+            $aliases{$key}->{wwid} = $wwid;
+
+        }
+        #
+        # Get the LUN's ID (Instance number -- Ie.: lun0)
+        #
+        elsif (/LUN:\s*(\S*)/) {
+
+            my $lun_number = $1;
+
+            $aliases{$key}->{lun_number} = $lun_number;
+
+        }
+        #
+        # Get the LUN's SSID
+        #
+        elsif (/\s+Subsystem ID \(SSID\):\s+(\d+)/) {
+
+            my $ssid = $1;
+
+            $aliases{$key}->{ssid} = $ssid;
+
+        }
+        #
+        # Get the LUN's ownership (at the raid controller level) 
+        #
+        elsif (/Preferred owner:.*slot\s*(\S*)/) {
+
+            my $owner = lc($1);
+
+            $aliases{$key}->{owner} = $owner;
+
+        }
+
+    }
+    close(INPUT);
+}
+
+
+########################################################################
+#
+# BEGIN write out the multipath.conf file
+#
+my $file = $out_file;
+open(FILE,">$file") or die("Couldn't open $file for writing");
+
+#
+# Default entries
+#
+print FILE qq(defaults {\n);
+print FILE qq(    user_friendly_names yes\n);
+print FILE qq(}\n);
+
+print FILE qq(\n);
+
+#
+# Blacklist entries
+#
+unless(defined $no_blacklist) {
+
+    my @blacklist_entries;
+    push @blacklist_entries, 'LSI,Logical Volume';
+    push @blacklist_entries, '*,Universal Xport';
+
+    #
+    # How to determine which device to blacklist on a node:
+    #
+    #   Figure out which device is your root device (sda in this case)
+    #   and use lsscsi to find out how it's classified.  Pay attention
+    #   to the vendor and product information as indicated below.  These
+    #   are the two pieces we use to blacklist root devices across a
+    #   class of machines (Ie.: all of your storage servers with the
+    #   exact same hardware configuration).
+    #
+    #   [root@storage06 ~]# lsscsi  | grep -w sda
+    #   [0:1:0:0]    disk    LSI      Logical Volume   3000  /dev/sda 
+    #
+    #                        ^^^      ^^^^^^^^^^^^^^
+    #                         |         |
+    #                         |         --- product 
+    #                         --- vendor
+    #
+    # XXXX Note to self: at some point, accept a user provided blacklist
+    # entry of the form:
+    #
+    #   --blacklist "vendor,product"
+    #   --blacklist "LSI,Logical Volume" --blacklist "MyRaid,Illogical Volume"
+    #
+
+    print FILE qq(blacklist {\n);
+    foreach my $entry (@blacklist_entries) {
+        my ($vendor, $product) = split(/,/, $entry, 2);
+
+        print FILE qq(    device {\n);
+        print FILE qq(        vendor    "$vendor"\n);
+        print FILE qq(        product   "$product"\n);
+        print FILE qq(    }\n);
+
+    }
+
+    print FILE qq(}\n);
+    print FILE qq(\n);
+}
+
+
+print FILE << 'EOF';
+#
+#   These entries based on the example settings from pages 118 - 120 of:
+#
+#       "IBM System Storage DS Storage Manager Version 10.8: Installation and Host Support Guide.pdf"
+#        (which can be found at: https://ibm.biz/Bdxk4t)
+#
+devices {
+    device {
+        #
+        #   This device section will apply to the following subsystems:
+        #
+        #       DS3512
+        #       DS3524
+        #
+        vendor                  "IBM"
+        product                 "1746"
+        path_grouping_policy    group_by_prio
+        getuid_callout          "/lib/udev/scsi_id -g -u -d /dev/%n"
+        #
+        # -g Treat the device as white listed.
+        # -u Turn whitespace to underscores.
+        # -d Instead of determining and creating a device node based on a
+        #    sysfs dev entry as done for the -s, send SG_IO commands to
+        #    device, such as /dev/sdc.  NOTE: This is important when
+        #    using friendly multipath device names. -Brian
+        #
+        path_selector           "round-robin 0"
+        path_checker            rdac
+        features                "2 pg_init_retries 50"
+        hardware_handler        "1 rdac"
+        prio                    rdac
+        failback                immediate
+        no_path_retry           15
+        rr_min_io               100
+        rr_weight               priorities
+    }   
+
+    device {
+        #
+        #   This device section will apply to the following subsystems:
+        #
+        #       DCS3700
+        #       DS5100
+        #       DS5300
+        #
+        vendor                  "IBM"
+        product                 "1818"
+        path_grouping_policy    group_by_prio
+        getuid_callout          "/lib/udev/scsi_id -g -u -d /dev/%n"
+        #
+        # -g Treat the device as white listed.
+        # -u Turn whitespace to underscores.
+        # -d Instead of determining and creating a device node based on a
+        #    sysfs dev entry as done for the -s, send SG_IO commands to
+        #    device, such as /dev/sdc.  NOTE: This is important when
+        #    using friendly multipath device names. -Brian
+        #
+        path_selector           "round-robin 0"
+        path_checker            rdac
+        features                "2 pg_init_retries 50"
+        hardware_handler        "1 rdac"
+        prio                    rdac
+        failback                immediate
+        no_path_retry           15
+        rr_min_io               100
+        rr_weight               priorities
+    }   
+}       
+
+EOF
+
+
+#
+# Multipath entries
+#
+print FILE qq(multipaths {\n);
+foreach my $key (sort keys %aliases) {
+
+
+    # multipath {
+    #   # Controller Name:  pershing-ctrl-14-3
+    #   # Raid Controller:  a
+    #   # LUN Name:         PA14_3_0
+    #   # LUN Number:       0
+    #   wwid  360080e50002e34b8000002fd506c631e
+    #   alias pershing_ctrl_14_3a_lun0
+    # }
+
+    my $controller = $aliases{$key}->{controller};
+    my $owner = $aliases{$key}->{owner};
+    my $lun_name = $aliases{$key}->{lun_name} if( defined $aliases{$key}->{lun_name} );
+    my $lun_number = $aliases{$key}->{lun_number} if( defined $aliases{$key}->{lun_number} );
+    my $ssid = $aliases{$key}->{ssid} if( defined $aliases{$key}->{ssid} );
+
+    my $lun;
+    if(defined $lun_number) {
+        $lun = $lun_number;
+    } else {
+        $lun = $ssid;
+    }
+
+    my $alias = "${controller}${owner}_lun${lun}";
+
+    my $wwid = $aliases{$key}->{wwid};
+
+    #
+    # (10:18:23 AM) Scott Fadden (GPFS): 
+    # typeset bannedFromDeviceNames='/?$&*()'   
+    # typeset bannedFromDiskNames='.<>{}/?`~!@#$%^&*()+=-' 
+    #
+    # GPFS Doesn't like hyphens in NSD disk names
+    #
+    $alias =~ s/-/_/g;
+    #
+    # And spaces introduced (perhaps by a controller name) are right
+    # out!
+    #
+    $alias =~ s/ /_/g;
+
+    print FILE "    multipath {\n";
+    print FILE "        #\n";
+    print FILE "        # Controller Name:      $controller\n";
+    print FILE "        # Raid Controller:      $owner\n";
+    print FILE "        # LUN Name:             $lun_name\n"    if( defined $lun_name);
+    print FILE "        # LUN Number:           $lun_number\n"  if( defined $lun_number);
+    print FILE "        # Subsystem ID (SSID):  $ssid\n"    if( defined $ssid);
+    print FILE "        #\n";
+    print FILE "        alias $alias\n";
+    print FILE "        wwid  $wwid\n";
+    print FILE "    }\n";
+}
+
+print FILE "}\n";
+close(FILE);
+#
+# END write out the multipath.conf file
+#
+########################################################################
+
+print "Done!  You can find your fresh multipath.conf file here:\n";
+print "\n";
+print "  $out_file\n";
+print "\n";
+print << 'EOF';
+Your next step is to copy it out to /etc/multipath.conf on all of the
+storage servers connected to these storage controllers.  Then execute
+the multipathd command to re-read the configuration file:
+
+    #
+    # WARNING!  Make sure you have performed an "mmshutdown" on each NSD
+    # server prior to copying out the new file and doing the reconfigure
+    # below.  If there are any differences between this config and your
+    # prior config, taking that precaution will ensure you don't provoke
+    # any corruption in any pre-existing GPFS filesystems.
+    #
+    # If you have NSD servers in building blocks as HA pairs, you should be
+    # able to do this on one server at a time (mmshutdown, reconfigure,
+    # mmstartup).  But, you _must_ use your own judgement -- don't
+    # blindly follow this part of these instructions.  (You can blindly
+    # follow the new file creation part. ;-)
+    #
+
+    multipathd -k'reconfigure' 
+    multipathd -k'reconfigure'
+
+    #
+    # Yes -- do it twice.  With the first invocation, it's possible that
+    # not all device mapper name changes will show up in the
+    # /dev/mapper/ directory.
+    #
+
+
+You can see the results with these commands (and others):
+
+    ls /dev/mapper/
+    multipath -ll
+
+EOF
+
+exit 0;
+                                                                
+sub version {
+    print qq(\n);
+    print qq($progname $version_string\n);
+    print qq(\n);
+    print qq(    Part of the "gpfs_goodies" package\n);
+    print qq(\n);
+
+    return 1;
+}
+
+sub usage {
+version();
+print << "EOF";
+Usage:  $progname [OPTION...] --out-file FILE [ --auto-detect | controller1 controller2... ]
+
+    All options can be abbreviated to minimum uniqeness.
+
+    --auto-detect
+
+        This command will use the output from SMcli -v -d to determine the list
+        of controllers to use.  Highly recomended.
+
+
+    --out-file FILE
+
+        The name of your resultant multipath.conf file.  It doesn't
+        actually have to be called multipath.conf here...
+
+        Example:  --out-file /tmp/multipath.conf.test_run
+
+
+    --no-blacklist
+
+        Don't blacklist any disks.  By default, this tool will create a
+        multipath.conf file that blacklists the local disks.  
+        
+        Please verify before rebooting your nodes by running 
+        'multipath -v3' and examining the output for blacklisted devices.
+
+
+EOF
+    return 1;
+#XXXX    --blacklist DISK[,DISK,DISK] 
+#
+#        A comma delimited list of disks to blacklist.  
+#        
+#        If no --blacklist entry is specified, "sda" will automatically
+#        be added to the blacklist as the default.  If you specify a
+#        blacklist it overrides the default (doesn't add to it).  So if
+#        you specify a blacklist, and want to include sda, it must be in
+#        your comma delimited list.
+#        
+#        Example:  --blacklist sdi,sdb,sdm
+#        
+#
+}
