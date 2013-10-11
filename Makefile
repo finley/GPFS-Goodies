@@ -1,4 +1,9 @@
-PKG_NAME 	:= $(shell basename `pwd`)
+PKG_NAME 	:= gpfs_goodies
+#
+# If we're running 'make' out of the git repo, then set the version
+# here.  If we're running during an RPM build, then take the VERSION
+# flag set in the environment by the spec file.
+#
 VERSION 	:= $(shell git describe --tags)
 TMPDIR 		:= $(shell mktemp -d)
 SPECFILE 	:= $(shell mktemp)
@@ -9,7 +14,7 @@ TARBALL		:= /tmp/${PKG_DIR}.tar.bz2
 all: tarball
 
 .PHONY += install
-install: version_executables
+install:
 	mkdir -p ${PREFIX}/usr/sbin/
 	install -m 755 sbin/* ${PREFIX}/usr/sbin/
 	
@@ -22,20 +27,24 @@ install: version_executables
 	mkdir -p ${PREFIX}/usr/share/doc/${PKG_NAME}-${VERSION}/
 	install -m 644 doc/* ${PREFIX}/usr/share/doc/${PKG_NAME}-${VERSION}/
 
-.PHONY += create_spec_file
-create_spec_file:
-	/bin/cp gpfs_goodies.spec ${SPECFILE}
-	perl -pi -e "s/^Version:.*/Version: ${VERSION}/g" ${SPECFILE}
-
-.PHONY += version_executables
-version_executables:
-	perl -pi -e "s/^(my \$version_string\s+=).*/$1 '${VERSION}'/g" ./bin/multipath.conf-creator
-
 .PHONY += tarball
-tarball: create_spec_file version_executables
+tarball:
+	
+	#
+	# Make a copy of the repo
 	git clone . ${TMPDIR}/${PKG_DIR}
 	rm -fr ${TMPDIR}/${PKG_DIR}/.git
-	/bin/cp ${SPECFILE} ${TMPDIR}/${PKG_DIR}/gpfs_goodies.spec
+	cp ${TMPDIR}/${PKG_DIR}/Makefile ${TMPDIR}/${PKG_DIR}/Makefile.rpm
+	
+	#
+	# Version the Files
+	perl -pi -e "s/^Version:.*/Version: ${VERSION}/g" 				${TMPDIR}/${PKG_DIR}/gpfs_goodies.spec
+	perl -pi -e "s/^(my \$version_string\s+=).*/$1 '${VERSION}'/g" 	${TMPDIR}/${PKG_DIR}/sbin/multipath.conf-creator
+	perl -pi -e "s/^(version_string=).*/$1 '${VERSION}'/g" 			${TMPDIR}/${PKG_DIR}/sbin/gpfs_goodies
+	perl -pi -e "s/^VERSION\s+.*/VERSION := ${VERSION}/g" 			${TMPDIR}/${PKG_DIR}/Makefile.rpm
+	
+	#
+	# Tar it up
 	cd ${TMPDIR} && tar -cvjf ${TARBALL} ${PKG_DIR}
 
 .PHONY += rpm
