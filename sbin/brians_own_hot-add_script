@@ -1,55 +1,151 @@
 #!/bin/sh
 
 #
-#   2012.06.28 Brian Elliott Finley <bfinley@us.ibm.com>
-#
-
-#
 #   This script will hot add LUNs from DS35xx and DCS37xx series
 #   devices.  It will also hot remove any devices that no longer exist.
 #   It will _NOT_ hot remove any devices that do still exist. -BEF-
 #
 
-
-# 
-# Hot delete any devices that don't have disk devices associated with them
+#
+#   2012.06.28 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - created
+#   2013.09.27 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - add --help, --status, and --yes options
 #
 
-delete_me=$(lsscsi | egrep '(1818|1746)' | grep -v sd | sed -e 's/.*\[//' -e 's/].*//')
-if [ ! -z "$delete_me" ]; then
+PROGNAME=$(basename $0)
+
+help() {
+
     echo
-    echo "Hot removing undefined LUNs:"
+    echo "$PROGNAME [--help|--status|--yes]"
     echo
+
+cat <<"EOF"
+    --help
+        Show this help output.
+
+    --status
+        Show the current LUN count, but don't actually do anything or
+        make any changes.
+
+    --yes
+        Hot delete any devices that don't have disk devices associated
+        with them, and hot add any new devices.
+
+        It's important to perform the hot delete prior to the hot add,
+        as a disk that's no longer present may be still be considered as
+        connected, and thus prevent detection of a new disk in that same
+        position.
+
+        The hot delete function should be considered "safe", in that it
+        won't remove the representation of any disk that is actually
+        present and in use, but will only operate on disks that have
+        already been removed.  If a disk has been re-located, it's SCSI
+        representation will be removed from it's old location and then
+        hot added in it's new location.
+
+        If it all in doubt, look at the code in this script, and make
+        your own determination as to the impact of it's operation and/or
+        try it in your test environment first.  
+        
+        You do have a test environment, right?
+
+
+    Support: 
+    
+        This software is provided as-is, with no express or implied
+        support.  However, the author would love to receive your
+        patches.  Please contact Brian E. Finley <bfinley@us.ibm.com>
+        with patches and/or suggestions.
+
+
+EOF
+
+}
+
+
+hot_delete() {
+    # 
+    # Hot delete any devices that don't have disk devices associated with them
+    #
+    
+    delete_me=$(lsscsi | egrep '(1818|1746)' | grep -v sd | sed -e 's/.*\[//' -e 's/].*//')
+    if [ ! -z "$delete_me" ]; then
+        echo
+        echo "Hot removing undefined LUNs:"
+        echo
+    fi
+    for i in $delete_me
+    do
+        file="/sys/class/scsi_device/${i}/device/delete"
+        echo "  echo 1 > $file"
+        echo 1 > $file
+    done
+    echo
+}
+
+hot_add() {
+    # 
+    # Hot add all new devices
+    #
+    
+    add_me=$(/bin/ls /sys/class/scsi_host/host*/scan)
+    if [ ! -z "$add_me" ]; then
+        echo
+        echo "Discovering and hot-adding new LUNs:"
+        echo
+    fi
+    
+    for i in $add_me
+    do
+        echo "  echo '- - -' > $i"
+        echo '- - -' > $i
+    done
+    echo
+    
+}
+
+status() {
+    echo "Total LUN count:"
+    lsscsi | grep '(1818|1746)' |wc -l
+    echo
+}
+
+
+if [ ! -z "$1" -a ! -z "$2" ]; then
+    help
+    echo
+    echo "SUGGESTION:  Please only specify one option."
+    echo
+    exit 1
 fi
-for i in $delete_me
-do
-    file="/sys/class/scsi_device/${i}/device/delete"
-    echo "  echo 1 > $file"
-    echo 1 > $file
-done
-echo
+
+OPTION=$(echo $1 | sed 's/^--/-/')
+
+case $OPTION in
+    -h|-help)
+        help
+        exit 0
+        ;;
+    -s|-status)
+        status
+        exit 0
+        ;;
+    -y|-yes)
+        hot_delete
+        hot_add
+        status
+        exit 0
+        ;;
+    *)
+        help
+        echo
+        echo "SUGGESTION:  Please specify either --status or --yes."
+        echo
+        exit 1
+        ;;
+esac
 
 
-
-# 
-# Hot add all new devices
-#
-
-add_me=$(/bin/ls /sys/class/scsi_host/host*/scan)
-if [ ! -z "$add_me" ]; then
-    echo
-    echo "Discovering and hot-adding new LUNs:"
-    echo
-fi
-
-for i in $add_me
-do
-    echo "  echo '- - -' > $i"
-    echo '- - -' > $i
-done
-echo
-
-echo "Total LUN count:"
-lsscsi | grep '(1818|1746)' |wc -l
-echo
 
