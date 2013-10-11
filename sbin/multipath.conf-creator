@@ -27,7 +27,7 @@ use Getopt::Long;
 use File::Basename;
 
 my $progname = basename($0);
-my $version_string = '__VERSION__';
+my $version_string = 'v' . '__VERSION__';
 
 GetOptions(
     "help"          => \my $help,
