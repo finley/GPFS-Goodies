@@ -4,13 +4,10 @@
 # 2013.09.27 Brian Elliott Finley <bfinley@us.ibm.com>
 #
 
-VERSION='__VERSION__'
-
-echo
-echo gpfs_goodies v$VERSION
-echo
-
 cat <<"EOF"
+
+gpfs_goodies v__VERSION__
+
 Please try one of the following commands.  It's OK -- they're all safe,
 and won't do anything but show help information if run with either no
 arguments, or with --help or -h as an argument.
@@ -18,6 +15,10 @@ arguments, or with --help or -h as an argument.
     brians_own_hot-add_script
     multipath.conf-creator
     test_nsd_block_device_settings
+
+    Be sure to take a look at the HOWTO and other docs in:
+
+        /usr/share/doc/gpfs_goodies-__VERSION__
 
 EOF
 
