@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#
+# 2013.09.27 Brian Elliott Finley <bfinley@us.ibm.com>
+#
+
+ 'v19'
+cat <<"EOF"
+
+gpfs_goodies v$version_string
+
+Please try one of the following commands.  It's OK -- they're all safe,
+and won't do anything but show help information if run with either no
+arguments, or with --help or -h as an argument.
+
+    brians_own_hot-add_script
+    multipath.conf-creator
+    test_nsd_block_device_settings
+
+EOF
+
