@@ -4,7 +4,7 @@
 # 2013.09.27 Brian Elliott Finley <bfinley@us.ibm.com>
 #
 
-VERSION='00'
+VERSION='__VERSION__'
 
 echo
 echo gpfs_goodies v$VERSION

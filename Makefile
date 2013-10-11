@@ -46,9 +46,9 @@ tarball:
 	
 	#
 	# Version the Files
-	perl -pi -e "s/^Version:.*/Version: ${VERSION}/g" 				${TMPDIR}/${PKG_DIR}/gpfs_goodies.spec
-	perl -pi -e "s/^(my \$version_string\s+=).*/$1 '${VERSION}'/g" 	${TMPDIR}/${PKG_DIR}/sbin/multipath.conf-creator
-	perl -pi -e "s/^VERSION=.*/VERSION=${VERSION}/g" 			    ${TMPDIR}/${PKG_DIR}/sbin/gpfs_goodies
+	perl -pi -e "s/__VERSION__/${VERSION}/g"  ${TMPDIR}/${PKG_DIR}/gpfs_goodies.spec
+	perl -pi -e "s/__VERSION__/${VERSION}/g"  ${TMPDIR}/${PKG_DIR}/sbin/multipath.conf-creator
+	perl -pi -e "s/__VERSION__/${VERSION}/g"  ${TMPDIR}/${PKG_DIR}/sbin/gpfs_goodies
 	
 	#
 	# Tar it up
