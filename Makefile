@@ -1,10 +1,13 @@
+#
+# 	2013.10.11 Brian Finley <bfinley@us.ibm.com>
+#	- improve version handling
+#
+
 PKG_NAME 	:= gpfs_goodies
-#
-# If we're running 'make' out of the git repo, then set the version
-# here.  If we're running during an RPM build, then take the VERSION
-# flag set in the environment by the spec file.
-#
-VERSION 	:= $(shell git describe --tags)
+MAJOR_VER 	:= $(shell git describe --tags | sed -e 's/^v//' -e 's/-.*//')
+MINOR_VER	:= $(shell git describe --tags | sed -e 's/^v[0-9]*-//' -e 's/-.*//')
+MINOR_VER   ?= 0
+VERSION     := ${MAJOR_VER}.${MINOR_VER}
 TMPDIR 		:= $(shell mktemp -d)
 SPECFILE 	:= $(shell mktemp)
 PKG_DIR     := ${PKG_NAME}-${VERSION}
@@ -34,14 +37,18 @@ tarball:
 	# Make a copy of the repo
 	git clone . ${TMPDIR}/${PKG_DIR}
 	rm -fr ${TMPDIR}/${PKG_DIR}/.git
-	cp ${TMPDIR}/${PKG_DIR}/Makefile ${TMPDIR}/${PKG_DIR}/Makefile.rpm
+	
+	#
+	# Create an RPM appropriate Makefile
+	cp ${TMPDIR}/${PKG_DIR}/Makefile 								${TMPDIR}/${PKG_DIR}/Makefile.rpm
+	perl -pi -e "s/^MAJOR_VER\s+.*/MAJOR_VER := ${MAJOR_VER}/g" 	${TMPDIR}/${PKG_DIR}/Makefile.rpm
+	perl -pi -e "s/^MINOR_VER\s+.*/MINOR_VER := ${MINOR_VER}/g" 	${TMPDIR}/${PKG_DIR}/Makefile.rpm
 	
 	#
 	# Version the Files
 	perl -pi -e "s/^Version:.*/Version: ${VERSION}/g" 				${TMPDIR}/${PKG_DIR}/gpfs_goodies.spec
 	perl -pi -e "s/^(my \$version_string\s+=).*/$1 '${VERSION}'/g" 	${TMPDIR}/${PKG_DIR}/sbin/multipath.conf-creator
-	perl -pi -e "s/^(version_string=).*/$1 '${VERSION}'/g" 			${TMPDIR}/${PKG_DIR}/sbin/gpfs_goodies
-	perl -pi -e "s/^VERSION\s+.*/VERSION := ${VERSION}/g" 			${TMPDIR}/${PKG_DIR}/Makefile.rpm
+	perl -pi -e "s/^VERSION=.*/VERSION=${VERSION}/g" 			    ${TMPDIR}/${PKG_DIR}/sbin/gpfs_goodies
 	
 	#
 	# Tar it up
