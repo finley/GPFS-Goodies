@@ -31,7 +31,7 @@ Includes:
 %install
 rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/
-make PREFIX=$RPM_BUILD_ROOT install
+make -f Makefile.rpm PREFIX=$RPM_BUILD_ROOT install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
