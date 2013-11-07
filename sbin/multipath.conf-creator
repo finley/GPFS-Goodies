@@ -24,6 +24,8 @@
 # - improve regex used to identify controller name
 # - incorporate numerous additional controllers in the multipath.conf
 #   devices section
+# 2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
+# - test for existence of SMcli
 #
 
 
@@ -70,10 +72,20 @@ if( ! defined $auto_detect and ! defined $ARGV[0] ) {
 #    exit 1;
 #} 
 
-if ( ! defined $out_file ) {
+if( ! defined $out_file ) {
     usage();
     print "\n";
     print qq(-->  Please specify "--out-file FILE".\n);
+    print "\n";
+    exit 1;
+}
+
+my $smcli = which("SMcli");
+if( ! defined $smcli ) {
+    usage();
+    print "\n";
+    print qq(-->  I can't find SMcli.  Please make sure that the IBM DS Storage Manager\n);
+    print qq(     software is installed, and is in your path.\n);
     print "\n";
     exit 1;
 }
@@ -308,11 +320,10 @@ devices {
         #
         #   This device section will apply to the following subsystems:
         #
-        #       DS3512 => 1746
-        #       DS3524 => 1746
+        #       DCS3700             => 1818
         #
         vendor                  "IBM"
-        product                 "1746"
+        product                 "1818"
         path_grouping_policy    group_by_prio
         getuid_callout          "/lib/udev/scsi_id -g -u -d /dev/%n"
         #
@@ -338,11 +349,11 @@ devices {
         #
         #   This device section will apply to the following subsystems:
         #
-        #       MYSTERY_CONTROLLER  => 1813
-        #       DCS3700             => 1818
+        #       DS3512 => 1746
+        #       DS3524 => 1746
         #
         vendor                  "IBM"
-        product                 "181[38]"
+        product                 "1746"
         path_grouping_policy    group_by_prio
         getuid_callout          "/lib/udev/scsi_id -g -u -d /dev/%n"
         #
@@ -444,7 +455,7 @@ devices {
         #
         #   This device section will apply to the following subsystems:
         #
-        #       SVC
+        #       SVC - IBM SAN Volume Controller
         #
         vendor                  "IBM"
         product                 "2145"
@@ -595,6 +606,10 @@ EOF
 
 exit 0;
                                                                 
+########################################################################
+#
+#   BEGIN Subroutines
+#
 sub version {
     print qq(\n);
     print qq($progname $version_string\n);
@@ -660,3 +675,26 @@ EOF
 #        
 #
 }
+
+
+sub which {
+
+    my $file = shift;
+    my $path = shift;
+    
+    if( ! defined($path) ) { 
+        $path = $ENV{PATH}; 
+    }
+    
+    foreach my $dir (split(/:/,$path)) {
+      if(-x "$dir/$file") {
+        return "$dir/$file";
+      }
+    }
+    return undef;
+}
+
+#
+#   END Subroutines
+#
+########################################################################
