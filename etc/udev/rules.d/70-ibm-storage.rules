@@ -1,17 +1,73 @@
 #
-# Created by: Jarrod Johnson
+# Originally created by: Jarrod Johnson
 #
-# Tweaked by: Brian Finley
-# - Added comments and DS3512 section
+#   Some time in 2012 -- Brian Finley
+#   - Added comments and DS3512 section
+#   2013.11.07 Brian Finley <bfinley@us.ibm.com>
+#   - Added 1813
+#   - Added many comments
+#
+
+#
+# TODO: create this file on target systems based on a template
+# distributed with gpfs_goodies, and have an entry per disk subsystem
+# based on WWN or some other unique identifier.
+#
+
+#
+#   If you make changes to this file and want to see them take effect
+#   without a reboot, try this:
+#
+#       udevadm trigger --verbose --subsystem-match=block
+#
+#   Then:
+#
+#       test_block_device_settings
+#
+
+#
+# queue_depth:  Ideal size can be determined by this formula:
+#   
+#   For each storage controller, we use a modern assumption that it has
+#   a 4096 total queue depth for receiving requests from all nodes that
+#   connect to it.  Therefore:
+#
+#       4096 / ($storage_nodes * $luns) => Target_queue_depth
+#
+#   So, for 4 storage servers, with 30 LUNs off of a single controller,
+#   we get:
+#
+#       4096 / (4 * 30) = 34.13
+#
+#   Let's round down with a binary factor, just because:
+#
+#       34.13 / 8 = 4 (and change, but we'll drop the change)
+#
+#       4 * 8 = 32
+#
+#   And so "32" is the ideal queue_depth in this case.  See how easy
+#   that was? ;-)
+#
+
 #
 # DCS3700
+# MYSTERY_CONTROLLER
 #
-SUBSYSTEM=="block", SUBSYSTEMS=="scsi", ATTRS{model}=="1818*", RUN+="/bin/sh -c '/bin/echo 4096 > /sys/block/%k/queue/max_sectors_kb;/bin/echo 512 > /sys/block/%k/queue/nr_requests;/bin/echo 4096 > /sys/block/%k/queue/read_ahead_kb;echo noop > /sys/block/%k/queue/scheduler'"
+SUBSYSTEM=="block", SUBSYSTEMS=="scsi", ATTRS{model}=="181[38]*", RUN+="/bin/sh -c '/bin/echo 4096 > /sys/block/%k/queue/max_sectors_kb; /bin/echo 4096 > /sys/block/%k/queue/read_ahead_kb; /bin/echo 512  > /sys/block/%k/queue/nr_requests; /bin/echo 32  > /sys/block/%k/device/queue_depth; /bin/echo noop > /sys/block/%k/queue/scheduler;'"
+
 #
 # DS3512
+# DS3524
 #
-SUBSYSTEM=="block", SUBSYSTEMS=="scsi", ATTRS{model}=="1746*", RUN+="/bin/sh -c '/bin/echo 4096 > /sys/block/%k/queue/max_sectors_kb;/bin/echo 512 > /sys/block/%k/queue/nr_requests;/bin/echo 4096 > /sys/block/%k/queue/read_ahead_kb;/bin/echo 512 > /sys/block/%k/queue/nr_requests;/bin/echo 128 > /sys/block/%k/device/queue_depth;/bin/echo noop > /sys/block/%k/queue/scheduler'"
+SUBSYSTEM=="block", SUBSYSTEMS=="scsi", ATTRS{model}=="1746*", RUN+="/bin/sh -c '/bin/echo 4096 > /sys/block/%k/queue/max_sectors_kb; /bin/echo 4096 > /sys/block/%k/queue/read_ahead_kb; /bin/echo 512  > /sys/block/%k/queue/nr_requests; /bin/echo 32  > /sys/block/%k/device/queue_depth; /bin/echo noop > /sys/block/%k/queue/scheduler;'"
+
+#
+# DCS9550
+#
+SUBSYSTEM=="block", SUBSYSTEMS=="scsi", ATTRS{model}=="DCS9550*", RUN+="/bin/sh -c '/bin/echo 4096 > /sys/block/%k/queue/max_sectors_kb; /bin/echo 4096 > /sys/block/%k/queue/read_ahead_kb; /bin/echo 512  > /sys/block/%k/queue/nr_requests; /bin/echo 32  > /sys/block/%k/device/queue_depth; /bin/echo noop > /sys/block/%k/queue/scheduler;'"
+
 #
 # Any and all /dev/dm-* devices.
 #
-SUBSYSTEM=="block", KERNEL=="dm-*",RUN+="/bin/sh -c '/bin/echo 4096 > /sys/block/%k/queue/max_sectors_kb;/bin/echo 512 > /sys/block/%k/queue/nr_requests;/bin/echo 4096 > /sys/block/%k/queue/read_ahead_kb;echo noop > /sys/block/%k/queue/scheduler'"	
+SUBSYSTEM=="block", KERNEL=="dm-*", RUN+="/bin/sh -c '/bin/echo 4096 > /sys/block/%k/queue/max_sectors_kb; /bin/echo 4096 > /sys/block/%k/queue/read_ahead_kb; /bin/echo 512  > /sys/block/%k/queue/nr_requests; /bin/echo 32  > /sys/block/%k/device/queue_depth; /bin/echo noop > /sys/block/%k/queue/scheduler;'"
+
