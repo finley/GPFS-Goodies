@@ -1,2 +1,94 @@
-- add option "--password PASSWORD"
+- use SMcli to determine alua vs. rdac
+    - provide warning if not recommended setting by controller type
+    - consider adding settings that are unique by controller instance
+      (ie.: one 1818 w/alua and one 1818 with Linux).
+    - consider adding host specific settings:
+        ie.: one host w/luns presented as alua and another with the same
+        luns presented as Linux
+
+- add option "--sm-password PASSWORD" 
+
+- Change MYSTERY_CONTROLLER to released name
+
+
+Blacklist
+
+    LSSCSI output for devices to blacklist:
+
+    [0:2:0:0]    disk    IBM      ServeRAID M5015  2.12  /dev/sda 
+    [4:0:0:0]    cd/dvd  HL-DT-ST DVDRAM GT30N     IS09  /dev/sr0 
+
+  devnode "^usbsd*"
+
+  device {
+     vendor                "ServeRA"
+     product               *
+  }
+  device {
+     vendor                "LSILOGIC"
+     product               "Logical Volume"
+  }
+  device {
+     vendor                "IBM-ESXS"
+     product               *
+  }
+
+        device {
+                vendor  "ServeRA"
+                product "8k-l Mirror"
+        }
+        device {
+                vendor  "IBM"
+                product "VirtualDisk"
+       
+
+
+
+
+LSSCSI output for devices to handle:
+
+    [3:0:0:0]    disk    IBM      1813      FAStT  0786  /dev/sdb 
+    [3:0:0:1]    disk    IBM      1813      FAStT  0786  /dev/sdc 
+    [3:0:0:2]    disk    IBM      1813      FAStT  0786  /dev/sdd 
+
+
+
+
+FAQ
+
+    Where do I need to run multipath.conf-creator?
+
+    A. Any node that can use SMclient to connect to the storage
+    subsystems.
+
+
+    Where do I need to copy the multipath.conf files?
+
+    A. All storage nodes.
+
+
+
+Make sure that multipathd is running
+
+Make to sort the output numerically (ie. lun2 comes before lun10)
+
+FOr the RPM, change paths in the HOWTO for files copied.
+
+
+
+
+
+CONTRIBUTORS
+
+    Ray Paden
+    Scott Denham
+
+
++# 
++#   TODO: perhaps add some notes on using these commands for additional
++#   verification? -BEF-
++# 
++#       - mmnsddiscover -a
++#       - mmlsdisk gpfs1 -M
++#
 
