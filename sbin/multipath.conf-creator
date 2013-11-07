@@ -19,6 +19,12 @@
 # - handle case where SMCli or subsystem doesn't return a "lun number"
 # 2013.09.22 Brian Elliott Finley <bfinley@us.ibm.com>
 # - add --version output
+# 2013.11.06 Brian Elliott Finley <bfinley@us.ibm.com>
+# - use proper grammar for plural and singular controller(s)
+# - improve regex used to identify controller name
+# - incorporate numerous additional controllers in the multipath.conf
+#   devices section
+#
 
 
 
@@ -27,7 +33,7 @@ use Getopt::Long;
 use File::Basename;
 
 my $progname = basename($0);
-my $version_string = 'v' . '__VERSION__';
+my $version_string = 'v' . '20.5';
 
 GetOptions(
     "help"          => \my $help,
@@ -95,7 +101,7 @@ if( defined $auto_detect ) {
         next if(m/^SMcli completed successfully/);
         next if(m/^(\s|$)/);
 
-        if( m/([\w ]*)\t+.*/ ) {
+        if( m/^(\w+)\s+.*/ ) {
             my $controller = $1;
             push @controllers, $controller;
         };
@@ -106,7 +112,13 @@ if( defined $auto_detect ) {
 }
 
 my $quantity = scalar @controllers;
-print "Looks like we're dealing with $quantity controllers. Let's get going:\n";
+
+my $plural = "";
+if( $quantity ne 1 ) { 
+	$plural = 's';
+}
+
+print "Looks like we're dealing with $quantity controller$plural. Let's get going:\n\n";
 
 my %aliases;
 foreach my $controller (@controllers) {
@@ -189,12 +201,19 @@ foreach my $controller (@controllers) {
 my $file = $out_file;
 open(FILE,">$file") or die("Couldn't open $file for writing");
 
+print FILE << 'EOF';
 #
 # Default entries
 #
-print FILE qq(defaults {\n);
-print FILE qq(    user_friendly_names yes\n);
-print FILE qq(}\n);
+defaults {
+    udev_dir                /dev
+    user_friendly_names     yes
+    log_checker_err         once
+    queue_without_daemon    "no"
+    max_fds                 65535
+}
+
+EOF
 
 print FILE qq(\n);
 
@@ -260,8 +279,37 @@ devices {
         #
         #   This device section will apply to the following subsystems:
         #
-        #       DS3512
-        #       DS3524
+        #       MYSTERY_CONTROLLER
+        #
+        vendor                  "IBM"
+        product                 "1813"
+        path_grouping_policy    group_by_prio
+        getuid_callout          "/lib/udev/scsi_id -g -u -d /dev/%n"
+        #
+        # -g Treat the device as white listed.
+        # -u Turn whitespace to underscores.
+        # -d Instead of determining and creating a device node based on a
+        #    sysfs dev entry as done for the -s, send SG_IO commands to
+        #    device, such as /dev/sdc.  NOTE: This is important when
+        #    using friendly multipath device names. -Brian
+        #
+        path_selector           "round-robin 0"
+        path_checker            rdac
+        features                "2 pg_init_retries 50"
+        hardware_handler        "1 rdac"
+        prio                    rdac
+        failback                immediate
+        no_path_retry           15
+        rr_min_io               100
+        rr_weight               priorities
+    }   
+
+    device {
+        #
+        #   This device section will apply to the following subsystems:
+        #
+        #       DS3512 => 1746
+        #       DS3524 => 1746
         #
         vendor                  "IBM"
         product                 "1746"
@@ -290,12 +338,11 @@ devices {
         #
         #   This device section will apply to the following subsystems:
         #
-        #       DCS3700
-        #       DS5100
-        #       DS5300
+        #       MYSTERY_CONTROLLER  => 1813
+        #       DCS3700             => 1818
         #
         vendor                  "IBM"
-        product                 "1818"
+        product                 "181[38]"
         path_grouping_policy    group_by_prio
         getuid_callout          "/lib/udev/scsi_id -g -u -d /dev/%n"
         #
@@ -316,6 +363,121 @@ devices {
         rr_min_io               100
         rr_weight               priorities
     }   
+
+    device {
+        #
+        #   This device section will apply to the following subsystems:
+        #
+        #       DS8000
+        #
+        vendor                  "IBM"
+        product                 "2107900"
+        path_grouping_policy    group_by_serial
+        flush_on_last_del       "yes"
+        features                "0"
+        no_path_retry           5    
+        fast_io_fail_tmo        5   
+        dev_loss_tmo            120
+    }
+
+    device {
+        #
+        #   This device section will apply to the following subsystems:
+        #
+        #       DS3200 => 1726-2xx
+        #       DS3400 => 1726-4xx
+        #
+        vendor                  "IBM"
+        product                 "1726-[24]xx"
+        failback                immediate
+        no_path_retry           fail
+        path_checker            rdac
+        path_grouping_policy    group_by_prio
+        prio                    rdac
+    }
+    
+    device {
+        #
+        #   This device section will apply to the following subsystems:
+        #
+        #       DS4700 => 1814
+        #       DS4800 => 1815
+        #
+        vendor                  "IBM"
+        product                 "181[45]"
+        failback                immediate
+        no_path_retry           fail
+        path_checker            rdac
+        path_grouping_policy    group_by_prio
+        prio                    rdac
+    }
+
+    device {
+        #
+        #   This device section will apply to the following subsystems:
+        #
+        #       DCS9550 
+        #       DCS9900
+        #
+        #   These settings are taken from multipath.conf.ddn provided by
+        #   ddn_mpath_RHEL5_SLES10-1.5-5.x86_64.rpm
+        #
+        vendor "IBM"
+        product "DCS9[59]*"
+        getuid_callout          "/sbin/scsi_id -u -g -p 0x80 -s /block/%n"
+        prio_callout            "/sbin/mpath_prio_alua %d"
+        path_grouping_policy    group_by_prio
+        path_checker            tur
+        failback                immediate
+        no_path_retry           fail
+    
+        #
+        # These settings augment those above, and are taken from
+        # SONAS_multipath_1.4.0.1-5c.conf.
+        #
+        features                "1 queue_if_no_path"
+        rr_min_io               63
+        rr_weight               priorities
+    }
+
+    device {
+        #
+        #   This device section will apply to the following subsystems:
+        #
+        #       SVC
+        #
+        vendor                  "IBM"
+        product                 "2145"
+        path_grouping_policy    group_by_prio
+        prio                    alua
+        features                "0"
+        no_path_retry           5
+        rr_min_io               1
+        dev_loss_tmo            3600
+        fast_io_fail_tmo        5
+        flush_on_last_del       "yes"
+    }
+
+    device {
+        vendor                  "DDN"
+        product                 "S2A 6620"
+        getuid_callout          "/sbin/scsi_id --page=0x83 --whitelisted --device=/dev/%n"
+        path_grouping_policy    group_by_prio
+        prio                    alua
+        no_path_retry           12
+        failback                "10"
+    }
+    
+    device {
+        vendor                  "IBM"
+        product                 "2851-DR1"
+        path_checker            tur
+        getuid_callout          "/sbin/scsi_id --page=0x83 --whitelisted --device=/dev/%n"
+        path_grouping_policy    group_by_prio
+        prio                    alua
+        no_path_retry           12
+        failback                "10"
+    }
 }       
 
 EOF
@@ -388,7 +550,10 @@ close(FILE);
 #
 ########################################################################
 
-print "Done!  You can find your fresh multipath.conf file here:\n";
+print "\n";
+print "Done!\n";
+print "\n";
+print "You can find your fresh multipath.conf file here:\n";
 print "\n";
 print "  $out_file\n";
 print "\n";
@@ -445,7 +610,7 @@ version();
 print << "EOF";
 Usage:  $progname [OPTION...] --out-file FILE [ --auto-detect | controller1 controller2... ]
 
-    All options can be abbreviated to minimum uniqeness.
+    All options can be abbreviated to minimum uniqueness.
 
     --auto-detect
 
@@ -469,6 +634,15 @@ Usage:  $progname [OPTION...] --out-file FILE [ --auto-detect | controller1 cont
         Please verify before rebooting your nodes by running 
         'multipath -v3' and examining the output for blacklisted devices.
 
+
+    Currently Supported Storage Controllers include:
+
+        DCS3700 DCS9550 DCS9900 DS3200 DS3400 DS3512 DS3524 DS4700
+        DS4800 DS8000 MYSTERY_CONTROLLER
+
+
+    To request support for an additional storage controller, please email
+    the output from 'lsscsi' to <bfinley\@us.ibm.com>.
 
 EOF
     return 1;
