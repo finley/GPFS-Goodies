@@ -35,7 +35,7 @@ use Getopt::Long;
 use File::Basename;
 
 my $progname = basename($0);
-my $version_string = 'v' . '20.5';
+my $version_number = 20.5;
 
 GetOptions(
     "help"          => \my $help,
@@ -612,7 +612,7 @@ exit 0;
 #
 sub version {
     print qq(\n);
-    print qq($progname $version_string\n);
+    print qq($progname v$version_number\n);
     print qq(\n);
     print qq(    Part of the "gpfs_goodies" package\n);
     print qq(\n);
