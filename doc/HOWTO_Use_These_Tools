@@ -14,6 +14,12 @@
 #
 
 Step 0:
+
+    Execute multipath.conf-creator on the machine where you have
+    SMclient installed.
+
+
+Step 1:
     
     mmshutdown 
 
@@ -24,9 +30,19 @@ Step 0:
     #
 
 
-Step 1:
+Step 2:
     
-    Copy ./var/mmfs/etc/nsddevices out to /var/mmfs/etc/nsddevices on
+    Run command to copy files out to each NSD server.
+
+        cp /var/mmfs/etc/nsddevices
+        /etc/udev/rules.d/70-ibm-storage.rules
+        /etc/modprobe.d/scsi_dh_alua.conf
+
+
+    # Set your node names
+    MY_NODE=nsd1
+
+    scp /usr/share/gpfs_goodies/var/mmfs/etc/nsddevices out to /var/mmfs/etc/nsddevices on
     each NSD server.
 
 
@@ -38,8 +54,6 @@ Step 2:
 
 Step 3:
 
-    Execute multipath.conf-creator on the machine where you have
-    SMclient installed.
 
 
 Step 4:
