@@ -54,7 +54,11 @@ tarball:
 	#
 	# Make a copy of the repo
 	git clone . ${TMPDIR}/${PKG_DIR}
-	rm -fr ${TMPDIR}/${PKG_DIR}/.git
+	/bin/rm -fr ${TMPDIR}/${PKG_DIR}/.git
+
+	#
+	# Copy this file over (for testing only)
+	/bin/cp Makefile ${TMPDIR}/${PKG_DIR}/
 	
 	#
 	# Create an RPM appropriate Makefile
@@ -64,10 +68,10 @@ tarball:
 	
 	#
 	# Version the Files
-	perl -pi -e "s/__VERSION__/${VERSION}/g"  					${TMPDIR}/${PKG_DIR}/gpfs_goodies.spec
-	perl -pi -e "s/^(gpfs_goodies v).*/${1}${VERSION}/g"  		${TMPDIR}/${PKG_DIR}/sbin/gpfs_goodies
-	perl -pi -e "s/^(VERSION=).*/$1${VERSION}/g"  				${TMPDIR}/${PKG_DIR}/sbin/brians_own_hot-add_script
-	perl -pi -e "s/^(my \$version_number = ).*/$1${VERSION};/g" ${TMPDIR}/${PKG_DIR}/sbin/multipath.conf-creator
+	perl -pi -e "s/__VERSION__/${VERSION}/g"  					        ${TMPDIR}/${PKG_DIR}/gpfs_goodies.spec
+	perl -pi -e "s/^VERSION=.*/VERSION=${VERSION}/g"                    ${TMPDIR}/${PKG_DIR}/sbin/gpfs_goodies
+	perl -pi -e "s/^VERSION=.*/VERSION=${VERSION}/g"  				    ${TMPDIR}/${PKG_DIR}/sbin/brians_own_hot-add_script
+	perl -pi -e "s/version_number = .*/version_number = '${VERSION}';/g"  ${TMPDIR}/${PKG_DIR}/sbin/multipath.conf-creator
 	
 	#
 	# Tar it up
