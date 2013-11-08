@@ -10,6 +10,7 @@
 PKG_NAME 	:= gpfs_goodies
 
 MAJOR_VER 	:= $(shell git describe --tags | sed -e 's/^v//' -e 's/-.*//')
+MAJOR_VER   ?= 0
 
 MINOR_VER	:= $(shell git describe --tags | sed -e 's/^v[0-9]*-//' -e 's/-.*//')
 MINOR_VER   ?= 0
@@ -18,6 +19,7 @@ PATCH_VER	:= $(shell git describe --tags | sed -e 's/^v[0-9]*-[0-9]*-//' -e 's/-
 PATCH_VER   ?= 0
 
 VERSION     := ${MAJOR_VER}.${MINOR_VER}.${PATCH_VER}
+
 TMPDIR 		:= $(shell mktemp -d)
 SPECFILE 	:= $(shell mktemp)
 PKG_DIR     := ${PKG_NAME}-${VERSION}
@@ -44,9 +46,8 @@ install:
 	install -m 644 var/mmfs/etc/*		${PREFIX}/usr/share/${PKG_NAME}/var/mmfs/etc/
 	
 	
-	
-	mkdir -p ${PREFIX}/usr/share/doc/${PKG_NAME}-${VERSION}/
-	echo "See the files in ${PREFIX}/usr/share/${PKG_NAME}/" > ${PREFIX}/usr/share/doc/${PKG_NAME}-${VERSION}/README
+	mkdir -p ${PREFIX}/usr/share/doc/${PKG_DIR}/
+	echo "See the files in /usr/share/${PKG_NAME}/" > ${PREFIX}/usr/share/doc/${PKG_DIR}/README
 
 .PHONY += tarball
 tarball:
@@ -65,6 +66,7 @@ tarball:
 	cp ${TMPDIR}/${PKG_DIR}/Makefile 								${TMPDIR}/${PKG_DIR}/Makefile.rpm
 	perl -pi -e "s/^MAJOR_VER\s+.*/MAJOR_VER := ${MAJOR_VER}/g" 	${TMPDIR}/${PKG_DIR}/Makefile.rpm
 	perl -pi -e "s/^MINOR_VER\s+.*/MINOR_VER := ${MINOR_VER}/g" 	${TMPDIR}/${PKG_DIR}/Makefile.rpm
+	perl -pi -e "s/^PATCH_VER\s+.*/PATCH_VER := ${PATCH_VER}/g" 	${TMPDIR}/${PKG_DIR}/Makefile.rpm
 	
 	#
 	# Version the Files
