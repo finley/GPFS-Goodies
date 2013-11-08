@@ -2,6 +2,7 @@
 
 #
 # 2013.09.27 Brian Elliott Finley <bfinley@us.ibm.com>
+# 2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
 #
 
 cat <<"EOF"
@@ -12,9 +13,9 @@ Please try one of the following commands.  It's OK -- they're all safe,
 and won't do anything but show help information if run with either no
 arguments, or with --help or -h as an argument.
 
-    brians_own_hot-add_script
     multipath.conf-creator
-    test_nsd_block_device_settings
+    test_block_device_settings
+    brians_own_hot-add_script
 
     Be sure to take a look at the HOWTO and other docs in:
 
