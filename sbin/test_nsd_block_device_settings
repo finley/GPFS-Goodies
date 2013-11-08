@@ -1,10 +1,11 @@
-#!/bin/sh
+#!/usr/bin/perl -w
 
 #
 # 2012.09.19 Brian Elliott Finley <bfinley@us.ibm.com>
-#
 #   - The core of this I coopted from the command line from Scott
 #     Denham.  Thanks, Scott!
+# 2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - Turned into perl
 #
 
 #
@@ -13,50 +14,176 @@
 #
 #   Example usage:
 #
-#       scp test_nsd_block_device_settings nsd1:/root/
-#       ssh nsd1 ./test_nsd_block_device_settings
+#       scp test_block_device_settings nsd1:/root/
+#       ssh nsd1 ./test_block_device_settings
 #
 
-CONTROLLER_REGEX='(1746|1818)'
+use strict;
+
+my %devices_by_friendly_name;
+my %friendly_name_by_index;
+my %dmsetup_info;
+my $file;
+my $cmd;
+
+$cmd = 'dmsetup ls --target multipath';
+open(INPUT,"$cmd|") or die("Couldn't run $cmd for input");
+while(<INPUT>) {
     #
-    #   1746 => ds3512
-    #   1818 => dcs3700
+    # [root@x36n09 ~]# dmsetup ls --target multipath
+    # dcs3700b_lun17  (253, 23)
+    # dcs3700a_lun28  (253, 14)
+    # dcs3700a_lun12  (253, 5)
+    # dcs3700b_lun15  (253, 22)
+    # dcs3700a_lun9   (253, 6)
+    # dcs3700a_lun26  (253, 12)
+    # dcs3700a_lun11  (253, 3)
+    # dcs3700b_lun29  (253, 28)
+    # mpatha  (253, 30)
+    # dcs3700b_lun13  (253, 21)
+    # dcs3700a_lun7   (253, 2)
+    # dcs3700a_lun24  (253, 13)
+    # dcs3700b_lun8   (253, 18)
+    # dcs3700b_lun27  (253, 29)
+    # dcs3700a_lun23  (253, 11)
+    # dcs3700b_lun6   (253, 19)
+    # dcs3700b_lun25  (253, 26)
+    # dcs3700b_lun10  (253, 20)
+    # dcs3700a_lun19  (253, 9)
+    # dcs3700a_lun4   (253, 1)
+    # dcs3700a_lun21  (253, 10)
+    # dcs3700b_lun5   (253, 16)
+    # dcs3700a_lun2   (253, 4)
+    # dcs3700b_lun3   (253, 17)
+    # dcs3700b_lun22  (253, 25)
+    # dcs3700a_lun16  (253, 8)
+    # dcs3700a_lun0   (253, 0)
+    # dcs3700b_lun18  (253, 24)
+    # dcs3700b_lun1   (253, 15)
+    # dcs3700b_lun20  (253, 27)
+    # dcs3700a_lun14  (253, 7)
     #
+    chomp;
 
-DM_DEVICES=$(multipath -ll | egrep $CONTROLLER_REGEX | awk '{print $3}')
-SD_DEVICES=$(multipath -ll | grep ' active ' | perl -pi -e 's/.*\d+:\d+:\d+:\d+ (\D+).*/$1/')
+    if(m/^(\S+)\s+\((\d+),\s+(\d+)\)/) {
 
-for k in $DM_DEVICES $SD_DEVICES
-do
+        my $device = $1;
+        my $major  = $2;
+        my $minor  = $3;
 
-	echo -n "$k: "
-	# 4096 
-	cat /sys/block/$k/queue/max_sectors_kb | perl -pi -e 's/\n/ /'
+        $dmsetup_info{"$major:$minor"} = $device;
+    }
+}
+close(INPUT);
+
+
+$file = '/proc/partitions';
+open(FILE,"<$file") or die("Couldn't open $file for reading");
+while(<FILE>) {
+
+    chomp;
+
+    #
+    # [root@x36n09 ~]# cat /proc/partitions  | head
+    # major minor  #blocks  name
+    #
+    #    8        0   70311936 sda
+    #    8       16 15623913472 sdb
+    #    8       32 15623913472 sdc
+    #
+    if(m/(\d+)\s+(\d+)\s+\d+\s+(\S+)/) {
+        my $major  = $1;
+        my $minor  = $2;
+        my $device = $3;
+
+        my $friendly_name;
+
+        if($device =~ m/^dm-/) {
+
+            #
+            # If we have no major/minor, then don't even mess with it.
+            #
+            next unless(defined $dmsetup_info{"$major:$minor"});
+
+            $friendly_name = $dmsetup_info{"$major:$minor"};
+
+        } else {
+
+            $friendly_name = $device;
+        }
+
+        $devices_by_friendly_name{$friendly_name} = $device;
 	
-	# 512 
-	cat /sys/block/$k/queue/nr_requests | perl -pi -e 's/\n/ /'
-	
-	# 4096 
-	cat /sys/block/$k/queue/read_ahead_kb | perl -pi -e 's/\n/ /'
-	
-	# noop 
-	cat /sys/block/$k/queue/scheduler | perl -pi -e 's/\n/ /'
 
-	echo
+        #
+        # Take a device name, like dcs3700a_lun2 which sorts after
+        # dcs3700a_lun10, and before dcs3700b_lun1.
+        #
+        #   dcs3700b_lun1  => dcs3700_lun1000001
+        #   dcs3700a_lun2  => dcs3700_lun1000002
+        #   dcs3700a_lun10 => dcs3700_lun1000010
+        #
+        # If it's just an /dev/sda3 device, then handle it also.
+        #
+        my $index = $friendly_name;
+        $index =~ s/[ab]_lun/_lun/;
+        if( $index =~ m/(\d+)$/ ) {
+            my $new_digits = $1 + 1000000;
+            $index =~ s/(\d+)$/$new_digits/;
+        }
 
-done
+        #
+        # Now we pre-pad the index value, so that sdb comes before sdaa when
+        # sorted later.
+        #
+        $index = sprintf('%1000s', $index);
+
+        $friendly_name_by_index{$index} = $friendly_name;
+    }
+}
+close(FILE);
+
+
+print "friendly_name max_sectors_kb nr_requests read_ahead_kb queue_depth scheduler\n\n";
+foreach my $index_key (sort keys %friendly_name_by_index) {
+
+    my $friendly_name = $friendly_name_by_index{$index_key};
+
+    my $device = $devices_by_friendly_name{$friendly_name};
+
+    print "$friendly_name";
+
+    foreach my $file (
+        "/sys/block/$device/queue/max_sectors_kb", 
+        "/sys/block/$device/queue/nr_requests",
+        "/sys/block/$device/queue/read_ahead_kb",
+        "/sys/block/$device/device/queue_depth",
+        "/sys/block/$device/queue/scheduler",
+                                                ) {
+
+        if( ! -e $file ) {
+            print "  N/A";
+            next;
+        }
+        open(FILE,"<$file") or die("Couldn't read $file");
+        while(<FILE>) {
+            chomp;
+            print "  $_";
+        }
+        close(FILE);
+    }
+
+    print "\n";
+}
+
+
+########################################################################
+#
+#   BEGIN Subroutines
+#
 
 #
-# Example output:
+#   END Subroutines
 #
-#   dm-16: 4096 512 4096 [noop] anticipatory deadline cfq  
-#   dm-41: 4096 512 4096 [noop] anticipatory deadline cfq  
-#   dm-23: 4096 512 4096 [noop] anticipatory deadline cfq  
-#   dm-44: 4096 512 4096 [noop] anticipatory deadline cfq  
-#   sdak: 4096 512 4096 [noop] anticipatory deadline cfq  
-#   sdg: 4096 512 4096 [noop] anticipatory deadline cfq  
-#   sdbp: 4096 512 4096 [noop] anticipatory deadline cfq  
-#   sdcn: 4096 512 4096 [noop] anticipatory deadline cfq  
-#   sdby: 4096 512 4096 [noop] anticipatory deadline cfq  
-#
+########################################################################
 
