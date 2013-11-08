@@ -11,19 +11,34 @@
 #   - created
 #   2013.09.27 Brian Elliott Finley <bfinley@us.ibm.com>
 #   - add --help, --status, and --yes options
+#   2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - added version
 #
 
 PROGNAME=$(basename $0)
+VERSION=20.5
+
+version() {
+    echo
+    echo "$PROGNAME v$VERSION"
+    echo
+    echo '    Part of the "gpfs_goodies" package'
+    echo
+}
+
 
 help() {
 
     echo
-    echo "$PROGNAME [--help|--status|--yes]"
+    echo "$PROGNAME [--help|--version|--status|--yes]"
     echo
 
 cat <<"EOF"
     --help
         Show this help output.
+
+    --version
+        Show this program's version number.
 
     --status
         Show the current LUN count, but don't actually do anything or
@@ -124,7 +139,12 @@ fi
 OPTION=$(echo $1 | sed 's/^--/-/')
 
 case $OPTION in
+    -v|-version)
+        version
+        exit 0
+        ;;
     -h|-help)
+        version
         help
         exit 0
         ;;
