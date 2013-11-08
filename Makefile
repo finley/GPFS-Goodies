@@ -8,10 +8,16 @@
 #
 
 PKG_NAME 	:= gpfs_goodies
+
 MAJOR_VER 	:= $(shell git describe --tags | sed -e 's/^v//' -e 's/-.*//')
+
 MINOR_VER	:= $(shell git describe --tags | sed -e 's/^v[0-9]*-//' -e 's/-.*//')
 MINOR_VER   ?= 0
-VERSION     := ${MAJOR_VER}.${MINOR_VER}
+
+PATCH_VER	:= $(shell git describe --tags | sed -e 's/^v[0-9]*-[0-9]*-//' -e 's/-.*//')
+PATCH_VER   ?= 0
+
+VERSION     := ${MAJOR_VER}.${MINOR_VER}.${PATCH_VER}
 TMPDIR 		:= $(shell mktemp -d)
 SPECFILE 	:= $(shell mktemp)
 PKG_DIR     := ${PKG_NAME}-${VERSION}
