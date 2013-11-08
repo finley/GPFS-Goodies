@@ -5,7 +5,7 @@
 # 2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
 #
 
-export VERSION=3.3.3.3
+VERSION=3.3.3.3
 
 echo "
 gpfs_goodies v$VERSION
