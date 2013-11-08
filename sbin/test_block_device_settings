@@ -19,6 +19,36 @@
 #
 
 use strict;
+use Getopt::Long;
+use File::Basename;
+
+my $progname = basename($0);
+my $version_string = 'v' . '20.5';
+
+GetOptions(
+    "help"          => \my $help,
+    "version"       => \my $version,
+) or usage() and exit(1);
+
+if ( defined $help ) {
+    usage();
+    print qq(\n-->  Try "$progname" with no options...\n\n);
+    exit 0;
+}
+
+if ( defined $version ) {
+    version();
+    exit 0;
+}
+
+unless ( user_is_root() ) {
+    usage();
+    print qq(\n-->  Please run as root so that we can read all necessary kernel tables.);
+    print qq(\n     You could try "sudo $progname" with no options...\n\n);
+    exit 1;
+}
+
+
 
 my %devices_by_friendly_name;
 my %friendly_name_by_index;
@@ -181,6 +211,48 @@ foreach my $index_key (sort keys %friendly_name_by_index) {
 #
 #   BEGIN Subroutines
 #
+
+sub version {
+    print qq(\n);
+    print qq($progname $version_string\n);
+    print qq(\n);
+    print qq(    Part of the "gpfs_goodies" package\n);
+    print qq(\n);
+
+    return 1;
+}
+
+sub usage {
+version();
+print << "EOF";
+
+This program will summarize key block device settings that impact the
+performance when accessing your disk subsystems.  It makes no changes to
+your system, and is safe to run on live production systems.
+
+Usage:  $progname [OPTION...]
+
+    All options can be abbreviated to minimum uniqueness.
+
+    --help
+
+    --version
+
+        Yup.  These are the only two options. ;-)
+
+
+EOF
+    return 1;
+}
+
+sub user_is_root {
+
+    if($< == 0) { 
+        return 1; 
+    }
+    return undef;
+}
+
 
 #
 #   END Subroutines
