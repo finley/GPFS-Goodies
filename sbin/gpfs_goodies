@@ -5,9 +5,10 @@
 # 2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
 #
 
-cat <<"EOF"
+export VERSION=3.3.3.3
 
-gpfs_goodies v__VERSION__
+echo "
+gpfs_goodies v$VERSION
 
 Please try one of the following commands.  It's OK -- they're all safe,
 and won't do anything but show help information if run with either no
@@ -19,7 +20,7 @@ arguments, or with --help or -h as an argument.
 
     Be sure to take a look at the HOWTO and other docs in:
 
-        /usr/share/doc/gpfs_goodies-__VERSION__
+        /usr/share/doc/gpfs_goodies-$VERSION
 
-EOF
+"
 
