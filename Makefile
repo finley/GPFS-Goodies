@@ -65,7 +65,7 @@ tarball:
 	#
 	# Version the Files
 	perl -pi -e "s/__VERSION__/${VERSION}/g"  					${TMPDIR}/${PKG_DIR}/gpfs_goodies.spec
-	perl -pi -e "s/^(gpfs_goodies v).*/$1${VERSION}/g"  		${TMPDIR}/${PKG_DIR}/sbin/gpfs_goodies
+	perl -pi -e "s/^(gpfs_goodies v).*/${1}${VERSION}/g"  		${TMPDIR}/${PKG_DIR}/sbin/gpfs_goodies
 	perl -pi -e "s/^(VERSION=).*/$1${VERSION}/g"  				${TMPDIR}/${PKG_DIR}/sbin/brians_own_hot-add_script
 	perl -pi -e "s/^(my \$version_number = ).*/$1${VERSION};/g" ${TMPDIR}/${PKG_DIR}/sbin/multipath.conf-creator
 	
