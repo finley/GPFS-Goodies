@@ -1,9 +1,9 @@
 #!/bin/sh
 
 #
-#   This script will hot add LUNs from DS35xx and DCS37xx series
-#   devices.  It will also hot remove any devices that no longer exist.
-#   It will _NOT_ hot remove any devices that do still exist. -BEF-
+#   This script will hot-add LUNs from DS35xx and DCS37xx series
+#   devices.  It will also hot-remove any devices that no longer exist.
+#   It will _NOT_ hot-remove any devices that do still exist. -BEF-
 #
 
 #
@@ -13,10 +13,13 @@
 #   - add --help, --status, and --yes options
 #   2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
 #   - added version
+#   2013.11.10 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - genericize to no be limited to specific controller models
+#   - improve status output to list per-controller type counts
 #
 
 PROGNAME=$(basename $0)
-VERSION=20.5
+VERSION=20.5.19
 
 version() {
     echo
@@ -42,23 +45,24 @@ cat <<"EOF"
 
     --status
         Show the current LUN count, but don't actually do anything or
-        make any changes.
+        make any changes.  This count will include all LUNs connected to
+        the system, including local devices.
 
     --yes
         Hot delete any devices that don't have disk devices associated
-        with them, and hot add any new devices.
+        with them (stale LUNs), and hot-add any new devices.
 
-        It's important to perform the hot delete prior to the hot add,
+        It's important to perform the hot-delete prior to the hot-add,
         as a disk that's no longer present may be still be considered as
         connected, and thus prevent detection of a new disk in that same
         position.
 
-        The hot delete function should be considered "safe", in that it
+        The hot-delete function should be considered "safe", in that it
         won't remove the representation of any disk that is actually
         present and in use, but will only operate on disks that have
-        already been removed.  If a disk has been re-located, it's SCSI
-        representation will be removed from it's old location and then
-        hot added in it's new location.
+        already been removed.  If a disk has been re-located, it's stale 
+        SCSI representation will be removed from it's old location and 
+        then hot-added in it's new location.
 
         If it all in doubt, look at the code in this script, and make
         your own determination as to the impact of it's operation and/or
@@ -85,19 +89,23 @@ hot_delete() {
     # Hot delete any devices that don't have disk devices associated with them
     #
     
-    delete_me=$(lsscsi | egrep '(1818|1746)' | grep -v sd | sed -e 's/.*\[//' -e 's/].*//')
-    if [ ! -z "$delete_me" ]; then
+    delete_me=$(lsscsi | egrep -v '/dev/(sd|sr)' | sed -e 's/.*\[//' -e 's/].*//')
+    if [ -z "$delete_me" ]; then
         echo
-        echo "Hot removing undefined LUNs:"
+        echo "No stale LUNs entries to hot-delete."
+    else
+        echo
+        echo "Hot removing stale LUN entries:"
+        echo
+
+        for i in $delete_me
+        do
+            file="/sys/class/scsi_device/${i}/device/delete"
+            echo "  echo 1 > $file"
+            echo 1 > $file
+        done
         echo
     fi
-    for i in $delete_me
-    do
-        file="/sys/class/scsi_device/${i}/device/delete"
-        echo "  echo 1 > $file"
-        echo 1 > $file
-    done
-    echo
 }
 
 hot_add() {
@@ -122,8 +130,18 @@ hot_add() {
 }
 
 status() {
-    echo "Total LUN count:"
-    lsscsi | grep '(1818|1746)' |wc -l
+    echo "Total disk based LUN count by product type:"
+    #
+    # Example lsscsi output:
+    #
+    # [$] lsscsi 
+    # [0:0:0:0]    disk    ATA      ST750LX003-1AC15 SM12  /dev/sda 
+    # [1:0:0:0]    disk    ATA      KINGSTON SV100S2 D100  /dev/sdb 
+    # [6:0:0:0]    disk    WD       My Passport 0740 1003  /dev/sdc 
+    # [6:0:0:1]    enclosu WD       SES Device       1003  -        
+    # [7:0:0:0]    cd/dvd  TSSTcorp CDDVDW SE-S084D  TS01  /dev/sr0 
+    #
+    lsscsi | egrep '/dev/sd' | perl -pi -e 's/\S+\s+\S+\s+\S+\s+(.*)\s+\S+\s+\S+\s*$/$1\n/' | uniq -c
     echo
 }
 
@@ -139,20 +157,24 @@ fi
 OPTION=$(echo $1 | sed 's/^--/-/')
 
 case $OPTION in
-    -v|-version)
+    -v*)
         version
         exit 0
         ;;
-    -h|-help)
+    -h*)
         version
         help
         exit 0
         ;;
-    -s|-status)
+    -s*)
         status
         exit 0
         ;;
-    -y|-yes)
+    -s*)
+        status
+        exit 0
+        ;;
+    -y*)
         hot_delete
         hot_add
         status
