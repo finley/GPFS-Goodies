@@ -20,7 +20,7 @@ arguments, or with --help or -h as an argument.
 
     Be sure to take a look at the HOWTO and other docs in:
 
-        /usr/share/doc/gpfs_goodies-$VERSION
+        /usr/share/gpfs_goodies
 
 "
 
