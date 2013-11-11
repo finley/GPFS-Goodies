@@ -1,0 +1,201 @@
+#!/usr/bin/perl -w
+
+#
+#   The idea:
+#
+#       Once a GPFS filesystem has been created, tune the block device
+#       settings underneath it automatically, on a per-NSD basis:
+#
+#       calculate values based on:
+#       - number of NSD servers serving each NSD
+#       - relevant FS parameters: i.e.: block size (mmlsfs -B)
+#       
+#       Create:
+#       - one udev rule file per file system
+#           that matches individual devices by WWID and
+#           applies their settings
+#           (accept --filesystem FILESYSTEM) argument?
+#
+#       - push that one rule out across all nodes via /udev/70-gpfs-???
+#       
+#       - %scsi_id_by_mpath (get by ssh to first nsd server in list for each lun and "/lib/udev/scsi_id -g -u -d /dev/mapper/dcs3860a_lun14")
+#   
+
+#
+#   2013.11.10 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - created
+#
+
+use strict;
+
+my $cmd;
+my %filesystems;
+my %mpath_by_nsd;
+my %servers_by_nsd;
+my %filesystems_by_nsd;
+my %blocksize_by_filesystem;
+
+#
+# Info Gather Pass 1
+#
+$cmd = 'mmlsnsd';
+open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
+while(<INPUT>) {
+    #
+    #   Sample input:
+    #
+    #    File system   Disk name    NSD servers                                    
+    #   ---------------------------------------------------------------------------
+    #    fs_1m         nsd_0        x36n09,x36n10            
+    #    fs_1m         nsd_1        x36n10,x36n11            
+    #    fs_1m         nsd_2        x36n11,x36n12            
+    #    fs_1m         nsd_3        x36n12,x36n09            
+    #    fs_1m         nsd_4        x36n09,x36n10            
+    #    fs_1m         nsd_5        x36n10,x36n11            
+    #    fs_1m         nsd_6        x36n10,x36n11            
+    #    fs_1m         nsd_7        x36n11,x36n12            
+    #    fs_1m         nsd_8        x36n12,x36n09            
+    #    fs_1m         nsd_9        x36n09,x36n10            
+    #    fs_1m         nsd_10       x36n10,x36n11            
+    #    fs_1m         nsd_11       x36n11,x36n12            
+    #    fs_1m         nsd_12       x36n11,x36n12            
+    #    fs_1m         nsd_13       x36n12,x36n09            
+    #    fs_1m         nsd_14       x36n09,x36n10            
+    #    fs_1m         nsd_15       x36n10,x36n11            
+    #    fs_1m         nsd_16       x36n11,x36n12            
+    #    fs_1m         nsd_17       x36n12,x36n09            
+    #    fs_1m         nsd_18       x36n12,x36n09            
+    #    fs_1m         nsd_19       x36n09,x36n10            
+    #    fs_1m         nsd_20       x36n10,x36n11            
+    #    fs_1m         nsd_21       x36n11,x36n12            
+    #    fs_1m         nsd_22       x36n12,x36n09            
+    #    fs_1m         nsd_23       x36n09,x36n10            
+    #    fs_1m         nsd_24       x36n09,x36n10            
+    #    fs_1m         nsd_25       x36n10,x36n11            
+    #    fs_1m         nsd_26       x36n11,x36n12            
+    #    fs_1m         nsd_27       x36n12,x36n09            
+    #    fs_1m         nsd_28       x36n09,x36n10            
+    #    fs_1m         nsd_29       x36n10,x36n11        
+    #
+    if(m/^\s+(\S+)\s+(\S+)\s+(\S+)\s*$/) {
+
+        my $fs      = $1;
+        my $nsd     = $2;
+        my $servers = $3;
+
+        $filesystems{$fs} = 1;
+        $servers_by_nsd{$nsd} = $servers;
+        $filesystems_by_nsd{$nsd} = $fs;
+    }
+}
+close(INPUT);
+
+
+#
+# Info Gather Pass 2
+#
+$cmd = 'mmlsnsd -m';
+open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
+while(<INPUT>) {
+    #	
+    #   Sample input:
+    #
+    #	[root@x36n10 bef]# mmlsnsd -m
+    #	
+    #	 Disk name    NSD volume ID      Device         Node name                Remarks       
+    #	---------------------------------------------------------------------------------------
+    #	 nsd_0        AC100009527FEBFE   /dev/mapper/dcs3860a_lun0 x36n09                   server node
+    #	 nsd_0        AC100009527FEBFE   /dev/mapper/dcs3860a_lun0 x36n10                   server node
+    #	 nsd_0        AC100009527FEBFE   /dev/mapper/dcs3860a_lun0 x36n11                   
+    #	 nsd_0        AC100009527FEBFE   /dev/mapper/dcs3860a_lun0 x36n12                   
+    #	 nsd_1        AC10000A527FEC03   /dev/mapper/dcs3860b_lun1 x36n09                   
+    #	 nsd_1        AC10000A527FEC03   /dev/mapper/dcs3860b_lun1 x36n10                   server node
+    #	 nsd_1        AC10000A527FEC03   /dev/mapper/dcs3860b_lun1 x36n11                   server node
+    #	 nsd_1        AC10000A527FEC03   /dev/mapper/dcs3860b_lun1 x36n12                   
+    #	 nsd_10       AC10000A527FEC30   /dev/mapper/dcs3860a_lun11 x36n09                   
+    #	 nsd_10       AC10000A527FEC30   /dev/mapper/dcs3860a_lun11 x36n10                   server node
+    #	 nsd_10       AC10000A527FEC30   /dev/mapper/dcs3860a_lun11 x36n11                   server node
+    #	 nsd_10       AC10000A527FEC30   /dev/mapper/dcs3860a_lun11 x36n12                   
+    #	 nsd_11       AC10000B527FEC34   /dev/mapper/dcs3860b_lun10 x36n09                   
+    #	 nsd_11       AC10000B527FEC34   /dev/mapper/dcs3860b_lun10 x36n10                   
+    #	 nsd_11       AC10000B527FEC34   /dev/mapper/dcs3860b_lun10 x36n11                   server node
+    #	 nsd_11       AC10000B527FEC34   /dev/mapper/dcs3860b_lun10 x36n12                   server node
+    #	 nsd_12       AC10000B527FEC39   /dev/mapper/dcs3860a_lun12 x36n09                   
+    #	 nsd_12       AC10000B527FEC39   /dev/mapper/dcs3860a_lun12 x36n10                   
+    #	[snip]
+    #
+    if(m/^\s+(\S+)\s+\S+\s+(\S+)\s.*server node$/) {
+
+        my $nsd     = $1;
+        my $mpath   = $2;
+
+        $mpath_by_nsd{$nsd} = $mpath;
+    }
+}
+close(INPUT);
+
+#
+# Info Gather Pass 3
+#
+foreach my $fs (keys %filesystems) {
+    my $cmd = "mmlsfs $fs";
+    open(INPUT,"$cmd|") or die("Can't run $cmd for input");
+    while(<INPUT>) {
+        #
+        # Sample input:
+        #
+        # [root@x36n01 bef]# ./tune_block_device_settings 
+        # flag                value                    description
+        # ------------------- ------------------------ -----------------------------------
+        #  -f                 32768                    Minimum fragment size in bytes
+        #  -i                 512                      Inode size in bytes
+        #  -I                 32768                    Indirect block size in bytes
+        #  -m                 1                        Default number of metadata replicas
+        #  -M                 2                        Maximum number of metadata replicas
+        #  -r                 1                        Default number of data replicas
+        #  -R                 2                        Maximum number of data replicas
+        #  -j                 scatter                  Block allocation type
+        #  -D                 nfs4                     File locking semantics in effect
+        #  -k                 all                      ACL semantics in effect
+        #  -n                 32                       Estimated number of nodes that will mount file system
+        #  -B                 1048576                  Block size
+        #  -Q                 none                     Quotas enforced
+        #                     none                     Default quotas enabled
+        #  --filesetdf        No                       Fileset df enabled?
+        #  -V                 13.23 (3.5.0.7)          File system version
+        #  --create-time      Sun Nov 10 17:20:44 2013 File system creation time
+        #  -u                 Yes                      Support for large LUNs?
+        #  -z                 No                       Is DMAPI enabled?
+        #  -L                 4194304                  Logfile size
+        #  -E                 Yes                      Exact mtime mount option
+        #  -S                 No                       Suppress atime mount option
+        #  -K                 whenpossible             Strict replica allocation option
+        #  --fastea           Yes                      Fast external attributes enabled?
+        #  --inode-limit      134217728                Maximum number of inodes
+        #  -P                 system                   Disk storage pools in file system
+        #  -d                 nsd_0;nsd_1;nsd_2;nsd_3;nsd_4;nsd_5;nsd_6;nsd_7;nsd_8;nsd_9;nsd_10;nsd_11;nsd_12;nsd_13;nsd_14;nsd_15;nsd_16;nsd_17;nsd_18;nsd_19;nsd_20;nsd_21;nsd_22;nsd_23;nsd_24;
+        #  -d                 nsd_25;nsd_26;nsd_27;nsd_28;nsd_29  Disks in file system
+        #  --perfileset-quota no                       Per-fileset quota enforcement
+        #  -A                 yes                      Automatic mount option
+        #  -o                 none                     Additional mount options
+        #  -T                 /fs_1m                   Default mount point
+        #  --mount-priority   0                        Mount priority
+        # 
+        if(m/^\s+-B\s+(\d+)\s+/) {
+            my $blocksize = $1;
+            $blocksize_by_filesystem{$fs} = $blocksize;
+        }
+    }
+    close(INPUT);
+}
+
+foreach my $nsd (keys %servers_by_nsd) {
+    my $servers = $servers_by_nsd{$nsd};
+    my $mpath = $mpath_by_nsd{$nsd};
+    my $fs = $filesystems_by_nsd{$nsd};
+    my $bs = $blocksize_by_filesystem{$fs};
+
+    print "$nsd  $mpath  $servers  $fs  $bs\n";
+}
+
+#   :set tw=0 ts=4 ai et   
