@@ -250,6 +250,7 @@ close(FILE);
 
 print "Your new rules can be found here: $file\n";
 distribute_rule($file);
+udev_reread();
 
 exit 0;
 
@@ -282,7 +283,7 @@ sub distribute_rule {
     foreach my $server (sort keys %nsd_server_list) {
         my $cmd = "scp $file $server:/etc/udev/rules.d/70-ibm-storage.rules";
         print ">> Command: $cmd\n" if(defined $debug);
-        #!system($cmd) or die("FAILED: $cmd\n");
+        #XXX !system($cmd) or die("FAILED: $cmd\n");
     }
 
     return 1;
@@ -293,12 +294,18 @@ sub udev_reread {
     #
     #   RHEL6 and friends, Ubuntu 12.10 and later:
     #       udevadm trigger --verbose --subsystem-match=block
+    #       which udevadm >/dev/null 2>&1 && udevadm trigger --verbose --subsystem-match=block
     #
     #   RHEL5 and friends:
     #       udevcontrol reload_rules
     #
+    foreach my $server (sort keys %nsd_server_list) {
+        my $cmd = qq(ssh $server 'which udevadm >/dev/null 2&>1  &&  udevadm trigger --subsystem-match=block  ||  udevcontrol reload_rules');
+        print ">> Command: $cmd\n" if(defined $debug);
+        #XXX !system($cmd) or die("FAILED: $cmd\n");
+    }
 
-    return undef;
+    return 1;
 }
 
 sub get_scsi_id {
