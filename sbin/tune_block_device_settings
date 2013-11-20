@@ -1,20 +1,30 @@
 #!/usr/bin/perl -w
 
 #
-#   The idea:
+#   "tune_block_device_settings"
 #
-#       Once a GPFS filesystem has been created, tune the block device
-#       settings underneath it automatically, on a per-NSD basis:
-#       
-#       Create:
-#       - one udev rule file etc/udev/rules.d/70-ibm-storage.rules
-#       - one udev rule per device
-#       - push that one rule file out across all nodes
+#   How it works:
 #
-#       Calculate certain values based on:
-#       - number of NSD servers serving each NSD
-#       - relevant FS parameters: i.e.: block size (mmlsfs -B)
-#       
+#       This command should be run from one of your GPFS cluster
+#       connected nodes after creating your GPFS file systems.  It will
+#       detect a number of things in your GPFS cluster environment, and
+#       make calculations based on best practices to create optimized
+#       block device tuning settings in the form of udev rules.
+#
+#       Some of the data it uses to make it's calculations include:
+#
+#           - Storage controller models
+#           - Storage controller settings, such as cache mirroring
+#             enabled/disabled
+#           - Number of storage servers connected to each controller
+#           - GPFS file system block sizes
+#
+#       It will create a single udev rule file
+#       (/etc/udev/rules.d/99-ibm-storage.rules), with one rule per
+#       device and give you the option of a) deploying the rules to your
+#       storage servers for you, and b) hot-activating the settings via
+#       udev.
+#
 
 #
 #   2013.11.10 Brian Elliott Finley <bfinley@us.ibm.com>
@@ -24,6 +34,38 @@
 #
 
 use strict;
+use Getopt::Long;
+use File::Basename;
+
+my $progname = basename($0);
+my $version_number = 20.5;
+my $udev_rules_file = '/etc/udev/rules.d/99-ibm-storage.rules';
+
+GetOptions(
+    "help"          => \my $help,
+    "version"       => \my $version,
+    "deploy"        => \my $deploy,
+    "activate"      => \my $activate,
+    "out-file=s"    => \my $out_file,
+) or usage() and exit(1);
+
+if ( defined $help ) {
+    usage();
+    exit 0;
+}
+
+if ( defined $version ) {
+    version();
+    exit 0;
+}
+
+if( ! defined $out_file ) {
+    usage();
+    print "\n";
+    print qq(-->  Please specify "--out-file FILE".\n);
+    print "\n";
+    exit 1;
+}
 
 my $cmd;
 my %filesystems;
@@ -212,9 +254,9 @@ foreach my $nsd (keys %filesystems_by_nsd) {
     my $mpath = $mpath_by_nsd{$nsd};
     my $server = $server_by_mpath{$mpath};
 
-    my $max_sectors_kb = 512;
-    my $read_ahead_kb  = 512;
-    my $nr_requests    = 512;
+    my $max_sectors_kb = calculate_max_sectors_kb();
+    my $read_ahead_kb  = $max_sectors_kb;   # read_ahead_kb and max_sectors_kb should always be the same -BEF-
+    my $nr_requests    = calculate_nr_requests();
     my $queue_depth    = calculate_queue_depth();
     my $elevator       = 'noop';
 
@@ -281,7 +323,7 @@ sub distribute_rule {
     my $file = shift;
 
     foreach my $server (sort keys %nsd_server_list) {
-        my $cmd = "scp $file $server:/etc/udev/rules.d/70-ibm-storage.rules";
+        my $cmd = "scp $file $server:$udev_rules_file";
         print ">> Command: $cmd\n" if(defined $debug);
         #XXX !system($cmd) or die("FAILED: $cmd\n");
     }
@@ -344,8 +386,19 @@ sub get_scsi_id {
     }
 }
 
-sub calculate_queue_depth {
+sub calculate_max_sectors_kb {
 
+    return 512;
+}
+
+
+sub calculate_nr_requests {
+
+    return 512;
+}
+
+
+sub calculate_queue_depth {
     #
     # queue_depth:  Ideal size can be determined by this formula:
     #   
@@ -371,7 +424,70 @@ sub calculate_queue_depth {
     #
 
     return 32;
+}
 
+
+sub version {
+    print qq(\n);
+    print qq($progname v$version_number\n);
+    print qq(\n);
+    print qq(    Part of the "gpfs_goodies" package\n);
+    print qq(\n);
+
+    return 1;
+}
+
+sub usage {
+version();
+print << "EOF";
+Usage:  $progname [OPTION...] --out-file FILE
+
+    All options can be abbreviated to minimum uniqueness.
+
+    --help
+
+    --version
+
+    --deploy
+
+        Deploy the resultant udev rules file to each participating
+        storage server.  Participating storage servers are identified by
+        their role as an NSD server for any of the LUNs in active file
+        systems.  Execute the command "mmlsnsd" for a list of these
+        servers.
+        
+        The name of the udev rules file on the target
+        NSD servers will be: $udev_rules_file
+
+    --activate
+
+        Hot-activate the new rules on each participating storage server.
+
+    --out-file FILE
+
+        The name of your resultant udev rules file.  This file can be
+        given any name you like.  If you also use the --deploy option,
+        this file will be deployed to your storage servers with the name
+        of $udev_rules_file.
+
+        Example:  --out-file /tmp/my_shiny_new_udev_rules_file.conf
+
+
+    To request support for an additional storage controller, please email
+    the output from 'lsscsi' to <bfinley\@us.ibm.com>.
+
+EOF
+    return 1;
+#XXXX    --file-systems FS1[,FS2,FS3,...]
+#
+#        A comma delimited list of file systems whose block devices
+#        should be tuned.
+#        
+#        If no --file-systems entry is specified, then block device
+#        settings for all file systems
+#        will be tuned.
+#        
+#
 }
 
 #
@@ -379,4 +495,6 @@ sub calculate_queue_depth {
 #
 ########################################################################
 
+#
 #   :set tw=0 ts=4 ai et   
+#
