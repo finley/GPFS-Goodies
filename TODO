@@ -1,3 +1,35 @@
+--
+
+- snurl.com/gpfs_goodies -> developerworks/gpfs_goodies page
+
+- prio_callout vs. prio
+
+Add "man gpfs_goodies"
+
+- sort multipath.conf LUN entires same way as test_block_devices
+
+- s/supported/tested/ -> Tested controllers list includes:
+
+    DS3700, etc.
+
+- Auto-choose an output file if none specified
+
+- Add --help and --version options to help output
+
+
+- Add --deploy option
+
+
+  --deploy NSD1,NSD2,NSD3,ETC...
+    - copy out config files:
+        - file1
+        - file2
+    - take action
+        - action1
+        - action2
+        - math on luns for udev rules
+
+
 - use SMcli to determine alua vs. rdac
     - provide warning if not recommended setting by controller type
     - consider adding settings that are unique by controller instance
@@ -91,4 +123,44 @@ CONTRIBUTORS
 +#       - mmnsddiscover -a
 +#       - mmlsdisk gpfs1 -M
 +#
+
+--
+
+Ray Paden
+I have a suggestion... you write... 
+11:10:35 AM
+◄
+# WARNING! Make sure you have performed an "mmshutdown" on each NSD
+# server prior to copying out the new file and doing the reconfigure
+# below. If there are any differences between this config and your
+# prior config, taking that precaution will ensure you don't provoke
+# any corruption in any pre-existing GPFS filesystems.
+ 
+ 11:10:45 AM
+ Brian Finley
+ k 
+ 11:10:58 AM
+ Ray Paden
+ I think it is OK to say this instead... 
+ 11:11:54 AM
+ ◄
+ # WARNING: Unmount any file system and delete any NSDs corresponding to
+ # existing LUNs 
+ 11:12:09 AM
+ ◄
+ It probably needs a little more detail, but you get the idea. 
+ 11:12:53 AM
+ ◄
+ One of the thing we need to be careful about is if they are adding new
+ LUNs to an existing cluster.  
+ 11:12:56 AM
+ Brian Finley
+ ok, I'll add that to my notes 
+ 11:13:18 AM
+ ◄
+ right -- they may not always need to delete existing LUNs... 
+
+--
+
+
 
