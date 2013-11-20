@@ -1,33 +1,36 @@
 #!/usr/bin/perl -w
 
 #
-# Originally created by: Jarrod Johnson <jbjohnso@us.ibm.com> as "getluns.pl"
+#   "multipath.conf-creator"
 #
 
 #
-# 2012.10.16 Brian Elliott Finley <bfinley@us.ibm.com>
-# - added invocation options and help output
-# 2012.10.18 Brian Elliott Finley <bfinley@us.ibm.com>
-# - added additional info in resultant configuration
-# 2013.02.14 Brian Elliott Finley <bfinley@us.ibm.com>
-# - added blacklist feature
-# 2013.06.14 Brian Elliott Finley <bfinley@us.ibm.com>
-# - modify blacklist to use vendor/product info instead of disk name
-# 2013.07.18 Brian Elliott Finley <bfinley@us.ibm.com>
-# - add section entries for DCS3700 and DS35xx subsystems
-# - handle case where subsystem name has spaces
-# - handle case where SMCli or subsystem doesn't return a "lun number"
-# 2013.09.22 Brian Elliott Finley <bfinley@us.ibm.com>
-# - add --version output
-# 2013.11.06 Brian Elliott Finley <bfinley@us.ibm.com>
-# - use proper grammar for plural and singular controller(s)
-# - improve regex used to identify controller name
-# - incorporate numerous additional controllers in the multipath.conf
-#   devices section
-# 2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
-# - test for existence of SMcli
+#   Originally created by: Jarrod Johnson <jbjohnso@us.ibm.com> as "getluns.pl"
+#   
+#   2012.10.16 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - added invocation options and help output
+#   2012.10.18 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - added additional info in resultant configuration
+#   2013.02.14 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - added blacklist feature
+#   2013.06.14 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - modify blacklist to use vendor/product info instead of disk name
+#   2013.07.18 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - add section entries for DCS3700 and DS35xx subsystems
+#   - handle case where subsystem name has spaces
+#   - handle case where SMCli or subsystem doesn't return a "lun number"
+#   2013.09.22 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - add --version output
+#   2013.11.06 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - use proper grammar for plural and singular controller(s)
+#   - improve regex used to identify controller name
+#   - incorporate numerous additional controllers in the multipath.conf
+#     devices section
+#   2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - test for existence of SMcli
+#   2013.11.19 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - improve --help verbiage
 #
-
 
 
 use strict;
@@ -42,7 +45,6 @@ GetOptions(
     "version"       => \my $version,
     "auto-detect"   => \my $auto_detect,
     "out-file=s"    => \my $out_file,
-    #"blacklist=s"   => \my $blacklist,
     "no-blacklist"  => \my $no_blacklist,
 ) or usage() and exit(1);
 
@@ -436,7 +438,7 @@ devices {
         vendor "IBM"
         product "DCS9[59]*"
         getuid_callout          "/sbin/scsi_id -u -g -p 0x80 -s /block/%n"
-        prio_callout            "/sbin/mpath_prio_alua %d"
+        prio                    "/sbin/mpath_prio_alua %d"
         path_grouping_policy    group_by_prio
         path_checker            tur
         failback                immediate
@@ -627,6 +629,10 @@ Usage:  $progname [OPTION...] --out-file FILE [ --auto-detect | controller1 cont
 
     All options can be abbreviated to minimum uniqueness.
 
+    --help
+
+    --version
+
     --auto-detect
 
         This command will use the output from SMcli -v -d to determine the list
@@ -650,14 +656,17 @@ Usage:  $progname [OPTION...] --out-file FILE [ --auto-detect | controller1 cont
         'multipath -v3' and examining the output for blacklisted devices.
 
 
-    Currently Supported Storage Controllers include:
+    Currently Supported Storage Controllers include all IBM DS Storage
+    Manager (SMClient) compatible controllers, and has been fully tested
+    on the following models:
 
-        DCS3700 DCS9550 DCS9900 DS3200 DS3400 DS3512 DS3524 DS4700
-        DS4800 DS8000 MYSTERY_CONTROLLER
+        DCS3700 DS3512 DS3524 DS3860
 
 
-    To request support for an additional storage controller, please email
-    the output from 'lsscsi' to <bfinley\@us.ibm.com>.
+    To request support for an additional storage controller, please
+    email the output from 'lsscsi' to <bfinley\@us.ibm.com>.  Emails
+    that have an actual storage controller attached (or at least remote
+    access to one) are likely to get the most attention. ;-)
 
 EOF
     return 1;
