@@ -74,6 +74,7 @@ tarball:
 	perl -pi -e "s/^VERSION=.*/VERSION=${VERSION}/g"                    ${TMPDIR}/${PKG_DIR}/sbin/gpfs_goodies
 	perl -pi -e "s/^VERSION=.*/VERSION=${VERSION}/g"  				    ${TMPDIR}/${PKG_DIR}/sbin/brians_own_hot-add_script
 	perl -pi -e "s/version_number = .*/version_number = '${VERSION}';/g"  ${TMPDIR}/${PKG_DIR}/sbin/multipath.conf-creator
+	perl -pi -e "s/version_number = .*/version_number = '${VERSION}';/g"  ${TMPDIR}/${PKG_DIR}/sbin/tune_block_device_settings
 	
 	#
 	# Tar it up
