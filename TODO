@@ -1,3 +1,13 @@
+Outstanding Questions -- Seeking Input
+- Which of these should we use in a multi-node GPFS environment?
+
+    no_path_retry           15
+
+        or 
+
+    no_path_retry           fail
+
+
 --
 
 - snurl.com/gpfs_goodies -> developerworks/gpfs_goodies page
