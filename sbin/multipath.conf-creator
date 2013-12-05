@@ -38,7 +38,7 @@ use Getopt::Long;
 use File::Basename;
 
 my $progname = basename($0);
-my $version_number = 20.5;
+my $version_number = '20.5.31';
 
 GetOptions(
     "help"          => \my $help,
@@ -109,9 +109,33 @@ if( ! defined $smcli ) {
 
 my @controllers;
 if( defined $auto_detect ) {
-    my $cmd = "SMcli -d -v";
+    my $cmd = "SMcli -d";
     open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
     while(<INPUT>) {
+        if(m/^There are currently no storage systems listed/) {
+            print << 'EOF';
+
+There are currently no storage systems listed in the configuration file. Add
+storage systems using the Add Storage System option in the storage management
+software or by command line.
+                                           
+Perhaps try running 'SMcli -A' to have SMclient auto-discover your storage
+controllers.  That would look something like this:
+
+    [root@disktree ~]# SMcli -A
+    Starting auto discovery.
+    ........................................................................
+    ..........................
+    Auto discovery operation successful.
+    SMcli completed successfully.
+
+
+Then try running this command again. :-)
+
+EOF
+            exit 2;
+        }
+
         next if(m/^SMcli completed successfully/);
         next if(m/^(\s|$)/);
 
