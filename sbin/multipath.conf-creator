@@ -327,7 +327,7 @@ devices {
         #
         #   This device section will apply to the following subsystems:
         #
-        #       MYSTERY_CONTROLLER
+        #       DCS3860
         #
         vendor                  "IBM"
         product                 "1813"

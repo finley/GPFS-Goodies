@@ -50,8 +50,6 @@ Add "man gpfs_goodies"
 
 - add option "--sm-password PASSWORD" 
 
-- Change MYSTERY_CONTROLLER to released name
-
 
 Blacklist
 

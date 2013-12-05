@@ -46,7 +46,7 @@
 #
 
 #
-# MYSTERY_CONTROLLER
+# DCS3860
 # DCS3700
 #
 SUBSYSTEM=="block", SUBSYSTEMS=="scsi", ATTRS{model}=="181[38]*", RUN+="/bin/sh -c '/bin/echo 512 > /sys/block/%k/queue/max_sectors_kb; /bin/echo 512 > /sys/block/%k/queue/read_ahead_kb; /bin/echo 512  > /sys/block/%k/queue/nr_requests; /bin/echo 32  > /sys/block/%k/device/queue_depth; /bin/echo noop > /sys/block/%k/queue/scheduler;'"
