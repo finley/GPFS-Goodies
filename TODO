@@ -1,4 +1,5 @@
 Outstanding Questions -- Seeking Input
+------------------------------------------------------------------------
 - Which of these should we use in a multi-node GPFS environment?
 
     no_path_retry           15
@@ -8,37 +9,27 @@ Outstanding Questions -- Seeking Input
     no_path_retry           fail
 
 
---
+- In the nsddevices file, is this statement true?
 
-- snurl.com/gpfs_goodies -> developerworks/gpfs_goodies page
+   # 
+   # dmm vs. generic is used by GPFS to prioritize internal order of
+   # searching through available disks, then later GPFS discards other
+   # disk device names that it finds that match as the same NSD device
+   # by a different path.  For this reason, dmm vs. generic is an
+   # important distinction if you are not explicitly producing the
+   # entire and exclusive set of disks that GPFS should use, as output
+   # from this script (nsddevices) _and_ exiting this script with a
+   # "return 0". -Brian Finley
+   #
+
+
+--
 
 - prio_callout vs. prio
 
-Add "man gpfs_goodies"
+- Add "man gpfs_goodies"
 
 - sort multipath.conf LUN entires same way as test_block_devices
-
-- s/supported/tested/ -> Tested controllers list includes:
-
-    DS3700, etc.
-
-- Auto-choose an output file if none specified
-
-- Add --help and --version options to help output
-
-
-- Add --deploy option
-
-
-  --deploy NSD1,NSD2,NSD3,ETC...
-    - copy out config files:
-        - file1
-        - file2
-    - take action
-        - action1
-        - action2
-        - math on luns for udev rules
-
 
 - use SMcli to determine alua vs. rdac
     - provide warning if not recommended setting by controller type
@@ -49,7 +40,6 @@ Add "man gpfs_goodies"
         luns presented as Linux
 
 - add option "--sm-password PASSWORD" 
-
 
 Blacklist
 
