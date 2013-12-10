@@ -6,6 +6,8 @@
 #     Denham.  Thanks, Scott!
 # 2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
 #   - Turned into perl
+# 2013.12.10 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - Added the --test option
 #
 
 #
@@ -28,6 +30,7 @@ my $version_string = 'v' . '20.5';
 GetOptions(
     "help"          => \my $help,
     "version"       => \my $version,
+    "test"          => \my $test,
 ) or usage() and exit(1);
 
 if ( defined $help ) {
@@ -45,6 +48,12 @@ unless ( user_is_root() ) {
     usage();
     print qq(\n-->  Please run as root so that we can read all necessary kernel tables.);
     print qq(\n     You could try "sudo $progname" with no options...\n\n);
+    exit 1;
+}
+
+unless ( defined $test ) {
+    usage();
+    print qq|\n-->  Try using the "--test" option (or "-t" for short).\n\n|;
     exit 1;
 }
 
