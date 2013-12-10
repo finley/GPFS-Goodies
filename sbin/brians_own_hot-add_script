@@ -37,18 +37,28 @@ help() {
     echo
 
 cat <<"EOF"
+    All options can be abbreviated to minimum uniqueness.
+
+    This program will hot delete any devices that don't have disk
+    devices associated with them (stale LUNs), and hot-add any new
+    devices.
+
     --help
+
         Show this help output.
 
     --version
+
         Show this program's version number.
 
     --status
+
         Show the current LUN count, but don't actually do anything or
         make any changes.  This count will include all LUNs connected to
         the system, including local devices.
 
     --yes
+
         Hot delete any devices that don't have disk devices associated
         with them (stale LUNs), and hot-add any new devices.
 

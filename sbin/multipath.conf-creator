@@ -790,10 +790,18 @@ Usage:  $progname [OPTION...] [--auto-detect | controller1 controller2...]
         DCS3700 DS3512 DS3524 DS3860
 
 
-    To request support for an additional storage controller, please
-    email the output from 'lsscsi' to <bfinley\@us.ibm.com>.  Emails
-    that have an actual storage controller attached (or at least remote
-    access to one) are likely to get the most attention. ;-)
+    Support: 
+    
+        This software is provided as-is, with no express or implied
+        support.  However, the author would love to receive your
+        patches.  Please contact Brian E. Finley <bfinley@us.ibm.com>
+        with patches and/or suggestions.
+
+        To request support for an additional storage controller, please
+        email the output from 'lsscsi' to <bfinley\@us.ibm.com>.  Emails
+        that have an actual storage controller attached (or at least
+        remote access to one) are likely to get the most attention. ;-)
+
 
 EOF
     return 1;

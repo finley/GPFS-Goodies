@@ -444,6 +444,12 @@ Usage:  $progname [OPTION...] --out-file FILE
 
     All options can be abbreviated to minimum uniqueness.
 
+    This program will examine your environment including GPFS, storage
+    servers, disk subsystems, and LUNs, to calculate best practice block
+    device tuning settings.  It will create a single udev rules file
+    with the tuning settings, using one entry for each LUN, and
+    optionally deploy it to each participating storage server.
+    
     --help
 
     --version
@@ -473,8 +479,12 @@ Usage:  $progname [OPTION...] --out-file FILE
         Example:  --out-file /tmp/my_shiny_new_udev_rules_file.conf
 
 
-    To request support for an additional storage controller, please email
-    the output from 'lsscsi' to <bfinley\@us.ibm.com>.
+    Support: 
+    
+        This software is provided as-is, with no express or implied
+        support.  However, the author would love to receive your
+        patches.  Please contact Brian E. Finley <bfinley@us.ibm.com>
+        with patches and/or suggestions.
 
 EOF
     return 1;

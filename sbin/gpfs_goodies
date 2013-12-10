@@ -15,8 +15,31 @@ and won't do anything but show help information if run with either no
 arguments, or with --help or -h as an argument.
 
     multipath.conf-creator
-    test_block_device_settings
+
+        Create and optionally deploy a multipath configuration
+        appropriate for your LUNs and storage servers.
+
     brians_own_hot-add_script
+
+        Hot delete any devices that don't have disk devices associated
+        with them (stale LUNs), and hot-add any new devices.
+
+    test_block_device_settings
+
+        This program will summarize key block device settings that
+        impact the performance when accessing your disk subsystems.  It
+        makes no changes to your system, and is safe to run on live
+        production systems.
+
+    tune_block_device_settings
+        
+        This program will examine your environment including GPFS,
+        storage servers, disk subsystems, and LUNs, to calculate best
+        practice block device tuning settings.  It will create a single
+        udev rules file with the tuning settings, using one entry for
+        each LUN, and optionally deploy it to each participating storage
+        server.
+
 
     Be sure to take a look at the HOWTO and other docs in:
 

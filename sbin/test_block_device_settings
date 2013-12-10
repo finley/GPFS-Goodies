@@ -245,9 +245,23 @@ Usage:  $progname [OPTION...]
 
     --help
 
+        Show this help output.
+
     --version
 
         Yup.  These are the only two options. ;-)
+
+    --test
+
+        Perform the test.  This should be considered a safe action.
+
+
+    Support: 
+    
+        This software is provided as-is, with no express or implied
+        support.  However, the author would love to receive your
+        patches.  Please contact Brian E. Finley <bfinley@us.ibm.com>
+        with patches and/or suggestions.
 
 
 EOF
