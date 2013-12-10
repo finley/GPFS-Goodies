@@ -19,8 +19,10 @@ viewing the HOWTO.
 Includes: 
 - multipath.conf-creator
 - brians_own_hot-add_script
-- test_nsd_block_device_settings
+- test_block_device_settings
+- tune_block_device_settings
 - HOWTO document
+
 
 
 %prep
