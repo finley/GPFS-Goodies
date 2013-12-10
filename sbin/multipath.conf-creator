@@ -30,9 +30,6 @@
 #   - test for existence of SMcli
 #   2013.11.19 Brian Elliott Finley <bfinley@us.ibm.com>
 #   - improve --help verbiage
-#   2013.12.06 Brian Elliott Finley <bfinley@us.ibm.com>
-#   - add --deploy option (ready for RHEL6 use)
-#   - auto-choose output file if not specified
 #
 
 
@@ -49,6 +46,7 @@ GetOptions(
     "auto-detect"   => \my $auto_detect,
     "out-file=s"    => \my $out_file,
     "deploy=s"      => \my $deploy,
+    "dry-run"       => \my $dry_run,
     "no-blacklist"  => \my $no_blacklist,
 ) or usage() and exit(1);
 
@@ -60,6 +58,12 @@ if ( defined $help ) {
 if ( defined $version ) {
     version();
     exit 0;
+}
+
+unless ( user_is_root() ) {
+    usage();
+    print qq(\n-->  Please run as root.\n\n);
+    exit 1;
 }
 
 if( ! defined $auto_detect and ! defined $ARGV[0] ) {
@@ -616,7 +620,7 @@ if( defined $deploy ) {
 
     my @servers = split(/,/, $deploy);
 
-    foreach my $server (@servers) {
+    foreach my $server (sort @servers) {
 
         my $cmd;
         my $file;
@@ -624,81 +628,73 @@ if( defined $deploy ) {
         #my $OS = determine_server_os($server);
         my $OS = "RHEL6";
 
-        print "Processing ${server}.";
+        print "Processing ${server}...\n\n";
+        if( $dry_run ) {
+
+            print "  I'm in --dry-run mode so I won't do anything, but here are the commands I would\n";
+            print "  normally run:\n\n";
+
+        }
 
         # Copy out config
-        $cmd = "scp $out_file root\@$server:/etc/multipath.conf";
-        print "$cmd\n"; #!system( $cmd ) or die("Couldn't run $cmd");
-        print ".";
+        $cmd = "scp $out_file $server:/etc/multipath.conf";
+        $cmd =~ s|/+|/|g;
+        print "  $cmd\n";
+        unless( $dry_run ) {
+            !system( $cmd ) or die("Couldn't run $cmd");
+        }
 
         # Copy out nsddevices
         $file = "/var/mmfs/etc/nsddevices";
-        $cmd = "scp /usr/share/gpfs_goodies/$file root\@$server:$file";
-        print "$cmd\n"; #!system( $cmd ) or die("Couldn't run $cmd");
-        print ".";
+        $cmd = "scp /usr/share/gpfs_goodies/$file $server:$file";
+        $cmd =~ s|/+|/|g;
+        print "  $cmd\n";
+        unless( $dry_run) {
+            !system( $cmd ) or die("Couldn't run $cmd");
+        }
 
         $file = "/etc/modprobe.d/scsi_dh_alua.conf";
-        $cmd = "scp /usr/share/gpfs_goodies/$file root\@$server:$file";
-        print "$cmd\n"; #!system( $cmd ) or die("Couldn't run $cmd");
-        print ".";
+        $cmd = "scp /usr/share/gpfs_goodies/$file $server:$file";
+        $cmd =~ s|/+|/|g;
+        print "  $cmd\n";
+        unless( $dry_run) {
+            !system( $cmd ) or die("Couldn't run $cmd");
+        }
 
         # Start it all up.  Should we also do an mmnsddiscover here?
-        $cmd = qq(ssh root\@$server ) . q("
-                    chkconfig multipathd on
-                    service multipathd start 
-                    multipathd -k'reconfigure'
-                    multipathd -k'reconfigure'
-                    chmod 755 /var/mmfs/etc/nsddevices
-                    chown root.root /var/mmfs/etc/nsddevices
-                    cp /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.orig
-                    dracut -f /boot/initramfs-$(uname -r).img $(uname -r)
-                ");
+        $cmd = qq(ssh $server ) . q("
+            chkconfig multipathd on
+            service multipathd start 
+            multipathd -k'reconfigure'
+            multipathd -k'reconfigure'
+            chmod 755 /var/mmfs/etc/nsddevices
+            chown root.root /var/mmfs/etc/nsddevices
+            rsync -a /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.orig
+            dracut -f /boot/initramfs-$(uname -r).img $(uname -r)
+            ls -l /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.orig
+        ");
+        $cmd =~ s|/+|/|g;
 
-        print "$cmd\n"; #!system( $cmd ) or die("Couldn't run $cmd");
-        print ".";
+        print "  $cmd\n";
+        unless( $dry_run) {
+            !system( $cmd ) or die("Couldn't run $cmd");
+        }
+
+        print "\n\n";
 
     }
 
-    print "done\n";
 
 
 } else {
     print << 'EOF';
-Consider trying the "--deploy" option next time -- it will perform the
-steps below for you.  See "--help" for details.
 
-Your next step is to copy it out to /etc/multipath.conf on all of the
-storage servers connected to these storage controllers.  Then execute
-the multipathd command to re-read the configuration file:
+Consider trying the "--deploy" option.  It will install your new multipath.conf
+file on your storage servers, and complete the steps necessary to enable
+multipath support.  If you're unsure, you can run it with the "--dry-run"
+option, and I'll show you the commands that I would have run.
 
-    #
-    # WARNING!  Make sure you have performed an "mmshutdown" on each NSD
-    # server prior to copying out the new file and doing the reconfigure
-    # below.  If there are any differences between this config and your
-    # prior config, taking that precaution will ensure you don't provoke
-    # any corruption in any pre-existing GPFS filesystems.
-    #
-    # If you have NSD servers in building blocks as HA pairs, you should be
-    # able to do this on one server at a time (mmshutdown, reconfigure,
-    # mmstartup).  But, you _must_ use your own judgement -- don't
-    # blindly follow this part of these instructions.  (You can blindly
-    # follow the new file creation part. ;-)
-    #
-
-    multipathd -k'reconfigure' 
-    multipathd -k'reconfigure'
-
-    #
-    # Yes -- do it twice.  With the first invocation, it's possible that
-    # not all device mapper name changes will show up in the
-    # /dev/mapper/ directory.
-    #
-
-
-You can see the results with these commands (and others):
-
-    ls /dev/mapper/
-    multipath -ll
+See "--help" for details.
 
 EOF
 }
@@ -760,8 +756,8 @@ Usage:  $progname [OPTION...] [--auto-detect | controller1 controller2...]
              not use any other devices).  Once installed, just run it as a
              script to see which devices it's choosing.
         
-        And re-build the initrd or initramfs to include your new multipath.conf
-        and scsi_dh_alua.conf files.
+	I'll also re-build the initrd or initramfs to include your new
+	multipath.conf and scsi_dh_alua.conf files.
 
 
     --out-file FILE
@@ -840,13 +836,14 @@ sub which {
 
 sub get_tmp_file {
 
-    my $cmd = qq(mktemp /tmp/multipath.conf.XXX);
-
     my $file;
+
+    my $template_base = '/tmp/multipath.conf';
+    my $cmd = qq(mktemp $template_base.XXX);
 
     open(INPUT,"$cmd|") or die("Couldn't run $cmd for input");
     while(<INPUT>) {
-        if( m#^(/tmp/gpfs_goodies.*)# ) {
+        if( m#^($template_base.*)# ) {
             $file = $1;
         }
     }
@@ -854,6 +851,15 @@ sub get_tmp_file {
 
     return $file;
 }
+
+sub user_is_root {
+
+    if($< == 0) {
+        return 1;
+    }
+    return undef;
+}
+
 
 
 #
