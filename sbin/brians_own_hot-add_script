@@ -155,6 +155,16 @@ status() {
     echo
 }
 
+test_for_root() {
+    UID=$(id | perl -pi -e 's/^uid=(\d+).*/$1/')
+    if [ $UID != 0 ]; then
+        help
+        echo "--> Please run as root"
+        echo
+        exit 1
+    fi
+}
+
 
 if [ ! -z "$1" -a ! -z "$2" ]; then
     help
@@ -177,14 +187,12 @@ case $OPTION in
         exit 0
         ;;
     -s*)
-        status
-        exit 0
-        ;;
-    -s*)
+        test_for_root
         status
         exit 0
         ;;
     -y*)
+        test_for_root
         hot_delete
         hot_add
         status
