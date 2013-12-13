@@ -46,8 +46,7 @@ if ( defined $version ) {
 
 unless ( user_is_root() ) {
     usage();
-    print qq(\n-->  Please run as root so that we can read all necessary kernel tables.);
-    print qq(\n     You could try "sudo $progname" with no options...\n\n);
+    print qq(\n-->  Please run as root\n\n);
     exit 1;
 }
 

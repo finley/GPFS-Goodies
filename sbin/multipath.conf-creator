@@ -62,7 +62,7 @@ if ( defined $version ) {
 
 unless ( user_is_root() ) {
     usage();
-    print qq(\n-->  Please run as root.\n\n);
+    print qq(\n-->  Please run as root\n\n);
     exit 1;
 }
 
