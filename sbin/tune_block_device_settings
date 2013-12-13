@@ -60,12 +60,21 @@ if ( defined $version ) {
 }
 
 if( ! defined $out_file ) {
+    $out_file = get_tmp_file();
+}
+
+unless ( user_is_root() ) {
     usage();
-    print "\n";
-    print qq(-->  Please specify "--out-file FILE".\n);
-    print "\n";
+    print qq(\n-->  Please run as root\n\n);
     exit 1;
 }
+
+unless ( -e "/usr/lpp/mmfs/bin/mmlsnsd" and -e "/usr/lpp/mmfs/bin/mmlsfs" ) {
+    usage();
+    print qq(\n-->  GPFS doesn't appear to be installed on this machine\n\n);
+    exit 1;
+}
+
 
 my $cmd;
 my %filesystems;
@@ -81,7 +90,7 @@ $debug = 'on';
 #
 # Info Gather Pass 1
 #
-$cmd = 'mmlsnsd 2>&1';
+$cmd = '/usr/lpp/mmfs/bin/mmlsnsd 2>&1';
 print ">> Command: $cmd\n" if(defined $debug);
 open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
 while(<INPUT>) {
@@ -142,7 +151,7 @@ close(INPUT);
 #
 # Info Gather Pass 2
 #
-$cmd = 'mmlsnsd -m 2>&1';
+$cmd = '/usr/lpp/mmfs/bin/mmlsnsd -m 2>&1';
 print ">> Command: $cmd\n" if(defined $debug);
 open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
 while(<INPUT>) {
@@ -192,7 +201,7 @@ close(INPUT);
 # Info Gather Pass 3
 #
 foreach my $fs (keys %filesystems) {
-    my $cmd = "mmlsfs $fs 2>&1";
+    my $cmd = "/usr/lpp/mmfs/bin/mmlsfs $fs 2>&1";
     print ">> Command: $cmd\n" if(defined $debug);
     open(INPUT,"$cmd|") or die("Can't run $cmd for input");
     while(<INPUT>) {
@@ -472,11 +481,14 @@ Usage:  $progname [OPTION...] --out-file FILE
     --out-file FILE
 
         The name of your resultant udev rules file.  This file can be
-        given any name you like.  If you also use the --deploy option,
-        this file will be deployed to your storage servers with the name
-        of $udev_rules_file.
+        given any name you like.  
+
+        If you also use the --deploy option, this file will be deployed
+        to your storage servers with the name of $udev_rules_file.
 
         Example:  --out-file /tmp/my_shiny_new_udev_rules_file.conf
+
+        Default:  I'll choose one for you and tell you what I've named it.
 
 
     Support: 
@@ -499,6 +511,15 @@ EOF
 #        
 #
 }
+
+sub user_is_root {
+
+    if($< == 0) {
+        return 1;
+    }
+    return undef;
+}
+
 
 #
 #   END Subroutines
