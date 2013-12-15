@@ -25,6 +25,53 @@ Outstanding Questions -- Seeking Input
 
 --
 
+- create a new tool
+
+    - tune_mmrestripefs_bandwidth
+
+        - This tool gives you a way to specify the rate at which your
+          data migration operation proceeds.  For example, you can use
+          it to achieve a slow migration over an extended time frame
+          to avoid impacting performance for production operations.
+          
+          When used without this tool, mmrestripefs will consume all the
+          bandwidth it can to complete it's operation as fast as
+          possible, limited only by the performance of the participating
+          nodes' network connectivity and/or the storage server disk
+          performance.  This can result in noticably lower performance
+          of the file system for users and/or other applications.
+
+        - Uses iptables to impose a bandwidth limit on rate of re-stripe
+          activity.
+
+        OPTIONS:
+            -h
+            -v
+            --MBps NUMBER
+
+                Limit the bandwidth to a maximum of this many megabytes
+                per second.
+
+            --Nodes NODE1[,NODE2,...]
+
+                The list of nodes that will be used for this operation.
+                
+                If multiple nodes are included in this list, the 
+                bandwidth specified via the "--MBps" option will be
+                divided equally among them, so that the aggregate
+                bandwidth stays within that limit.
+                
+            --mmrestripefs-options "OPTION1[,OPTION2,...]"
+                
+                A list options, within quotation marks, that should be
+                passed to the mmrestripefs command.  The -N option can
+                be excluded and will be ignored if it is included.
+
+                Example: 
+
+                --mmrestripefs-options "fs1 -m"
+
+
 - prio_callout vs. prio
 
 - Add "man gpfs_goodies"
