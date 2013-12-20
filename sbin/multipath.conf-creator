@@ -160,7 +160,7 @@ if( $quantity ne 1 ) {
 	$plural = 's';
 }
 
-print "Looks like we're dealing with $quantity controller$plural. Let's get going:\n\n";
+print "\nLooks like we're dealing with $quantity controller$plural. Let's get going:\n\n";
 
 my %aliases;
 foreach my $controller (@controllers) {
@@ -609,8 +609,8 @@ close(FILE);
 ########################################################################
 
 print "\n";
-print "Done!\n";
-print "\n";
+print "  done!\n";
+print "\n\n";
 print "You can find your fresh multipath.conf file here:\n";
 print "\n";
 print "  $out_file\n";
@@ -618,6 +618,7 @@ print "\n";
 
 if( defined $deploy ) {
 
+    print "\n";
     my @servers = split(/,/, $deploy);
 
     foreach my $server (sort @servers) {
@@ -641,7 +642,7 @@ if( defined $deploy ) {
         $cmd =~ s|/+|/|g;
         print "  $cmd\n";
         unless( $dry_run ) {
-            !system( $cmd ) or die("Couldn't run $cmd");
+            !system( "$cmd >/dev/null" ) or die("Couldn't run $cmd");
         }
 
         # Copy out nsddevices
@@ -650,7 +651,7 @@ if( defined $deploy ) {
         $cmd =~ s|/+|/|g;
         print "  $cmd\n";
         unless( $dry_run) {
-            !system( $cmd ) or die("Couldn't run $cmd");
+            !system( "$cmd >/dev/null" ) or die("Couldn't run $cmd");
         }
 
         $file = "/etc/modprobe.d/scsi_dh_alua.conf";
@@ -658,7 +659,7 @@ if( defined $deploy ) {
         $cmd =~ s|/+|/|g;
         print "  $cmd\n";
         unless( $dry_run) {
-            !system( $cmd ) or die("Couldn't run $cmd");
+            !system( "$cmd >/dev/null" ) or die("Couldn't run $cmd");
         }
 
         # Start it all up.  Should we also do an mmnsddiscover here?
@@ -669,7 +670,7 @@ if( defined $deploy ) {
             multipathd -k'reconfigure'
             chmod 755 /var/mmfs/etc/nsddevices
             chown root.root /var/mmfs/etc/nsddevices
-            rsync -a /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.orig
+            test -e /boot/initramfs-$(uname -r).img.orig || rsync -a /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.orig
             dracut -f /boot/initramfs-$(uname -r).img $(uname -r)
             ls -l /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.orig
         ");
@@ -677,10 +678,11 @@ if( defined $deploy ) {
 
         print "  $cmd\n";
         unless( $dry_run) {
-            !system( $cmd ) or die("Couldn't run $cmd");
+            #!system( $cmd ) or die("Couldn't run $cmd");
+            !system( "$cmd >/dev/null" ) or die("Couldn't run $cmd");
         }
 
-        print "\n\n";
+        print "  done!\n\n";
 
     }
 
