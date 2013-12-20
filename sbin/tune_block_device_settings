@@ -41,21 +41,29 @@ my $progname = basename($0);
 my $version_number = 20.5;
 my $udev_rules_file = '/etc/udev/rules.d/99-ibm-storage.rules';
 
+our $ERROR;
+
 GetOptions(
     "help"          => \my $help,
     "version"       => \my $version,
     "deploy"        => \my $deploy,
-    "activate"      => \my $activate,
+    "test-run"      => \my $test_run,
+    "verbose|v"     => \my $debug,
     "out-file=s"    => \my $out_file,
 ) or usage() and exit(1);
 
 if ( defined $help ) {
     usage();
     exit 0;
+} 
+elsif ( defined $version ) {
+    version();
+    exit 0;
 }
 
-if ( defined $version ) {
-    version();
+if( (! defined $deploy and ! defined $test_run ) or ( defined $deploy and defined $test_run ) ) {
+    usage();
+    print qq(\n-->  Try either "--deploy" or "--test-run"\n\n);
     exit 0;
 }
 
@@ -83,9 +91,6 @@ my %server_by_mpath;
 my %nsd_server_list;
 my %filesystems_by_nsd;
 my %blocksize_by_filesystem;
-
-my $debug;
-$debug = 'on';
 
 #
 # Info Gather Pass 1
@@ -254,22 +259,26 @@ foreach my $fs (keys %filesystems) {
     close(INPUT);
 }
 
-my $file = get_tmp_file();
+my $file = $out_file;
 open(FILE,">$file") or die("Couldn't open $file for writing");
 foreach my $nsd (keys %filesystems_by_nsd) {
 
     my $fs = $filesystems_by_nsd{$nsd};
     my $bs = $blocksize_by_filesystem{$fs};
-    my $mpath = $mpath_by_nsd{$nsd};
-    my $server = $server_by_mpath{$mpath};
 
-    my $max_sectors_kb = calculate_max_sectors_kb();
-    my $read_ahead_kb  = $max_sectors_kb;   # read_ahead_kb and max_sectors_kb should always be the same -BEF-
-    my $nr_requests    = calculate_nr_requests();
-    my $queue_depth    = calculate_queue_depth();
-    my $elevator       = 'noop';
+    my $mpath;
+    my $server;
+    if( defined $mpath_by_nsd{$nsd} ) {
 
-    if( defined $mpath ) { 
+        $mpath = $mpath_by_nsd{$nsd};
+        $server = $server_by_mpath{$mpath};
+
+        my $max_sectors_kb = calculate_max_sectors_kb();
+        my $read_ahead_kb  = $max_sectors_kb;   # read_ahead_kb and max_sectors_kb should always be the same -BEF-
+        my $nr_requests    = calculate_nr_requests();
+        my $queue_depth    = calculate_queue_depth();
+        my $elevator       = 'noop';
+
         my $scsi_id = get_scsi_id( $server, $mpath );
         if(defined $scsi_id) {
 
@@ -286,22 +295,40 @@ foreach my $nsd (keys %filesystems_by_nsd) {
             
         } else {
             print "$nsd -- Couldn't not retrieve the scsi_id from $server:$mpath.\n";
-            exit 1;
+            $ERROR++;
         }
 
     } else {
         print "$nsd -- ERROR No path to device found for this NSD.\n";
-        print "  Please make sure that all devices, and ideally all NSD servers are fully operational.\n";
-        print "\n";
-        exit 1;
+        $ERROR++;
     }
 
 }
 close(FILE);
 
-print "Your new rules can be found here: $file\n";
-distribute_rule($file);
-udev_reread();
+if($ERROR == 0) {
+    print "Your new rules can be found here: $out_file\n";
+
+    if(defined $deploy) {
+        distribute_rule($out_file);
+        udev_reread();
+    } else {
+        print "\n";
+        print "Not deploying.  You might want to try --deploy.\n";
+        print "\n";
+        print "See $progname --help for details.\n";
+        print "\n";
+    }
+
+} else {
+    print "\n";
+    print "  ERROR: Please make sure that all devices, and ideally all\n";
+    print "         NSD servers are fully operational, then try again.\n";
+    print "\n";
+    print "         Try 'mmlsnsd -m' to verify.\n";
+    print "\n";
+    exit 1;
+}
 
 exit 0;
 
@@ -312,18 +339,19 @@ exit 0;
 #
 sub get_tmp_file {
 
-    my $cmd = 'mktemp /tmp/gpfs_goodies.XXXXXXXXXX';
+    my $cmd = "mktemp /tmp/$progname.XXXXXXXXXX";
 
     my $file;
 
     open(INPUT,"$cmd|") or die("Couldn't run $cmd for input");
     while(<INPUT>) {
-        if( m#^(/tmp/gpfs_goodies.*)# ) {
+        if( m#^(/tmp/$progname.*)# ) {
             $file = $1;
         }
     }
     close(INPUT);
 
+    print ">> get_tmp_file => $file\n" if(defined $debug);
     return $file;
 }
 
@@ -353,7 +381,7 @@ sub udev_reread {
     foreach my $server (sort keys %nsd_server_list) {
         my $cmd = qq(ssh $server 'which udevadm >/dev/null 2&>1  &&  udevadm trigger --subsystem-match=block  ||  udevcontrol reload_rules');
         print ">> Command: $cmd\n" if(defined $debug);
-        #XXX !system($cmd) or die("FAILED: $cmd\n");
+        !system($cmd) or die("FAILED: $cmd\n");
     }
 
     return 1;
@@ -463,20 +491,22 @@ Usage:  $progname [OPTION...] --out-file FILE
 
     --version
 
+    --test-run
+
+        Create the rules, but don't deploy them.
+
+
     --deploy
 
-        Deploy the resultant udev rules file to each participating
-        storage server.  Participating storage servers are identified by
-        their role as an NSD server for any of the LUNs in active file
-        systems.  Execute the command "mmlsnsd" for a list of these
-        servers.
+        Deploy and activate the resultant udev rules file to each
+        participating storage server.  Participating storage servers are
+        identified by their role as an NSD server for any of the LUNs in
+        active file systems.  Execute the command "mmlsnsd" for a list
+        of these servers.
         
-        The name of the udev rules file on the target
-        NSD servers will be: $udev_rules_file
+        The name of the udev rules file on the target NSD servers will
+        be: $udev_rules_file
 
-    --activate
-
-        Hot-activate the new rules on each participating storage server.
 
     --out-file FILE
 
