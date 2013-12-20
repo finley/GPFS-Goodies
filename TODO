@@ -25,6 +25,8 @@ Outstanding Questions -- Seeking Input
 
 --
 
+- Add "HOWTO Convert from LSI RDAC to Linux Multipath with GPFS Goodies"
+
 - create a new tool
 
     - tune_mmrestripefs_bandwidth
