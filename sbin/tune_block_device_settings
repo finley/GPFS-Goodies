@@ -31,6 +31,8 @@
 #   - created
 #   2013.11.18 Brian Elliott Finley <bfinley@us.ibm.com>
 #   - add initial default tuning settings
+#   2014.01.03 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - minor refinements after testing on Ray Paden's test cluster
 #
 
 use strict;
@@ -41,7 +43,7 @@ my $progname = basename($0);
 my $version_number = 20.5;
 my $udev_rules_file = '/etc/udev/rules.d/99-ibm-storage.rules';
 
-our $ERROR;
+our $ERROR = 0;
 
 GetOptions(
     "help"          => \my $help,
@@ -284,8 +286,18 @@ foreach my $nsd (keys %filesystems_by_nsd) {
 
             print FILE qq(#\n);
             print FILE qq(# NSD: $nsd  PATH: $mpath\n);
-
+            print FILE qq(#\n);
+            print FILE qq(#  Individual Devices\n);
             print FILE q(SUBSYSTEM=="block", SUBSYSTEMS=="scsi", PROGRAM=="/lib/udev/scsi_id -g -u -d /dev/%k", RESULT==") . $scsi_id . q(", RUN+="/bin/sh -c ');
+            print FILE q(/bin/echo ) . $max_sectors_kb . q( > /sys/block/%k/queue/max_sectors_kb; );
+            print FILE q(/bin/echo ) . $read_ahead_kb  . q( > /sys/block/%k/queue/read_ahead_kb; );
+            print FILE q(/bin/echo ) . $nr_requests    . q( > /sys/block/%k/queue/nr_requests; );
+            print FILE q(/bin/echo ) . $queue_depth    . q( > /sys/block/%k/device/queue_depth; );
+            print FILE q(/bin/echo ) . $elevator       . q( > /sys/block/%k/queue/scheduler; );
+            print FILE qq('"\n);
+            print FILE qq(#\n);
+            print FILE qq(#  Multipathed device\n);
+            print FILE q(SUBSYSTEM=="block", KERNEL=="dm-*", PROGRAM=="/lib/udev/scsi_id -g -u -d /dev/%k", RESULT==") . $scsi_id . q(", RUN+="/bin/sh -c ');
             print FILE q(/bin/echo ) . $max_sectors_kb . q( > /sys/block/%k/queue/max_sectors_kb; );
             print FILE q(/bin/echo ) . $read_ahead_kb  . q( > /sys/block/%k/queue/read_ahead_kb; );
             print FILE q(/bin/echo ) . $nr_requests    . q( > /sys/block/%k/queue/nr_requests; );
@@ -307,7 +319,7 @@ foreach my $nsd (keys %filesystems_by_nsd) {
 close(FILE);
 
 if($ERROR == 0) {
-    print "Your new rules can be found here: $out_file\n";
+    print "Your new rules can be found here:\n\n  $out_file\n\n";
 
     if(defined $deploy) {
         distribute_rule($out_file);
@@ -360,9 +372,10 @@ sub distribute_rule {
     my $file = shift;
 
     foreach my $server (sort keys %nsd_server_list) {
-        my $cmd = "scp $file $server:$udev_rules_file";
+        my $cmd = "scp -q $file $server:$udev_rules_file";
+        print "Deploying to $server as $udev_rules_file\n";
         print ">> Command: $cmd\n" if(defined $debug);
-        #XXX !system($cmd) or die("FAILED: $cmd\n");
+        !system($cmd) or die("FAILED: $cmd\n");
     }
 
     return 1;
@@ -379,7 +392,7 @@ sub udev_reread {
     #       udevcontrol reload_rules
     #
     foreach my $server (sort keys %nsd_server_list) {
-        my $cmd = qq(ssh $server 'which udevadm >/dev/null 2&>1  &&  udevadm trigger --subsystem-match=block  ||  udevcontrol reload_rules');
+        my $cmd = qq(ssh $server 'which udevadm >/dev/null 2>&1  &&  udevadm trigger --subsystem-match=block  ||  udevcontrol reload_rules');
         print ">> Command: $cmd\n" if(defined $debug);
         !system($cmd) or die("FAILED: $cmd\n");
     }
