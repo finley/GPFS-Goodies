@@ -84,3 +84,11 @@ tarball:
 rpm:	tarball
 	rpmbuild -ta ${TARBALL}
 
+.PHONY += help
+help:
+	@echo "Targets include:"
+	@echo "  help"
+	@echo "  rpm"
+	@echo "  tarball"
+	@echo "  all"
+	@echo "  install"
