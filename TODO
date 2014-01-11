@@ -22,7 +22,6 @@ Outstanding Questions -- Seeking Input
    # "return 0". -Brian Finley
    #
 
-
 --
 
 - Add "HOWTO Convert from LSI RDAC to Linux Multipath with GPFS Goodies"
@@ -208,6 +207,4 @@ I have a suggestion... you write...
  right -- they may not always need to delete existing LUNs... 
 
 --
-
-
 
