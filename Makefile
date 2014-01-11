@@ -77,7 +77,7 @@ tarball:
 	
 	#
 	# Version the Files
-	perl -pi -e "s/__VERSION__/${VERSION}/g"  					        ${TMPDIR}/${PKG_DIR}/gpfs_goodies.spec
+	perl -pi -e "s/__VERSION__/${VERSION}/g"  					        ${TMPDIR}/${PKG_DIR}/${PKG_NAME}.spec
 	perl -pi -e "s/^VERSION=.*/VERSION=${VERSION}/g"                    ${TMPDIR}/${PKG_DIR}/sbin/gpfs_goodies
 	perl -pi -e "s/^VERSION=.*/VERSION=${VERSION}/g"  				    ${TMPDIR}/${PKG_DIR}/sbin/brians_own_hot-add_script
 	perl -pi -e "s/version_number = .*/version_number = '${VERSION}';/g"  ${TMPDIR}/${PKG_DIR}/sbin/multipath.conf-creator
@@ -90,6 +90,15 @@ tarball:
 .PHONY += rpm
 rpm:	tarball
 	rpmbuild -ta ${TARBALL}
+
+.PHONY += release
+release:	rpm
+	cp -i ~/rpmbuild/RPMS/noarch/${PKG_NAME}-${VERSION}-1.noarch.rpm   packages/RPMs/
+	cp -i ~/rpmbuild/SRPMS/${PKG_NAME}-${VERSION}-1.src.rpm            packages/RPMs/
+	cp -i ${TARBALL}                                                packages/tarballs/
+	@echo
+	@echo "Results:"
+	@/bin/ls -1 packages/*/*${PKG_NAME}-${VERSION}* | sed 's/^/  /'
 
 .PHONY += help
 help:
