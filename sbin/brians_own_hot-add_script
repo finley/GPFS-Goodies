@@ -156,8 +156,8 @@ status() {
 }
 
 test_for_root() {
-    UID=$(id | perl -pi -e 's/^uid=(\d+).*/$1/')
-    if [ $UID != 0 ]; then
+    EFFECTIVE_UID=$(id | perl -pi -e 's/^uid=(\d+).*/$1/')
+    if [ $EFFECTIVE_UID != 0 ]; then
         help
         echo "--> Please run as root"
         echo
