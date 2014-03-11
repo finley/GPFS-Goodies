@@ -1,5 +1,31 @@
-Outstanding Questions -- Seeking Input
-------------------------------------------------------------------------
+- Add a "--scheduler [cfq|noop|deadline|as]" option to
+  tune_block_device_settings...
+
+
+- Comments from Scott Denham:
+
+    In the longer run, I'd like to see it be more "Linux-like" in storing
+    the specific parameter values in /etc/sysconfig/<device type> or the
+    like, and to be able to dynamically expand / contract which
+    /sys/block/<dev>/ paramters are tuned, as opposed to storing the values
+    directly in the scripts.  This would allow updating without
+    re-customizing, and puts the tunables in a logical place instead of
+    buried inside /etc/udev/rules. 
+    
+    I like your idea about probing the local Ethernet for candidates for
+    management interfaces for storage devices.  The possible concerns here
+    would be time, should this be a system with a large, flat Layer2
+    management net, or reachability should the storage devices actually be
+    on a separate, routeable subnet from the GPFS system where gpfs_goodies
+    is being run. Perhaps a simple old-xCAT style "tab" with IP:DEVICE TYPE
+    as a complement to the discovery logic?
+    
+
+- Incorporate "Net::SSH::Expect" into this code.  It does not appear to
+  be commonly available in either Debian or Red Hat based distros.
+
+    http://search.cpan.org/~bnegrao/Net-SSH-Expect-1.09/lib/Net/SSH/Expect.pod
+
 - Which of these should we use in a multi-node GPFS environment?
 
     no_path_retry           15
