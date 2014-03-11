@@ -46,12 +46,13 @@ my $udev_rules_file = '/etc/udev/rules.d/99-ibm-storage.rules';
 our $ERROR = 0;
 
 GetOptions(
-    "help"          => \my $help,
-    "version"       => \my $version,
-    "deploy"        => \my $deploy,
-    "test-run"      => \my $test_run,
-    "verbose|v"     => \my $debug,
-    "out-file=s"    => \my $out_file,
+    "help"              => \my $help,
+    "version"           => \my $version,
+    "deploy"            => \my $deploy,
+    "disks-per-array=i" => \my $disks_per_array,
+    "test-run"          => \my $test_run,
+    "verbose|v"         => \my $debug,
+    "out-file=s"        => \my $out_file,
 ) or usage() and exit(1);
 
 if ( defined $help ) {
@@ -66,6 +67,12 @@ elsif ( defined $version ) {
 if( (! defined $deploy and ! defined $test_run ) or ( defined $deploy and defined $test_run ) ) {
     usage();
     print qq(\n-->  Try either "--deploy" or "--test-run"\n\n);
+    exit 0;
+}
+
+if( ! defined $disks_per_array ) {
+    usage();
+    print qq(\n-->  Try "--disks-per-array NN"\n\n);
     exit 0;
 }
 
@@ -93,6 +100,7 @@ my %server_by_mpath;
 my %nsd_server_list;
 my %filesystems_by_nsd;
 my %blocksize_by_filesystem;
+my %block_allocation_type_by_filesystem;
 
 #
 # Info Gather Pass 1
@@ -254,8 +262,13 @@ foreach my $fs (keys %filesystems) {
         # 
         print ">> $_" if(defined $debug);
         if(m/^\s+-B\s+(\d+)\s+/) {
+            #  -B                 1048576                  Block size
             my $blocksize = $1;
             $blocksize_by_filesystem{$fs} = $blocksize;
+        } elsif(m/^\s+-j\s+(\d+)\s+/) {
+            #  -j                 scatter                  Block allocation type
+            my $block_allocation_type = $1;
+            $block_allocation_type_by_filesystem{$fs} = $block_allocation_type;
         }
     }
     close(INPUT);
@@ -267,6 +280,7 @@ foreach my $nsd (keys %filesystems_by_nsd) {
 
     my $fs = $filesystems_by_nsd{$nsd};
     my $bs = $blocksize_by_filesystem{$fs};
+    my $block_allocation_type = $block_allocation_type_by_filesystem{$fs};
 
     my $mpath;
     my $server;
@@ -275,10 +289,10 @@ foreach my $nsd (keys %filesystems_by_nsd) {
         $mpath = $mpath_by_nsd{$nsd};
         $server = $server_by_mpath{$mpath};
 
-        my $max_sectors_kb = calculate_max_sectors_kb();
-        my $read_ahead_kb  = $max_sectors_kb;   # read_ahead_kb and max_sectors_kb should always be the same -BEF-
-        my $nr_requests    = calculate_nr_requests();
-        my $queue_depth    = calculate_queue_depth();
+        my $max_sectors_kb = calculate_max_sectors_kb($bs);
+        my $read_ahead_kb  = calculate_read_ahead_kb($block_allocation_type, $max_sectors_kb);
+        my $nr_requests    = calculate_nr_requests($disks_per_array);
+        my $queue_depth    = calculate_queue_depth($disks_per_array);
         my $elevator       = 'noop';
 
         my $scsi_id = get_scsi_id( $server, $mpath );
@@ -436,44 +450,111 @@ sub get_scsi_id {
     }
 }
 
+
+sub calculate_read_ahead_kb {
+
+    my $block_allocation_type   = shift;
+    my $max_sectors_kb          = shift;
+
+    #
+    # General best practice: 
+    #
+    #   If block allocation type is 'scatter', then set to zero.  If
+    #   it's 'cluster', then set to /* XXX ask Ray for method to determine this */
+    #
+    #   -Tuning input from:
+    #       Sven Oehme
+    #       Ray Paden
+    #
+    if( $block_allocation_type eq 'scatter' ) {
+        return 0;
+    } else {
+        # Hmm.  Must be type 'cluster'
+        #XXX Ray -- what formula should we use here?  Using $max_sectors_kb for now... -BEF-
+        return $max_sectors_kb;
+    }
+}
+
+
 sub calculate_max_sectors_kb {
 
-    return 512;
+    my $bs = shift;
+
+    #
+    #   GPFS block size / 4 or 512, whichever is greater.
+    #
+    #   max_sectors_kb should always be set as high as you can,
+    #   independent of the blocksize.  However, empirical testing
+    #   indicates lower performance, and in rare cases SCSI underruns,
+    #   if this is set too high with certain hardware.
+    #
+    #   Therefore, we start with the conservative setting below, that
+    #   should still be an improvement over the out of the box setup.
+    #
+    #   -Tuning input from:
+    #       Sven Oehme
+    #       Ray Paden
+    #
+    my $kb = $bs / 4;
+
+    if( $kb < 512 ) {
+        $kb = 512;
+    }
+
+    return $kb;
 }
 
 
 sub calculate_nr_requests {
 
-    return 512;
+    my $disks_per_array = shift;
+
+    #
+    # nr_requests can be higher than queue_depth without much negative
+    # impact as the device queue determines how much is actually queued
+    # on the device.
+    #
+    # queue_depth is what can really hurt drive performance if it's set
+    # too high.
+    #
+    # So, 32 per physical disk is a good starting point for nr_requests
+    # and a queue depth of 4 per physical disk.
+    #
+    #   -Tuning input from:
+    #       Sven Oehme
+    #
+
+    my $nr_requests = $disks_per_array * 32;
+
+    return $nr_requests;
 }
 
 
 sub calculate_queue_depth {
+
+    my $disks_per_array = shift;
+
     #
-    # queue_depth:  Ideal size can be determined by this formula:
-    #   
-    #   For each storage controller, we use a modern assumption that it has
-    #   a 4096 total queue depth for receiving requests from all nodes that
-    #   connect to it.  Therefore:
+    # Let's take an 8+2p array (8 data disks, 2 parity disks, AKA RAID6)
+    # as an example:
     #
-    #       4096 / ($storage_nodes * $luns) => Target_queue_depth
+    #   The most accurate value for _writes_ would be based on 8 disks.
+    #   I/O on the other 2 disks is "generated parity" by the array, and
+    #   need not be considered by the OS.
     #
-    #   So, for 4 storage servers, with 30 LUNs off of a single controller,
-    #   we get:
+    #   The most accurate value for _reads_ would be based on 10 disks.
+    #   Reads may pull data from across all 10 disks.
     #
-    #       4096 / (4 * 30) = 34.13
+    #   Therefore, we recommend the conservative approach for this tool,
+    #   which would be 8.
     #
-    #   Let's round down with a binary factor, just because:
-    #
-    #       34.13 / 8 = 4 (and change, but we'll drop the change)
-    #
-    #       4 * 8 = 32
-    #
-    #   And so "32" is the ideal queue_depth in this case.  See how easy
-    #   that was? ;-)
+    #   -Tuning input from:
+    #       Sven Oehme
     #
 
-    return 32;
+    my $queue_depth = $disks_per_array * 4;
+
+    return $queue_depth;
 }
 
 
@@ -509,6 +590,19 @@ Usage:  $progname [OPTION...] --out-file FILE
     --help
 
     --version
+
+    --disks-per-array NN
+
+        Where NN is the number of disks in each array.  
+        
+        Typically, each LUN presented to the OS represents on RAID array
+        in the storage subsystem.  Here are some examples by array type:
+
+            Value for NN    Array Type
+            ------------    --------------------------------------------
+                 8          8+2p RAID6        (8 data + 2 parity disks)
+                 8          8+3p Reed Solomon (8 data + 3 parity disks)
+                 4          4+1p RAID5        (4 data + 1 parity disk)
 
     --test-run
 
