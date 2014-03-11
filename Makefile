@@ -93,9 +93,9 @@ rpm:	tarball
 
 .PHONY += release
 release:	rpm
-	cp -i ~/rpmbuild/RPMS/noarch/${PKG_NAME}-${VERSION}-1.noarch.rpm   packages/RPMs/
-	cp -i ~/rpmbuild/SRPMS/${PKG_NAME}-${VERSION}-1.src.rpm            packages/RPMs/
-	cp -i ${TARBALL}                                                packages/tarballs/
+	cp -i ~/rpmbuild/RPMS/noarch/${PKG_NAME}-${VERSION}-1.noarch.rpm    packages/RPMs/
+	cp -i ~/rpmbuild/SRPMS/${PKG_NAME}-${VERSION}-1.src.rpm             packages/RPMs/
+	cp -i ${TARBALL}                                                    packages/tarballs/
 	@echo
 	@echo "Results:"
 	@/bin/ls -1 packages/*/*${PKG_NAME}-${VERSION}* | sed 's/^/  /'
