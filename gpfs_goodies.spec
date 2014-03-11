@@ -5,7 +5,7 @@ Release: 1
 Source: %{name}-%{version}.tar.bz2
 BuildRoot: /tmp/%{name}-buildroot
 BuildArchitectures: noarch
-Requires: lsscsi >= 0.21
+Requires: lsscsi >= 0.21, perl-Net-SSH-Expect
 License: EPL
 
 
