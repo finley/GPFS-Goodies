@@ -492,6 +492,12 @@ version();
 print << "EOF";
 Usage:  $progname [OPTION...] --out-file FILE
 
+  WARNING: $progname should be considered BETA code at 
+           this point.  It works well in some environments but the
+           following tuning settings are currently hard coded pending
+           creation of formulas for calculating system specific values.
+           If you have such a formula -- let me know. ;-)  -Brian
+
     All options can be abbreviated to minimum uniqueness.
 
     This program will examine your environment including GPFS, storage
