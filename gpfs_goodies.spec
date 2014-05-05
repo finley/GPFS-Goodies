@@ -41,8 +41,8 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root)
 #%config(noreplace) /etc/myconffile.conf
-%{_prefix}/sbin/
-%{_prefix}/share/
+%{_prefix}/sbin/*
+%{_prefix}/share/*
 
 %changelog
 * Fri Sep 20 2013 Brian Elliott Finley <bfinley@us.ibm.com>
