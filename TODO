@@ -1,3 +1,10 @@
+- Do Videos:
+    Part 1: Introduction to GPFS Goodies
+    Part 2: Auto-configuring Linux Kernel Multipath
+    Part 3: Hot Adding and Removing SCSI Subsystem Devices
+    Part 4: Auto-tuning your Block Devices
+
+
 - Add a "--scheduler [cfq|noop|deadline|as]" option to
   tune_block_device_settings...
 
