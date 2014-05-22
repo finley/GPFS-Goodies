@@ -40,6 +40,9 @@ install:
 	mkdir -p             				${PREFIX}/usr/sbin/
 	install -m 755 sbin/*				${PREFIX}/usr/sbin/
 	
+	mkdir -p                            ${PREFIX}/etc/gpfs_goodies/multipath.conf-creator_config_chunks/
+	install -m 755 etc/gpfs_goodies/multipath.conf-creator_config_chunks/*    ${PREFIX}/etc/gpfs_goodies/multipath.conf-creator_config_chunks/
+	
 	mkdir -p            				${PREFIX}/usr/share/${PKG_NAME}/
 	install -m 644 doc/*				${PREFIX}/usr/share/${PKG_NAME}/
 	
@@ -51,7 +54,6 @@ install:
 	
 	mkdir -p                       		${PREFIX}/usr/share/${PKG_NAME}/var/mmfs/etc/
 	install -m 644 var/mmfs/etc/*		${PREFIX}/usr/share/${PKG_NAME}/var/mmfs/etc/
-	
 	
 	mkdir -p ${PREFIX}/usr/share/doc/${PKG_DIR}/
 	echo "See the files in /usr/share/${PKG_NAME}/" > ${PREFIX}/usr/share/doc/${PKG_DIR}/README
