@@ -38,7 +38,7 @@ use Getopt::Long;
 use File::Basename;
 
 my $progname = basename($0);
-my $version_number = '20.5.31';
+my $version_number = '20.7.22';
 
 GetOptions(
     "help"          => \my $help,
@@ -324,24 +324,26 @@ print FILE << 'EOF';
 #        (which can be found at: https://ibm.biz/Bdxk4t)
 #
 devices {
+
 EOF
 
 my $dir = '/etc/gpfs_goodies/multipath.conf-creator_config_chunks/';
-opendir(my $dh, $dir) || die;
-while(readdir $dh) {
-    if( m/^device-/ ) {
-        $chunk = "$dir/$_";
-        if( -e "$chunk" ) {
-            open(CHUNK,"<$chunk") or die("Couldn't open $chunk for reading");
-            print FILE (<CHUNK>);
-            close(CHUNK);
-        }
+opendir(my $dh, $dir) || die "can't opendir $dir: $!";
+my @chunks = grep { /^device-/ && -f "$dir/$_" } readdir($dh);
+closedir $dh;
+
+foreach(@chunks) {
+    $chunk = "$dir/$_";
+    if( -e "$chunk" ) {
+        open(CHUNK,"<$chunk") or die("Couldn't open $chunk for reading");
+        print FILE (<CHUNK>);
+        close(CHUNK);
     }
     print FILE "\n";
 }
-closedir $dh;
 
 print FILE "}\n";
+print FILE "\n";
 
 #
 #   END devices
