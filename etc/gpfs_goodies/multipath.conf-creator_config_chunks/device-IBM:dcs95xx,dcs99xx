@@ -1,0 +1,27 @@
+    device {
+        #
+        #   This device section will apply to the following subsystems:
+        #
+        #       DCS9550 
+        #       DCS9900
+        #
+        #   These settings are taken from multipath.conf.ddn provided by
+        #   ddn_mpath_RHEL5_SLES10-1.5-5.x86_64.rpm
+        #
+        vendor "IBM"
+        product "DCS9[59]*"
+        getuid_callout          "/sbin/scsi_id -u -g -p 0x80 -s /block/%n"
+        prio                    "/sbin/mpath_prio_alua %d"
+        path_grouping_policy    group_by_prio
+        path_checker            tur
+        failback                immediate
+        no_path_retry           fail
+    
+        #
+        # These settings augment those above, and are taken from
+        # SONAS_multipath_1.4.0.1-5c.conf.
+        #
+        features                "1 queue_if_no_path"
+        rr_min_io               63
+        rr_weight               priorities
+    }

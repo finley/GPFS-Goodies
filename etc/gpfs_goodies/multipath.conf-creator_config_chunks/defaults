@@ -1,0 +1,10 @@
+#
+# Default entries
+#
+defaults {
+    udev_dir                /dev
+    user_friendly_names     yes
+    log_checker_err         once
+    queue_without_daemon    "no"
+    max_fds                 65535
+}
