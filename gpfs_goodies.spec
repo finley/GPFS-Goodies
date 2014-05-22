@@ -40,7 +40,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-#%config(noreplace) /etc/myconffile.conf
+%config(noreplace) %{_prefix}/etc/*
 %{_prefix}/sbin/*
 %{_prefix}/share/*
 
