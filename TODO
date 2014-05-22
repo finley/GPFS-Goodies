@@ -4,6 +4,10 @@
     Part 3: Hot Adding and Removing SCSI Subsystem Devices
     Part 4: Auto-tuning your Block Devices
 
+- Break out multipath.conf file chunks by device type
+
+   /etc/gpfs_goodies/multipath.conf_source_files/
+        
 
 - Add a "--scheduler [cfq|noop|deadline|as]" option to
   tune_block_device_settings...
