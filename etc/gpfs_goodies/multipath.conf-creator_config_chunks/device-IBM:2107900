@@ -14,5 +14,3 @@
         fast_io_fail_tmo        5   
         dev_loss_tmo            120
     }
-
-
