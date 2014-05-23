@@ -40,7 +40,7 @@ use Getopt::Long;
 use File::Basename;
 
 my $progname = basename($0);
-my $version_number = 20.5;
+my $version_number = '20.7.22';
 my $udev_rules_file = '/etc/udev/rules.d/99-ibm-storage.rules';
 
 our $ERROR = 0;
@@ -265,7 +265,7 @@ foreach my $fs (keys %filesystems) {
             #  -B                 1048576                  Block size
             my $blocksize = $1;
             $blocksize_by_filesystem{$fs} = $blocksize;
-        } elsif(m/^\s+-j\s+(\d+)\s+/) {
+        } elsif(m/^\s+-j\s+(scatter)\s+/) {
             #  -j                 scatter                  Block allocation type
             my $block_allocation_type = $1;
             $block_allocation_type_by_filesystem{$fs} = $block_allocation_type;
@@ -466,7 +466,7 @@ sub calculate_read_ahead_kb {
     #       Sven Oehme
     #       Ray Paden
     #
-    if( $block_allocation_type eq 'scatter' ) {
+    if( "$block_allocation_type" eq 'scatter' ) {
         return 0;
     } else {
         # Hmm.  Must be type 'cluster'
