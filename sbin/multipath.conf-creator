@@ -480,9 +480,9 @@ if( defined $deploy ) {
             multipathd -k'reconfigure'
             chmod 755 /var/mmfs/etc/nsddevices
             chown root.root /var/mmfs/etc/nsddevices
-            test -e /boot/initramfs-$(uname -r).img.orig || rsync -a /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.orig
-            dracut -f /boot/initramfs-$(uname -r).img $(uname -r)
-            ls -l /boot/initramfs-$(uname -r).img /boot/initramfs-$(uname -r).img.orig
+            test -e /boot/initramfs-\$(uname -r).img.orig || rsync -a /boot/initramfs-\$(uname -r).img /boot/initramfs-\$(uname -r).img.orig
+            dracut -f /boot/initramfs-\$(uname -r).img \$(uname -r)
+            ls -l /boot/initramfs-\$(uname -r).img /boot/initramfs-\$(uname -r).img.orig
         ");
         $cmd =~ s|/+|/|g;
 
