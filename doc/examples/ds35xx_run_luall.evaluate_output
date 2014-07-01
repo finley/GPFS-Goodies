@@ -1,0 +1,16 @@
+#!/bin/bash
+
+/root/bef_scripts/ds35xx_run_luall sc-cap3-b1 
+
+f=ds35xx_run_luall.out
+
+echo 
+head -n 3 $f 
+
+( 
+    for i in $(grep -B 9 'Associated array:        18' ~bfinley/SM_Data/storage-cap3.profile.2013.06.27-11.12 | grep Drive | awk '{print "t"$4 "s"$6}')
+    do
+        grep $i $f
+    done 
+) | tail -n 13
+

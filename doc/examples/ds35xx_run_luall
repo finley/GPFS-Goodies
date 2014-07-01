@@ -1,0 +1,36 @@
+#!/usr/bin/expect --
+
+#
+#   Telnet to a raid controller on a ds35xx storage subsystem, and
+#   retrieve the stats for individual disks via the "luall" (show lun
+#   all) command.
+#
+
+#
+# 2013.07.30 Brian Elliott Finley
+# - created
+#
+
+
+set timeout -1
+set user "shellUsr"
+set pass "wy3oo&w4"
+
+# Get hostname from first arg on the command line
+set hostname [lrange $argv 0 0]
+
+spawn telnet $hostname
+expect "login"
+send "$user\r"
+expect "assword"
+send "$pass\r"
+expect ">"
+
+# Log this session to a file (default is to append)
+log_file ds35xx_run_luall.out
+
+send "luall 3\r"
+expect ">"
+
+send "exit\r"
+
