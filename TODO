@@ -1,3 +1,15 @@
+- Add bit to Makefile that creates GPFS_Goodies web page:
+
+    echo "Section Header info"
+    ./multipath.conf-creator --help >> webpage
+
+    echo "Section Header info"
+    ./tune --help >> webpage
+
+    etc...
+
+
+
 - Do Videos:
     Part 1: Introduction to GPFS Goodies
     Part 2: Auto-configuring Linux Kernel Multipath
@@ -81,6 +93,8 @@
 
         - Uses iptables to impose a bandwidth limit on rate of re-stripe
           activity.
+
+        - Could use maxMBpS instead of iptables...
 
         OPTIONS:
             -h
