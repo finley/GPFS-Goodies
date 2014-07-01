@@ -20,9 +20,12 @@ viewing the HOWTO.
 Includes: 
 - multipath.conf-creator
 - brians_own_hot-add_script
+- gpfs_stanzafile-creator
 - test_block_device_settings
 - tune_block_device_settings
-- HOWTO document
+- GPFS Multi-Cluster Routing HOWTO
+- Some half-baked goodies 
+- Examples
 
 
 

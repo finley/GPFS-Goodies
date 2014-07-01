@@ -37,23 +37,25 @@ all: tarball
 
 .PHONY += install
 install:
-	mkdir -p             				${PREFIX}/usr/sbin/
-	install -m 755 sbin/*				${PREFIX}/usr/sbin/
+	mkdir -p             	${PREFIX}/usr/sbin/
+	install -m 755 sbin/*	${PREFIX}/usr/sbin/
 	
-	mkdir -p                            ${PREFIX}/etc/gpfs_goodies/multipath.conf-creator_config_chunks/
+	mkdir -p                ${PREFIX}/etc/gpfs_goodies/multipath.conf-creator_config_chunks/
 	install -m 755 etc/gpfs_goodies/multipath.conf-creator_config_chunks/*    ${PREFIX}/etc/gpfs_goodies/multipath.conf-creator_config_chunks/
 	
-	mkdir -p            				${PREFIX}/usr/share/${PKG_NAME}/
-	install -m 644 doc/*				${PREFIX}/usr/share/${PKG_NAME}/
+	mkdir -p            			        ${PREFIX}/usr/share/${PKG_NAME}/
+	rsync -av doc/* 						${PREFIX}/usr/share/${PKG_NAME}/
+	find ${PREFIX}/usr/share/${PKG_NAME}/ -type d -exec chmod 755 '{}' \;
+	find ${PREFIX}/usr/share/${PKG_NAME}/ -type f -exec chmod 644 '{}' \;
 	
-	mkdir -p                       		${PREFIX}/usr/share/${PKG_NAME}/etc/modprobe.d/
-	install -m 644 etc/modprobe.d/*		${PREFIX}/usr/share/${PKG_NAME}/etc/modprobe.d/
+	mkdir -p                       			${PREFIX}/usr/share/${PKG_NAME}/etc/modprobe.d/
+	install -m 644 etc/modprobe.d/*			${PREFIX}/usr/share/${PKG_NAME}/etc/modprobe.d/
 	
-	mkdir -p                         	${PREFIX}/usr/share/${PKG_NAME}/etc/udev/rules.d/
-	install -m 644 etc/udev/rules.d/*	${PREFIX}/usr/share/${PKG_NAME}/etc/udev/rules.d/
+	mkdir -p                         		${PREFIX}/usr/share/${PKG_NAME}/etc/udev/rules.d/
+	install -m 644 etc/udev/rules.d/*		${PREFIX}/usr/share/${PKG_NAME}/etc/udev/rules.d/
 	
-	mkdir -p                       		${PREFIX}/usr/share/${PKG_NAME}/var/mmfs/etc/
-	install -m 644 var/mmfs/etc/*		${PREFIX}/usr/share/${PKG_NAME}/var/mmfs/etc/
+	mkdir -p                       			${PREFIX}/usr/share/${PKG_NAME}/var/mmfs/etc/
+	install -m 644 var/mmfs/etc/*			${PREFIX}/usr/share/${PKG_NAME}/var/mmfs/etc/
 	
 	mkdir -p ${PREFIX}/usr/share/doc/${PKG_DIR}/
 	echo "See the files in /usr/share/${PKG_NAME}/" > ${PREFIX}/usr/share/doc/${PKG_DIR}/README
