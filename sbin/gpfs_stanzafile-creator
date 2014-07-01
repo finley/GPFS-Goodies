@@ -4,8 +4,12 @@
 # StanzaFile-creator
 #
 
-#   2012.10.16 Brian Elliott Finley <bfinley@us.ibm.com>
-#   - added invocation options and help output
+#
+#   2014.05.23 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - Created for demo at Edge2014
+#   2014.07.01 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - Improved help output and options validation
+#
 
 server1=$1
 server2=$2
@@ -14,9 +18,10 @@ if [ -z $server2 ]; then
     echo "
 Usage: $0 SERVER1 SERVER2
 
-    This script should be considered an example of how you can create a
-    StanzaFile that will appropriately balance your disk devices across
-    your NSD servers for balanced performance.  
+    This script will auto-create a GPFS StanzaFile (written to STDOUT)
+    that should be considered an example of how you can appropriately
+    balance your disk devices across your NSD servers for best
+    performance.  It may be used as-is in many cases.
     
     WARNING:  This script should work as-is for a GPFS building block
     that:

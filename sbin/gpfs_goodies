@@ -10,19 +10,27 @@ VERSION=3.3.3.3
 echo "
 gpfs_goodies v$VERSION
 
-Please try one of the following commands.  It's OK -- they're all safe,
-and won't do anything but show help information if run with either no
-arguments, or with --help or -h as an argument.
+Please try one of the following commands.  They're listed in the order
+of their typical use, from start to finish.  It's OK -- they're all
+safe, and won't do anything but show help information if run with either
+no arguments, or with --help or -h as an argument.
+
+    brians_own_hot-add_script
+
+        Hot delete any devices that don't have disk devices associated
+        with them (stale LUNs), and hot-add any new devices.
 
     multipath.conf-creator
 
         Create and optionally deploy a multipath configuration
         appropriate for your LUNs and storage servers.
 
-    brians_own_hot-add_script
+    gpfs_stanzafile-creator
 
-        Hot delete any devices that don't have disk devices associated
-        with them (stale LUNs), and hot-add any new devices.
+        This script will auto-create a GPFS StanzaFile (written to
+        STDOUT) that should be considered an example of how you can
+        appropriately balance your disk devices across your NSD servers
+        for best performance.  It may be used as-is in many cases.
 
     test_block_device_settings
 
@@ -41,7 +49,8 @@ arguments, or with --help or -h as an argument.
         server.
 
 
-    Be sure to take a look at the HOWTO and other docs in:
+    Be sure to take a look at the HOWTO as well as other docs, examples,
+    and half-baked goodies in:
 
         /usr/share/gpfs_goodies
 
