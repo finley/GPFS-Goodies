@@ -1,0 +1,237 @@
+
+# ***************************************************************************
+Definitions:
+- cluster1 = cluster owning the FS (e.g., GSS.cluster)
+- cluster2 = remote cluster that mounts cluster1's FS (e.g., nxt1102.cluster)
+# ***************************************************************************
+
+# ----------------------------
+# Do the following on cluster1
+# ----------------------------
+
+[root@mgt2 ssl]# cd /var/mmfs/ssl
+
+[root@mgt2 ssl]# mmauth genkey new
+Generating RSA private key, 512 bit long modulus
+............++++++++++++
+...++++++++++++
+e is 65537 (0x10001)
+writing RSA key
+mmauth: Command successfully completed
+mmauth: Propagating the cluster configuration data to all affected nodes.
+
+### Sanity Checks
+
+[root@mgt2 ssl]# ls -l
+total 20
+-rw------- 1 root root  497 Feb 20 20:11 id_rsa1
+lrwxrwxrwx 1 root root    7 Feb 20 20:11 id_rsa_committed -> id_rsa1
+-rw-r--r-- 1 root root  449 Feb 20 20:11 id_rsa_committed.cert
+-rw-r--r-- 1 root root  825 Feb 20 20:11 id_rsa_committed.pub
+lrwxrwxrwx 1 root root   34 Feb 20 20:11 id_rsa.pub -> /var/mmfs/ssl/id_rsa_committed.pub
+-rw-r--r-- 1 root root  183 Feb 20 20:11 openssl.conf
+drwx------ 2 root root 4096 Feb 20 20:11 stage
+[root@mgt2 ssl]# ssh gss6 'ls -l /var/mmfs/ssl'
+total 16
+-rw------- 1 root root  497 Feb 20 20:11 id_rsa1
+lrwxrwxrwx 1 root root    7 Feb 20 20:11 id_rsa_committed -> id_rsa1
+-rw-r--r-- 1 root root  449 Feb 20 20:11 id_rsa_committed.cert
+-rw-r--r-- 1 root root  825 Feb 20 20:11 id_rsa_committed.pub
+lrwxrwxrwx 1 root root   34 Feb 20 20:11 id_rsa.pub -> /var/mmfs/ssl/id_rsa_committed.pub
+drwx------ 2 root root 4096 Feb 20 20:11 stage
+
+### Stop GPFS on all nodes in cluster1
+
+[root@mgt2 ssl]# mmauth update . -l AUTHONLY
+Verifying GPFS is stopped on all nodes ...
+mmauth: Command successfully completed
+mmauth: Propagating the cluster configuration data to all affected nodes.
+
+[root@mgt2 ssl]# scp id_rsa_committed.pub nxt1102:/var/mmfs/ssl/.
+id_rsa_committed.pub                                                                                                       100%  825     0.8KB/s   00:00    
+[root@mgt2 ssl]# 
+
+
+# ----------------------------
+# Do the following on cluster2
+# ----------------------------
+
+root@nxt1102 ssl]# cd /var/mmfs/ssl/
+[root@nxt1102 ssl]# mv id_rsa_committed.pub GSS.cluster.id_rsa_committed.pub
+[root@nxt1102 ssl]# dir
+total 4
+-rw-r--r-- 1 root root 825 Feb 20 20:28 GSS.cluster.id_rsa_committed.pub
+drwx------ 2 root root  40 Feb 20 18:14 stage
+
+[root@nxt1102 ssl]# mmauth genkey new
+Generating RSA private key, 512 bit long modulus
+....++++++++++++
+...........++++++++++++
+e is 65537 (0x10001)
+writing RSA key
+mmauth: Command successfully completed
+mmauth: Propagating the cluster configuration data to all
+  affected nodes.  This is an asynchronous process.
+
+### Sanity check
+
+[root@nxt1102 ssl]# dir
+total 20
+-rw-r--r-- 1 root root 825 Feb 20 20:28 GSS.cluster.id_rsa_committed.pub
+-rw------- 1 root root 493 Feb 20 20:33 id_rsa1
+lrwxrwxrwx 1 root root   7 Feb 20 20:33 id_rsa_committed -> id_rsa1
+-rw-r--r-- 1 root root 457 Feb 20 20:33 id_rsa_committed.cert
+-rw-r--r-- 1 root root 837 Feb 20 20:33 id_rsa_committed.pub
+lrwxrwxrwx 1 root root  34 Feb 20 20:33 id_rsa.pub -> /var/mmfs/ssl/id_rsa_committed.pub
+-rw-r--r-- 1 root root 187 Feb 20 20:33 openssl.conf
+drwx------ 2 root root  60 Feb 20 20:33 stage
+
+### Stop GPFS on all nodes in cluster1
+
+[root@nxt1102 ssl]# mmauth update . -l AUTHONLY
+Verifying GPFS is stopped on all nodes ...
+mmauth: Command successfully completed
+mmauth: Propagating the cluster configuration data to all
+  affected nodes.  This is an asynchronous process.
+
+[root@nxt1102 ssl]# scp id_rsa_committed.pub mgt2-10g:/var/mmfs/ssl/nxt1102.cluster.id_rsa_committed.pub
+id_rsa_committed.pub                                                                                                        100%  837     0.8KB/s   00:00    
+
+### restart GPFS on cluster2
+
+# ----------------------------
+# Do the following on cluster1
+# ----------------------------
+
+### Sanity check
+
+[root@mgt2 ssl]# dir
+total 28
+-rw-r--r-- 1 root root  370 Feb 20 20:16 authorized_keys
+-rw------- 1 root root  497 Feb 20 20:11 id_rsa1
+lrwxrwxrwx 1 root root    7 Feb 20 20:11 id_rsa_committed -> id_rsa1
+-rw-r--r-- 1 root root  449 Feb 20 20:11 id_rsa_committed.cert
+-rw-r--r-- 1 root root  825 Feb 20 20:11 id_rsa_committed.pub
+lrwxrwxrwx 1 root root   34 Feb 20 20:11 id_rsa.pub -> /var/mmfs/ssl/id_rsa_committed.pub
+-rw-r--r-- 1 root root  837 Feb 20 20:38 nxt1102.cluster.id_rsa_committed.pub
+-rw-r--r-- 1 root root  183 Feb 20 20:11 openssl.conf
+drwx------ 2 root root 4096 Feb 20 20:11 stage
+
+[root@mgt2 ssl]# mmauth add nxt1102.cluster -k nxt1102.cluster.id_rsa_committed.pub
+mmauth: Command successfully completed
+mmauth: Propagating the cluster configuration data to all affected nodes.
+
+### restart GPFS on cluster1
+
+[root@mgt2 ssl]# mmmount all -a
+Thu Feb 20 20:47:25 CST 2014: mmmount: Mounting file systems ...
+[root@mgt2 ssl]# mmlsmount all
+File system fs12 is mounted on 7 nodes.
+File system fs34 is mounted on 7 nodes.
+File system fs56 is mounted on 7 nodes.
+
+[root@mgt2 ssl]# mmauth show all
+Cluster name:        nxt1102.cluster
+Cipher list:         AUTHONLY
+SHA digest:          ee7db3f7ed142024d3901b20c7d9d3ee992ef61f
+File system access:  (none authorized)
+
+Cluster name:        GSS.cluster (this cluster)
+Cipher list:         AUTHONLY
+SHA digest:          2ea65f84a39ac25dea10d6e9eac39469148087fb
+File system access:  (all rw)
+
+[root@mgt2 ssl]# mmauth grant nxt1102.cluster -f all
+
+mmauth: Granting cluster nxt1102.cluster access to file system fs12:
+        access type rw; root credentials will not be remapped.
+
+mmauth: Granting cluster nxt1102.cluster access to file system fs34:
+        access type rw; root credentials will not be remapped.
+
+mmauth: Granting cluster nxt1102.cluster access to file system fs56:
+        access type rw; root credentials will not be remapped.
+
+mmauth: Command successfully completed
+mmauth: Propagating the cluster configuration data to all affected nodes.
+[root@mgt2 ssl]# mmauth show all
+Cluster name:        nxt1102.cluster
+Cipher list:         AUTHONLY
+SHA digest:          ee7db3f7ed142024d3901b20c7d9d3ee992ef61f
+File system access:  fs12      (rw, root allowed)
+                     fs34      (rw, root allowed)
+                     fs56      (rw, root allowed)
+
+Cluster name:        GSS.cluster (this cluster)
+Cipher list:         AUTHONLY
+SHA digest:          2ea65f84a39ac25dea10d6e9eac39469148087fb
+File system access:  (all rw)
+
+# ----------------------------
+# Do the following on cluster2
+# ----------------------------
+
+[root@nxt1102 ssl]# mmremotecluster add GSS.cluster -n gss1-10g,gss4-10g -k GSS.cluster.id_rsa_committed.pub
+mmremotecluster: Command successfully completed
+mmremotecluster: Propagating the cluster configuration data to all
+  affected nodes.  This is an asynchronous process.
+
+[root@nxt1102 ssl]# mmremotecluster show
+Cluster name:    GSS.cluster
+Contact nodes:   gss1-10g,gss4-10g
+SHA digest:      2ea65f84a39ac25dea10d6e9eac39469148087fb
+File systems:    (none defined)
+
+[root@nxt1102 ssl]# mmremotefs add fs12 -f fs12 -C GSS.cluster -A no -T /gss/fs12
+mmremotefs: Propagating the cluster configuration data to all
+  affected nodes.  This is an asynchronous process.
+[root@nxt1102 ssl]# mmremotefs add fs34 -f fs34 -C GSS.cluster -A no -T /gss/fs34
+mmremotefs: Propagating the cluster configuration data to all
+  affected nodes.  This is an asynchronous process.
+[root@nxt1102 ssl]# mmremotefs add fs56 -f fs56 -C GSS.cluster -A no -T /gss/fs56
+mmremotefs: Propagating the cluster configuration data to all
+  affected nodes.  This is an asynchronous process.
+
+[root@nxt1102 ssl]# mmremotefs show
+Local Name  Remote Name  Cluster name       Mount Point        Mount Options    Automount  Drive  Priority
+fs12        fs12         GSS.cluster        /gss/fs12          rw               no           -        0
+fs34        fs34         GSS.cluster        /gss/fs34          rw               no           -        0
+fs56        fs56         GSS.cluster        /gss/fs56          rw               no           -        0
+
+[root@nxt1102 ssl]# mmremotecluster show
+Cluster name:    GSS.cluster
+Contact nodes:   gss1-10g,gss4-10g
+SHA digest:      2ea65f84a39ac25dea10d6e9eac39469148087fb
+File systems:    fs12 (fs12)  fs34 (fs34)  fs56 (fs56)  
+
+[root@nxt1102 ssl]# mmmount all -a
+Thu Feb 20 21:02:26 CST 2014: mmmount: Mounting file systems ...
+[root@nxt1102 ssl]# mmlsmount all
+File system fs12 (GSS.cluster:fs12) is mounted on 31 nodes.
+File system fs34 (GSS.cluster:fs34) is mounted on 31 nodes.
+File system fs56 (GSS.cluster:fs56) is mounted on 31 nodes.
+
+[root@nxt1102 ssl]# chmod 1777 /gss
+
+[root@nxt1102 ssl]# dir /gss/
+total 192
+drwxrwxrwt 2 root root 32768 Feb 20 17:13 fs12
+drwxrwxrwt 2 root root 32768 Feb 20 17:50 fs34
+drwxrwxrwt 2 root root 32768 Feb 20 17:49 fs56
+
+[root@nxt1102 ssl]# dir /gss/fs*
+/gss/fs12:
+total 2097152
+-rw-r--r-- 1 root root 2147483648 Feb 20 17:13 buggs
+
+/gss/fs34:
+total 4194304
+-rw-r--r-- 1 root root 2147483648 Feb 20 17:13 buggs
+-rw-r--r-- 1 root root 2147483648 Feb 20 17:50 bunny
+
+/gss/fs56:
+total 4194304
+-rw-r--r-- 1 root root 2147483648 Feb 20 17:13 buggs
+-rw-r--r-- 1 root root 2147483648 Feb 20 17:49 bunny
+
+
