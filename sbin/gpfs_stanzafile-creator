@@ -1,38 +1,45 @@
 #!/bin/bash
 
 #
-#   2014.05.23 Brian Elliott Finley
-#   - created for live demo at Edge2014
+# StanzaFile-creator
 #
 
-echo 
-echo "This is just example code right now. -Brian"
-echo
-sleep 1
-cat $0 | less -i
+#   2012.10.16 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - added invocation options and help output
 
-#
-# Options
-#
-#   --servers SERVER1[,SERVER2,...]
-#
-#   ASSUMPTION:  It is assumed that each server is dual-connected to
-#   each storage controller -- one to RAID controller A and one to RAID
-#   controller B.
-#
-#   WARNING: If the above ASSUMPTION is not the case, then you should
-#   either change the connectivity (so that it matches the ASSUMPTION)
-#   or use some other method to create your disk StanzaFile to achive
-#   optimal performance.
-#
+server1=$1
+server2=$2
+
+if [ -z $server2 ]; then
+    echo "
+Usage: $0 SERVER1 SERVER2
+
+    This script should be considered an example of how you can create a
+    StanzaFile that will appropriately balance your disk devices across
+    your NSD servers for balanced performance.  
+    
+    WARNING:  This script should work as-is for a GPFS building block
+    that:
+    a) includes two NSD servers
+    b) that are both multipathed to the same storage subsystem
+    c) that have been prepared for use with the GPFS Goodies
+       multipath.conf-creator tool.
+
+    Please review your StanzaFile for appropriateness before using, and
+    you may need to modify this script or use an alternate method for
+    use with different building block configurations.
+
+    Have fun!  -Brian Finley
+
+"
+    exit 1
+fi
 
 
-server1=surnsd1
-server2=surnsd2
+CONTROLLER_REGEX='[ab]_lun[0-9]+'
 
 count=1
-CONTROLLER_REGEX='[ab]_lun[0-9]+'
-for lun in $(ls -1 /dev/mapper/ | egrep $CONTROLLER_REGEX | awk -F'lun' '{print $2" "$1"lun"$2}' | sort -n | awk '{print $NF}')
+for lun in $(ssh $server1 ls -1 /dev/mapper/* | egrep $CONTROLLER_REGEX | awk -F'lun' '{print $2" "$1"lun"$2}' | sort -n | awk '{print $NF}')
 do 
 	NsdName=$(basename $lun)
 	if [ $count -le 2 ]; then
