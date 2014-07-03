@@ -3,6 +3,8 @@
 #
 defaults {
     udev_dir                /dev
+    polling_interval        5
+    # checker_timeout         10    # uncomment for FlashStorage connected systems
     user_friendly_names     yes
     log_checker_err         once
     queue_without_daemon    "no"
