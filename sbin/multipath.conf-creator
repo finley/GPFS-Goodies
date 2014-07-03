@@ -34,11 +34,12 @@
 
 
 use strict;
+use Socket;
 use Getopt::Long;
 use File::Basename;
 
 my $progname = basename($0);
-my $version_number = '20.7.22';
+my $version_number = '20.8.3';
 
 GetOptions(
     "help"          => \my $help,
@@ -48,6 +49,7 @@ GetOptions(
     "deploy=s"      => \my $deploy,
     "dry-run"       => \my $dry_run,
     "no-blacklist"  => \my $no_blacklist,
+    "v|verbose"     => \my $verbose,
 ) or usage() and exit(1);
 
 if ( defined $help ) {
@@ -157,18 +159,340 @@ my $quantity = scalar @controllers;
 
 my $plural = "";
 if( $quantity ne 1 ) { 
-	$plural = 's';
+    $plural = 's';
 }
 
 print "\nLooks like we're dealing with $quantity controller$plural. Let's get going:\n\n";
 
 my %aliases;
 foreach my $controller (@controllers) {
-    
-    my $lun_name;
-    my $key;
+    get_controller_info("$controller");
+}
+
+
+sub get_controller_info {
+
+    my $controller = shift;
+
+    print qq(  Detecting API for "$controller") if($verbose);
+    my $api = detect_controller_api("$controller");
+    print " -> $api\n" if($verbose);
 
     print qq(  Querying "$controller"\n);
+    if($api eq 'SMcli') {
+        get_controller_info_via_SMcli("$controller");
+    }
+    elsif($api eq 'IBM FlashSystem') {
+        get_controller_info_via_IBM_FlashSystem("$controller");
+    }
+
+    return 1;
+}
+
+
+sub detect_controller_api {
+
+    my $controller = shift;
+
+    if($auto_detect) { return 'SMcli'; }
+
+    my $ip = hostname2ip($controller);
+    if(! $ip) {
+
+        usage();
+        print "  WARNING:  I couldn't find an IP address for $controller\n";
+        print "\n";
+        print "    Hint --> Are you sure that's the right hostname?\n";
+        print "\n";
+
+        exit 1;
+    }
+
+    my $cmd;
+    $cmd = "ping -c 1 $ip >/dev/null 2>&1";
+    !system($cmd) or die("Couldn't run command: $cmd");
+
+    $cmd = "ip neigh";
+    open(INPUT,"$cmd|") or die("Couldn't run $cmd for input");
+    while(<INPUT>) {
+        #
+        #   Example input
+        #
+        # 10.72.15.65 dev ib0 lladdr a0:00:01:00:fe:80:00:00:00:00:00:00:50:05:07:00:5b:00:f9:a5 STALE
+        # 10.70.17.7 dev bond-10g lladdr 6c:ae:8b:08:2e:78 DELAY
+        # 10.70.17.61 dev bond-10g lladdr 6c:ae:8b:08:34:84 STALE
+        # 10.70.11.30 dev bond-10g lladdr 6c:ae:8b:08:35:7a STALE
+        # 10.70.20.40 dev bond-10g lladdr 6c:ae:8b:08:2e:60 STALE
+        # 10.72.13.17 dev ib0 lladdr a0:00:01:00:fe:80:00:00:00:00:00:00:50:05:07:00:5b:01:00:91 STALE
+        #
+        if(m/^$ip\s+dev\s+\S+\s+lladdr\s+(\S+)\s+/) {
+            #                             ^^^ 
+            #                              |
+            #                              mac address of the controller
+            #
+            my $mac = $1;
+
+            #
+            # We've matched the controller's IP and grabbed it's MAC, now let's dig deeper
+            if($mac =~ m/^00:20:c2/) {
+                return 'IBM FlashSystem';
+            }
+        }
+    }
+    close(INPUT);
+
+    # Assume SMcli for everything else (which may be incorrect, but
+    # we'll know soon enough. ;-)
+    return 'SMcli';
+}
+
+
+sub get_controller_info_via_IBM_FlashSystem {
+
+    my $controller = shift;
+
+    my @input = ();
+    my @lun_names;
+    my $file;
+    my $cmd;
+    my %lun_numbers_by_lun_name;
+
+    ########################################################################
+    #
+    #   BEGIN get list of luns
+    #
+    $file = get_tmp_file();
+    open(FILE,">$file") or die("Couldn't open $file for writing");
+
+        print FILE  q|set timeout -1                                  | . qq|\n|;
+        print FILE  q|spawn $env(SHELL)                               | . qq|\n|;
+        print FILE  q|match_max 100000                                | . qq|\n|;
+        print FILE qq|send -- "telnet $controller\r"                  | . qq|\n|;
+        print FILE  q|expect " login:"                                | . qq|\n|;
+        print FILE  q|send -- "admin\r"                               | . qq|\n|;
+        print FILE  q|expect "Password:"                              | . qq|\n|;
+        print FILE  q|send -- "password\r"                            | . qq|\n|;
+        print FILE  q|expect "admin #:"                               | . qq|\n|;
+        print FILE  q|send -- "lu\r"                                  | . qq|\n|;
+        print FILE  q|expect "admin #:"                               | . qq|\n|;
+
+    close(FILE);
+
+    $cmd = "expect -f $file";
+    open(INPUT,"$cmd|") or die $!;
+    while(<INPUT>) {
+        push @input, (<INPUT>);
+    }
+    close(INPUT);
+    unlink $file;
+
+    #
+    # Example input:
+    #
+    #   admin #: lu
+    #
+    #   ------------------------------Storage Information-----------------------------
+    #   Total Size:   18.75 TiB
+    #   Free Space:   23.97 GiB
+    #   Storage Mode: RAID 5
+    #
+    #   ------------------------------Logical Unit Table------------------------------
+    #
+    #   --------------Name-------------- --Number-- --State-- ---Size--- --Log Lun--
+    #   fs820-3_lun0                     0          Good        3.12 TiB no
+    #   fs820-3_lun1                     1          Good        3.12 TiB no
+    #   fs820-3_lun2                     2          Good        3.12 TiB no
+    #   fs820-3_lun3                     3          Good        3.12 TiB no
+    #   fs820-3_lun4                     4          Good        3.12 TiB no
+    #   fs820-3_lun5                     5          Good        3.12 TiB no
+    #
+
+    #
+    # Skip past the cruft at the top
+    #
+    while(@input) {
+
+        $_ = shift @input;
+
+        last if(m/^--------------Name--------------/);
+    }
+
+    #
+    # Now gather the actual LUN names
+    #
+    while(@input) {
+
+        $_ = shift @input;
+        if( m/^\S+/ ) {
+
+            my $lun_name = substr($_, 0, 32);    # We have to do it this way, as lun names may contain spaces.
+            $lun_name =~ s/\s+$//;               # Then we strip off any trailing spaces...
+
+            my $lun_number = substr($_, 33, 10);
+            $lun_number =~ s/\s+$//;
+
+            push @lun_names, $lun_name;
+            $lun_numbers_by_lun_name{$lun_name} = $lun_number;
+        }
+
+        last if( m/^(\s+|$)/ );
+    }
+
+    #
+    #   END get list of luns
+    #
+    ########################################################################
+
+    ########################################################################
+    #
+    #   BEGIN get lun info
+    #
+
+    $file = get_tmp_file();
+    open(FILE,">$file") or die("Couldn't open $file for writing");
+
+        print FILE  q|set timeout -1                                  | . qq|\n|;
+        print FILE  q|spawn $env(SHELL)                               | . qq|\n|;
+        print FILE  q|match_max 100000                                | . qq|\n|;
+        print FILE qq|send -- "telnet $controller\r"                  | . qq|\n|;
+        print FILE  q|expect " login:"                                | . qq|\n|;
+        print FILE  q|send -- "admin\r"                               | . qq|\n|;
+        print FILE  q|expect "Password:"                              | . qq|\n|;
+        print FILE  q|send -- "password\r"                            | . qq|\n|;
+
+        foreach my $lun_name (@lun_names) {
+            print FILE  q|expect "admin #:"                               | . qq|\n|;
+            print FILE  q|send -- "lu scsi_id \"| . $lun_name . q|\"\r"   | . qq|\n|;
+        }
+
+        print FILE  q|expect "admin #:"                               | . qq|\n|;
+
+    close(FILE);
+
+    @input = ();
+    $cmd = "expect -f $file";
+    open(INPUT,"$cmd|") or die $!;
+    while(<INPUT>) {
+        push @input, (<INPUT>);
+    }
+    close(INPUT);
+    unlink $file;
+
+    #
+    #   END get lun info
+    #
+    ########################################################################
+
+    ########################################################################
+    #
+    #   BEGIN format stanzas
+    #
+    my $lun_name;
+    my $wwid;
+    my $key;
+    while(@input) {
+        #
+        #   Input looks like:
+        #
+        # flashctl1-a login: admin
+        # Password: 
+        # 
+        # IBM - Intelligent Cluster
+        # FlashSystem-820 Management Interface
+        # 
+        #     Firmware Version:        6.3.1
+        #     Storage Capacity:        9.37 TiB    
+        #     Management Controller:   mc-1
+        #     Eth0 IP Address:         10.73.1.23
+        #     Hostname:                flashctl1-a
+        #     Chassis Serial:          T-6A2C
+        # 
+        # 
+        # admin #: lu scsi_id "LogicalUnit 0"
+        # 
+        # Page: 83
+        # Type: 2
+        # ID:   00 20 c2 40 00 14 6a 2c
+        # 
+        # admin #: lu scsi_id "LogicalUnit 1"
+        # 
+        # Page: 83
+        # Type: 2
+        # ID:   00 20 c2 40 01 14 6a 2c
+        # 
+        # admin #: lu scsi_id "LogicalUnit 2"
+        # 
+        # Page: 83
+        # Type: 2
+        # ID:   00 20 c2 40 02 14 6a 2c
+        # 
+        # admin #: lu scsi_id "LogicalUnit 3"
+        # 
+        # Page: 83
+        # Type: 2
+        # ID:   00 20 c2 40 03 14 6a 2c
+        # 
+        # admin #: #                                            
+
+        $_ = shift @input;
+
+        if( m/^admin #: lu scsi_id "(.*)"/ ) {
+
+            $lun_name = $1;
+
+            $key = "${controller}_${lun_name}";
+
+            $aliases{$key}->{controller} = $controller;
+            $aliases{$key}->{lun_name} = $lun_name;
+            $aliases{$key}->{lun_number} = $lun_numbers_by_lun_name{$lun_name};
+
+        }
+        elsif( m/^Type:\s+(\d+)/ ) {
+
+            #
+            # Now we've got Type:
+            #
+            my $type = $1;
+
+            #
+            # Now get ID:
+            #
+            $_ = shift @input;
+            m/^ID:\s+(.*)/;
+            my $id = $1;
+            $id =~ s/\s+//g;
+
+            #
+            # Take the Type (2) and append the ID (00 20 c2 40 00 14 bd 28)
+            #                ^                        ^                  ^
+            #                |                        |                  |
+            #                ^-------------------v  v-^          v-------^
+            #                                    |  |            |
+            #                                    v  v            v
+            # $wwid should end up looking like:  20020c2400014bd28
+            #
+            $wwid = $type . $id;
+
+            $aliases{$key}->{wwid} = $wwid;
+            $aliases{$key}->{owner} = "ab";   # There is no preferred owner with IBM FlashStorage, so we say they both own it
+        }
+    }
+
+    #
+    #   END format stanzas
+    #
+    ########################################################################
+
+    return 1;
+}
+
+
+sub get_controller_info_via_SMcli {
+
+    my $controller = shift;
+
+    my $lun_name;
+    my $key;
 
     my $cmd = qq(SMcli -n "$controller" -c 'show logicalDrives;');
     open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
@@ -592,10 +916,11 @@ Usage:  $progname [OPTION...] [--auto-detect | controller1 controller2...]
 
 
     Currently Supported Storage Controllers should include all IBM DS
-    Storage Manager (SMClient) compatible controllers.  Testing has been
-    performed on the following models:
+    Storage Manager (SMClient) compatible controllers and IBM FlashSystem
+    storage.  Testing has been performed on the following models:
 
-        DS3860 DCS3700 DS3512 DS3524
+        FlashSystem 820     DS3860      DCS3700 
+        DS3512              DS3524
 
 
     Support: 
@@ -673,6 +998,15 @@ sub user_is_root {
 }
 
 
+# Usage:
+# my $ip = hostname2ip($hostname);
+# Description:
+#       Convert hostname into the IPv4 address.
+sub hostname2ip
+{
+       my $ip = (gethostbyname(shift))[4] || "";
+       return $ip ? inet_ntoa( $ip ) : undef;
+}
 
 #
 #   END Subroutines
