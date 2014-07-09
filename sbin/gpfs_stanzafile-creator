@@ -14,25 +14,48 @@
 server1=$1
 server2=$2
 
+PROGNAME=$(basename $0)
+
 if [ -z $server2 ]; then
     echo "
-Usage: $0 SERVER1 SERVER2
+Usage: $PROGNAME SERVER1 SERVER2
+
+    Where SERVER1 and SERVER2 are the node names for your two NSD
+    servers as they appear in the 'Admin node name' column in the
+    'mmlscluster' output.
+
+
+    Details:
 
     This script will auto-create a GPFS StanzaFile (written to STDOUT)
     that should be considered an example of how you can appropriately
     balance your disk devices across your NSD servers for best
-    performance.  It may be used as-is in many cases.
+    performance.  
+    
+    It may be used as-is in many cases.
+
+    You'll want to re-direct the output to a file for use with the
+    mmcrnsd command:
+
+        $PROGNAME SERVER1 SERVER2 > SERVER1-SERVER2.StanzaFile
     
     WARNING:  This script should work as-is for a GPFS building block
     that:
-    a) includes two NSD servers
-    b) that are both multipathed to the same storage subsystem
-    c) that have been prepared for use with the GPFS Goodies
-       multipath.conf-creator tool.
+
+        a) includes two NSD servers
+        b) that are both multipathed to the same storage subsystem
+        c) that have been prepared for use with the GPFS Goodies
+           multipath.conf-creator tool.
 
     Please review your StanzaFile for appropriateness before using, and
     you may need to modify this script or use an alternate method for
     use with different building block configurations.
+
+    If you are satisfied with the StanzaFile you've created, you can use
+    mmcrnsd to initialize the disks (see "man mmcrnsd" for more details):
+
+        mmcrnsd -F SERVER1-SERVER2.StanzaFile
+
 
     Have fun!  -Brian Finley
 
