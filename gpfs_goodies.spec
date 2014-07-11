@@ -5,8 +5,7 @@ Release: 1
 Source: %{name}-%{version}.tar.bz2
 BuildRoot: /tmp/%{name}-buildroot
 BuildArchitectures: noarch
-Requires: lsscsi >= 0.21
-#Requires: lsscsi >= 0.21, perl-Net-SSH-Expect
+Requires: lsscsi >= 0.21, expect
 License: EPL
 
 
@@ -18,14 +17,18 @@ cluster.  Includes step-by-step guidance on deployment.  Start by
 viewing the HOWTO.
 .
 Includes: 
-- multipath.conf-creator
-- brians_own_hot-add_script
-- gpfs_stanzafile-creator
-- test_block_device_settings
-- tune_block_device_settings
-- GPFS Multi-Cluster Routing HOWTO
-- Some half-baked goodies 
-- Examples
+  Tools
+    - multipath.conf-creator
+    - brians_own_hot-add_script
+    - gpfs_stanzafile-creator
+    - test_block_device_settings
+    - tune_block_device_settings
+  OpenSM init script for direct connect InfiniBand storage
+    - /etc/init.d/opensmd.for_direct_connect_storage
+    - installed inactive
+  HOWTOs
+    - GPFS Multi-Cluster Routing HOWTO
+  Some half-baked goodies and examples
 
 
 
