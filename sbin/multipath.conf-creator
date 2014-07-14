@@ -30,6 +30,8 @@
 #   - test for existence of SMcli
 #   2013.11.19 Brian Elliott Finley <bfinley@us.ibm.com>
 #   - improve --help verbiage
+#   2014.07.14 Brian Elliott Finley <bfinley@us.ibm.com> & Christian Caruthers <christian.caruthers@us.ibm.com>
+#   - Identify and fix bug in handling device names that include hyphens
 #
 
 
@@ -145,7 +147,7 @@ EOF
         next if(m/^SMcli completed successfully/);
         next if(m/^(\s|$)/);
 
-        if( m/^(\w+)\s+.*/ ) {
+        if( m/^(\S+)\s+.*/ ) {
             my $controller = $1;
             push @controllers, $controller;
         };
