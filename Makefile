@@ -67,6 +67,10 @@ tarball:
 	# Make a copy of the repo
 	git clone . ${TMPDIR}/${PKG_DIR}
 	/bin/rm -fr ${TMPDIR}/${PKG_DIR}/.git
+	#
+	# Vizio files may be quite large, and can be found in the repo if
+	# needed. -BEF-
+	/bin/rm -fr ${TMPDIR}/${PKG_DIR}/doc/*.vsd
 
 	#
 	# Copy this file over (for testing only)
@@ -97,9 +101,9 @@ rpm:	tarball
 
 .PHONY += release
 release:	rpm
-	cp -i ~/rpmbuild/RPMS/noarch/${PKG_NAME}-${VERSION}-1.noarch.rpm    packages/RPMs/
-	cp -i ~/rpmbuild/SRPMS/${PKG_NAME}-${VERSION}-1.src.rpm             packages/RPMs/
-	cp -i ${TARBALL}                                                    packages/tarballs/
+	cp -i ~/rpmbuild/RPMS/noarch/${PKG_NAME}-${VERSION}-1.noarch.rpm    packages/
+	cp -i ~/rpmbuild/SRPMS/${PKG_NAME}-${VERSION}-1.src.rpm             packages/
+	cp -i ${TARBALL}                                                    packages/
 	@echo
 	@echo "Results:"
 	@/bin/ls -1 packages/*/*${PKG_NAME}-${VERSION}* | sed 's/^/  /'
