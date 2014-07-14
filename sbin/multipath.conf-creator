@@ -73,7 +73,7 @@ unless ( user_is_root() ) {
 if( ! defined $auto_detect and ! defined $ARGV[0] ) {
     usage();
     print "\n";
-    print qq(-->  Make sure you specify one of "--auto-detect" or "a list of controllers".\n);
+    print qq(-->  Make sure you specify one of "--auto-detect" or "a list of subsystems".\n);
     print "\n";
     exit 1;
 } 
@@ -115,7 +115,7 @@ if( ! defined $smcli ) {
 #}
 
 
-my @controllers;
+my @subsystems;
 if( defined $auto_detect ) {
     my $cmd = "SMcli -d";
     open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
@@ -128,7 +128,7 @@ storage systems using the Add Storage System option in the storage management
 software or by command line.
                                            
 Perhaps try running 'SMcli -A' to have SMclient auto-discover your storage
-controllers.  That would look something like this:
+subsystems.  That would look something like this:
 
     [root@disktree ~]# SMcli -A
     Starting auto discovery.
@@ -148,61 +148,61 @@ EOF
         next if(m/^(\s|$)/);
 
         if( m/^(\S+)\s+.*/ ) {
-            my $controller = $1;
-            push @controllers, $controller;
+            my $subsystem = $1;
+            push @subsystems, $subsystem;
         };
     }
     close(INPUT);
 } else {
-    push @controllers, @ARGV;
+    push @subsystems, @ARGV;
 }
 
-my $quantity = scalar @controllers;
+my $quantity = scalar @subsystems;
 
 my $plural = "";
 if( $quantity ne 1 ) { 
     $plural = 's';
 }
 
-print "\nLooks like we're dealing with $quantity controller$plural. Let's get going:\n\n";
+print "\nLooks like we're dealing with $quantity subsystem$plural. Let's get going:\n\n";
 
 my %aliases;
-foreach my $controller (@controllers) {
-    get_controller_info("$controller");
+foreach my $subsystem (@subsystems) {
+    get_subsystem_info("$subsystem");
 }
 
 
-sub get_controller_info {
+sub get_subsystem_info {
 
-    my $controller = shift;
+    my $subsystem = shift;
 
-    print qq(  Detecting API for "$controller") if($verbose);
-    my $api = detect_controller_api("$controller");
+    print qq(  Detecting API for "$subsystem") if($verbose);
+    my $api = detect_subsystem_api("$subsystem");
     print " -> $api\n" if($verbose);
 
-    print qq(  Querying "$controller"\n);
+    print qq(  Querying "$subsystem"\n);
     if($api eq 'SMcli') {
-        get_controller_info_via_SMcli("$controller");
+        get_subsystem_info_via_SMcli("$subsystem");
     }
     elsif($api eq 'IBM FlashSystem') {
-        get_controller_info_via_IBM_FlashSystem("$controller");
+        get_subsystem_info_via_IBM_FlashSystem("$subsystem");
     }
 
     return 1;
 }
 
 
-sub detect_controller_api {
+sub detect_subsystem_api {
 
-    my $controller = shift;
+    my $subsystem = shift;
 
     if($auto_detect) { return 'SMcli'; }
 
-    my $ip = hostname2ip($controller);
+    my $ip = hostname2ip($subsystem);
     if(! $ip) {
 
         usage();
-        print "  WARNING:  I couldn't find an IP address for $controller\n";
+        print "  WARNING:  I couldn't find an IP address for $subsystem\n";
         print "\n";
         print "    Hint --> Are you sure that's the right hostname?\n";
         print "\n";
@@ -230,12 +230,12 @@ sub detect_controller_api {
         if(m/^$ip\s+dev\s+\S+\s+lladdr\s+(\S+)\s+/) {
             #                             ^^^ 
             #                              |
-            #                              mac address of the controller
+            #                              mac address of the subsystem
             #
             my $mac = $1;
 
             #
-            # We've matched the controller's IP and grabbed it's MAC, now let's dig deeper
+            # We've matched the subsystem's IP and grabbed it's MAC, now let's dig deeper
             if($mac =~ m/^00:20:c2/) {
                 return 'IBM FlashSystem';
             }
@@ -249,9 +249,9 @@ sub detect_controller_api {
 }
 
 
-sub get_controller_info_via_IBM_FlashSystem {
+sub get_subsystem_info_via_IBM_FlashSystem {
 
-    my $controller = shift;
+    my $subsystem = shift;
 
     my @input = ();
     my @lun_names;
@@ -269,7 +269,7 @@ sub get_controller_info_via_IBM_FlashSystem {
         print FILE  q|set timeout -1                                  | . qq|\n|;
         print FILE  q|spawn $env(SHELL)                               | . qq|\n|;
         print FILE  q|match_max 100000                                | . qq|\n|;
-        print FILE qq|send -- "telnet $controller\r"                  | . qq|\n|;
+        print FILE qq|send -- "telnet $subsystem\r"                  | . qq|\n|;
         print FILE  q|expect " login:"                                | . qq|\n|;
         print FILE  q|send -- "admin\r"                               | . qq|\n|;
         print FILE  q|expect "Password:"                              | . qq|\n|;
@@ -356,7 +356,7 @@ sub get_controller_info_via_IBM_FlashSystem {
         print FILE  q|set timeout -1                                  | . qq|\n|;
         print FILE  q|spawn $env(SHELL)                               | . qq|\n|;
         print FILE  q|match_max 100000                                | . qq|\n|;
-        print FILE qq|send -- "telnet $controller\r"                  | . qq|\n|;
+        print FILE qq|send -- "telnet $subsystem\r"                  | . qq|\n|;
         print FILE  q|expect " login:"                                | . qq|\n|;
         print FILE  q|send -- "admin\r"                               | . qq|\n|;
         print FILE  q|expect "Password:"                              | . qq|\n|;
@@ -442,9 +442,9 @@ sub get_controller_info_via_IBM_FlashSystem {
 
             $lun_name = $1;
 
-            $key = "${controller}_${lun_name}";
+            $key = "${subsystem}_${lun_name}";
 
-            $aliases{$key}->{controller} = $controller;
+            $aliases{$key}->{subsystem} = $subsystem;
             $aliases{$key}->{lun_name} = $lun_name;
             $aliases{$key}->{lun_number} = $lun_numbers_by_lun_name{$lun_name};
 
@@ -489,14 +489,14 @@ sub get_controller_info_via_IBM_FlashSystem {
 }
 
 
-sub get_controller_info_via_SMcli {
+sub get_subsystem_info_via_SMcli {
 
-    my $controller = shift;
+    my $subsystem = shift;
 
     my $lun_name;
     my $key;
 
-    my $cmd = qq(SMcli -n "$controller" -c 'show logicalDrives;');
+    my $cmd = qq(SMcli -n "$subsystem" -c 'show logicalDrives;');
     open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
     while(<INPUT>) {
 
@@ -507,9 +507,9 @@ sub get_controller_info_via_SMcli {
 
             my $lun_name = $1;
 
-            $key = "${controller}_${lun_name}";
+            $key = "${subsystem}_${lun_name}";
 
-            $aliases{$key}->{controller} = $controller;
+            $aliases{$key}->{subsystem} = $subsystem;
             $aliases{$key}->{lun_name} = $lun_name;
 
         }
@@ -693,7 +693,7 @@ foreach my $key (sort keys %aliases) {
     #   alias pershing_ctrl_14_3a_lun0
     # }
 
-    my $controller = $aliases{$key}->{controller};
+    my $subsystem = $aliases{$key}->{subsystem};
     my $owner = $aliases{$key}->{owner};
     my $lun_name = $aliases{$key}->{lun_name} if( defined $aliases{$key}->{lun_name} );
     my $lun_number = $aliases{$key}->{lun_number} if( defined $aliases{$key}->{lun_number} );
@@ -706,7 +706,7 @@ foreach my $key (sort keys %aliases) {
         $lun = $ssid;
     }
 
-    my $alias = "${controller}${owner}_lun${lun}";
+    my $alias = "${subsystem}${owner}_lun${lun}";
 
     my $wwid = $aliases{$key}->{wwid};
 
@@ -719,14 +719,14 @@ foreach my $key (sort keys %aliases) {
     #
     $alias =~ s/-/_/g;
     #
-    # And spaces introduced (perhaps by a controller name) are right
+    # And spaces introduced (perhaps by a subsystem name) are right
     # out!
     #
     $alias =~ s/ /_/g;
 
     print FILE "    multipath {\n";
     print FILE "        #\n";
-    print FILE "        # Controller Name:      $controller\n";
+    print FILE "        # Controller Name:      $subsystem\n";
     print FILE "        # Raid Controller:      $owner\n";
     print FILE "        # LUN Name:             $lun_name\n"    if( defined $lun_name);
     print FILE "        # LUN Number:           $lun_number\n"  if( defined $lun_number);
@@ -856,7 +856,7 @@ sub version {
 sub usage {
 version();
 print << "EOF";
-Usage:  $progname [OPTION...] [--auto-detect | controller1 controller2...]
+Usage:  $progname [OPTION...] [--auto-detect | subsystem1 subsystem2...]
 
     Options can be abbreviated to minimum uniqueness.  For example, you could
     use "-h" or "--h" instead of "--help".
@@ -870,12 +870,12 @@ Usage:  $progname [OPTION...] [--auto-detect | controller1 controller2...]
         Highly recomended!
 
         This command will use the output from "SMcli -d" to determine the list
-        of controllers to use.  
+        of subsystems to use.  
         
         If you _don't_ specify this option, you'll need to specify a list of
-        controllers on the command line instead:
+        subsystems on the command line instead:
 
-          $progname controller1 controller2 etc...
+          $progname subsystem1 subsystem2 etc...
 
 
     --deploy SERVER[,SERVER,...]
@@ -918,7 +918,7 @@ Usage:  $progname [OPTION...] [--auto-detect | controller1 controller2...]
 
 
     Currently Supported Storage Controllers should include all IBM DS
-    Storage Manager (SMClient) compatible controllers and IBM FlashSystem
+    Storage Manager (SMClient) compatible subsystems and IBM FlashSystem
     storage.  Testing has been performed on the following models:
 
         FlashSystem 820     DS3860      DCS3700 
@@ -932,9 +932,9 @@ Usage:  $progname [OPTION...] [--auto-detect | controller1 controller2...]
         patches.  Please contact Brian E. Finley <bfinley\@us.ibm.com>
         with patches and/or suggestions.
 
-        To request support for an additional storage controller, please
+        To request support for an additional storage subsystem, please
         email the output from 'lsscsi' to <bfinley\@us.ibm.com>.  Emails
-        that have an actual storage controller attached (or at least
+        that have an actual storage subsystem attached (or at least
         remote access to one) are likely to get the most attention. ;-)
 
 
