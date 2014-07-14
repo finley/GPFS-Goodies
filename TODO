@@ -1,3 +1,29 @@
+- add ping test to each --deploy server as part of the options
+  validation at the beginning
+
+- add test for multipathd and multipath on each --deploy server as part
+  of options validation at beginning
+
+- consider how name is derived from non-SMClient devices.  Example:
+
+    Trying 10.73.1.23...
+    Connected to flashctl1-a.
+    Escape character is '^]'.
+    
+    flashctl1-a login: admin
+    Password: 
+    
+    IBM - Intelligent Cluster
+    FlashSystem-820 Management Interface
+    
+        Firmware Version:        6.3.1
+        Storage Capacity:        9.37 TiB    
+        Management Controller:   mc-1
+        Eth0 IP Address:         10.73.1.23
+        Hostname:                flashctl1-a
+        Chassis Serial:          T-XSXS
+
+
 - Add bit to Makefile that creates GPFS_Goodies web page:
 
     echo "Section Header info"
