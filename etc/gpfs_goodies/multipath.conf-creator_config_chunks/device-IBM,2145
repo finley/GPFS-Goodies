@@ -1,0 +1,18 @@
+    device {
+        #
+        #   This device section will apply to the following subsystems:
+        #
+        #       SVC - IBM SAN Volume Controller
+        #
+        vendor                  "IBM"
+        product                 "2145"
+        path_grouping_policy    group_by_prio
+        prio                    alua
+        features                "0"
+        no_path_retry           5
+        #no_path_retry           fail
+        rr_min_io               1
+        dev_loss_tmo            3600
+        fast_io_fail_tmo        5
+        flush_on_last_del       "yes"
+    }
