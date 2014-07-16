@@ -2,11 +2,12 @@
         #
         #   This device section will apply to the following subsystems:
         #
-        #       DS3512 => 1746
-        #       DS3524 => 1746
+        #       Code name Tahoe
         #
-        vendor                  "IBM"
-        product                 "1746"
+        # NETAPP   INF-01-00        6810
+        #
+        vendor                  "NETAPP"
+        product                 "INF-01-00"
         path_grouping_policy    group_by_prio
         getuid_callout          "/lib/udev/scsi_id -g -u -d /dev/%n"
         #
