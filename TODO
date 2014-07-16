@@ -1,3 +1,16 @@
+- tune_block_device_settings
+
+    - GSS:  auto-detect if a server is a GSS node and blacklist it:
+        - don't gather data from it (wouldn't be useful)
+        - don't push tuning out to it (could be harmful)
+
+    - --disks-per-array
+        handle tiered file systems with different --disks-per-array by pool
+
+            --disks-per-array (NN|POOLNAME:NN,[POOLNAME:NN])
+                Detect number of disk pools.  If more than one disk
+                pool, require POOLNAME:NN syntax.
+
 - for SMcli capable storage, use "SMcli -d -w" to capture the info, then
   use "SMcli -w $WWID" to invoke the commands.  If multiple controllers
   with the same name, append a number to the end of them:
