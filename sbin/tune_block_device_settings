@@ -495,7 +495,12 @@ sub calculate_max_sectors_kb {
     #       Sven Oehme
     #       Ray Paden
     #
-    my $kb = $bs / 4;
+    #   Note: GPFS block size is in bytes, so we must divide by 1024 to
+    #   get kilobytes.  Then we divide by 4 to get our max_sectors_kb
+    #   value.  Thanks go to Christian Caruthers for his input on this
+    #   -BEF-.
+    #
+    my $kb = $bs / 1024 / 4;
 
     if( $kb < 512 ) {
         $kb = 512;
