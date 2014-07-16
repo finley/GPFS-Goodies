@@ -106,7 +106,7 @@ release:	rpm
 	cp -i ${TARBALL}                                                    packages/
 	@echo
 	@echo "Results:"
-	@/bin/ls -1 packages/*/*${PKG_NAME}-${VERSION}* | sed 's/^/  /'
+	@/bin/ls -1 packages/*${PKG_NAME}-${VERSION}* | sed 's/^/  /'
 
 .PHONY += help
 help:
