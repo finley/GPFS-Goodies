@@ -25,6 +25,8 @@
     dcs3860_1   -> 600a09800056e8d9000000005375f2aa
     dcs3860_2   -> 600a09800056e9180000000053ad6572
 
+- consider adding libnet-mac-vendor-perl to look up mac address for
+  storage to map into method (SMCli, etc.)
 
 - add ping test to each --deploy server as part of the options
   validation at the beginning
