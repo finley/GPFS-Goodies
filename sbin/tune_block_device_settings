@@ -19,8 +19,8 @@
 #           - Number of storage servers connected to each controller
 #           - GPFS file system block sizes
 #
-#       It will create a single udev rule file
-#       (/etc/udev/rules.d/99-ibm-storage.rules), with one rule per
+#       It will create a single udev rule file per file system
+#       (/etc/udev/rules.d/99-gpfs-FSNAME.rules), with one rule per
 #       device and give you the option of a) deploying the rules to your
 #       storage servers for you, and b) hot-activating the settings via
 #       udev.
@@ -33,6 +33,12 @@
 #   - add initial default tuning settings
 #   2014.01.03 Brian Elliott Finley <bfinley@us.ibm.com>
 #   - minor refinements after testing on Ray Paden's test cluster
+#   2014.08.06 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - handle tiered file systems, and other file systems with multiple 
+#     pools gracefully
+#   - detect GSS file systems and exit with no action taken
+#   - Operate in "--test" mode if "--deploy" not specified.  Suggested
+#     by Francis Dang <francis@tamu.edu>.
 #
 
 use strict;
@@ -40,19 +46,21 @@ use Getopt::Long;
 use File::Basename;
 
 my $progname = basename($0);
-my $version_number = '20.7.22';
-my $udev_rules_file = '/etc/udev/rules.d/99-ibm-storage.rules';
+my $version_number = '20.8.7';
+my $disks_per_array_default = 8;
+my $udev_rules_file_base = "/etc/udev/rules.d/99-gpfs_goodies";
 
 our $ERROR = 0;
 
 GetOptions(
-    "help"              => \my $help,
-    "version"           => \my $version,
-    "deploy"            => \my $deploy,
-    "disks-per-array=i" => \my $disks_per_array,
-    "test-run"          => \my $test_run,
-    "verbose|v"         => \my $debug,
-    "out-file=s"        => \my $out_file,
+    "help"                      => \my $help,
+    "version"                   => \my $version,
+    "filesystem|fsname|fs=s"    => \my $fs,
+    "deploy"                    => \my $deploy,
+    "disks-per-array=s"         => \my $disks_per_array,
+    "test|test-run"             => \my $test_run,
+    "verbose|v"                 => \my $debug,
+    "out-file=s"                => \my $out_file,
 ) or usage() and exit(1);
 
 if ( defined $help ) {
@@ -64,23 +72,28 @@ elsif ( defined $version ) {
     exit 0;
 }
 
-if( (! defined $deploy and ! defined $test_run ) or ( defined $deploy and defined $test_run ) ) {
+if( defined $deploy and defined $test_run ) {
     usage();
-    print qq(\n-->  Try either "--deploy" or "--test-run"\n\n);
+    print qq(\n-->  Try either "--deploy" or "--test"\n\n);
     exit 0;
 }
 
-if( ! defined $disks_per_array ) {
+if( ! defined $fs ) {
     usage();
-    print qq(\n-->  Try "--disks-per-array NN"\n\n);
+    print qq(\n-->  Try "--filesystem FSNAME"\n\n);
     exit 0;
+}
+
+if( ! defined $deploy and ! defined $test_run ) {
+    $test_run = 1;
+    print qq(Running in "--test" mode only -- no changes will be made to your system.\n);
 }
 
 if( ! defined $out_file ) {
     $out_file = get_tmp_file();
 }
 
-unless ( user_is_root() ) {
+if ( ! user_is_root() ) {
     usage();
     print qq(\n-->  Please run as root\n\n);
     exit 1;
@@ -92,130 +105,244 @@ unless ( -e "/usr/lpp/mmfs/bin/mmlsnsd" and -e "/usr/lpp/mmfs/bin/mmlsfs" ) {
     exit 1;
 }
 
+my %servers;
+my $block_size;
+my %server_by_disk_path;
+my $block_allocation_type;
+my %disk_path_by_disk_name;
+my %disk_pools;
+my %disk_pool_by_disk_name;
+my %disks_per_array_by_pool;
 
-my $cmd;
-my %filesystems;
-my %mpath_by_nsd;
-my %server_by_mpath;
-my %nsd_server_list;
-my %filesystems_by_nsd;
-my %blocksize_by_filesystem;
-my %block_allocation_type_by_filesystem;
 
+check_for_fs();
+get_disk_pool_info();
+process_disks_per_array_option();
+get_mmlsnsd_info();
+detect_gss_servers();
+get_mmlsfs_info();
+create_udev_rules();
+report_results();
+
+exit 0;
+
+
+
+########################################################################
 #
-# Info Gather Pass 1
+#   BEGIN Subroutines
 #
-$cmd = '/usr/lpp/mmfs/bin/mmlsnsd 2>&1';
-print ">> Command: $cmd\n" if(defined $debug);
-open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
-while(<INPUT>) {
-    #
-    #   Sample input:
-    #
-    #    File system   Disk name    NSD servers                                    
-    #   ---------------------------------------------------------------------------
-    #    fs_1m         nsd_0        x36n09,x36n10            
-    #    fs_1m         nsd_1        x36n10,x36n11            
-    #    fs_1m         nsd_2        x36n11,x36n12            
-    #    fs_1m         nsd_3        x36n12,x36n09            
-    #    fs_1m         nsd_4        x36n09,x36n10            
-    #    fs_1m         nsd_5        x36n10,x36n11            
-    #    fs_1m         nsd_6        x36n10,x36n11            
-    #    fs_1m         nsd_7        x36n11,x36n12            
-    #    fs_1m         nsd_8        x36n12,x36n09            
-    #    fs_1m         nsd_9        x36n09,x36n10            
-    #    fs_1m         nsd_10       x36n10,x36n11            
-    #    fs_1m         nsd_11       x36n11,x36n12            
-    #    fs_1m         nsd_12       x36n11,x36n12            
-    #    fs_1m         nsd_13       x36n12,x36n09            
-    #    fs_1m         nsd_14       x36n09,x36n10            
-    #    fs_1m         nsd_15       x36n10,x36n11            
-    #    fs_1m         nsd_16       x36n11,x36n12            
-    #    fs_1m         nsd_17       x36n12,x36n09            
-    #    fs_1m         nsd_18       x36n12,x36n09            
-    #    fs_1m         nsd_19       x36n09,x36n10            
-    #    fs_1m         nsd_20       x36n10,x36n11            
-    #    fs_1m         nsd_21       x36n11,x36n12            
-    #    fs_1m         nsd_22       x36n12,x36n09            
-    #    fs_1m         nsd_23       x36n09,x36n10            
-    #    fs_1m         nsd_24       x36n09,x36n10            
-    #    fs_1m         nsd_25       x36n10,x36n11            
-    #    fs_1m         nsd_26       x36n11,x36n12            
-    #    fs_1m         nsd_27       x36n12,x36n09            
-    #    fs_1m         nsd_28       x36n09,x36n10            
-    #    fs_1m         nsd_29       x36n10,x36n11        
-    #
-    print ">> $_" if(defined $debug);
-    if(m/^\s+(\S+)\s+(\S+)\s+(\S+)\s*$/) {
+sub process_disks_per_array_option {
 
-        my $fs      = $1;
-        my $nsd     = $2;
-        my $servers = $3;
+    my $valid;
 
-        $filesystems{$fs} = 1;
-        $filesystems_by_nsd{$nsd} = $fs;
+    # Pre-assign the default for each pool
+    foreach my $pool (keys %disk_pools) {
+        $disks_per_array_by_pool{$pool} = $disks_per_array_default;
+        $valid = 'yes';
+    }
+    
+    if( defined $disks_per_array ) {
+    
+        #
+        # Override the default with custom setting
+        #
+        if( $disks_per_array =~ m/^\d+$/ ) {
 
-        foreach my $server ( split(/,/, $servers) ) {
-            $nsd_server_list{$server} = 1;
+            foreach my $pool (keys %disk_pools) {
+                $disks_per_array_by_pool{$pool} = $disks_per_array;
+                $valid = 'yes';
+            }
+
+        } elsif( $disks_per_array =~ m/:/ ) {
+
+            my @arguments = split(/,/, $disks_per_array);
+            foreach (@arguments) {
+
+                my ($count, $pool) = split(/:/);
+
+                #
+                # Break out of the loop and jump to the error message unless
+                # $count is a digit.
+                #
+                unless($count =~ m/^\d+$/) {
+                    $valid = 'no';
+                    last;
+                }
+
+                $disks_per_array_by_pool{$pool} = $count;
+                $valid = 'yes';
+            }
         }
     }
-}
-close(INPUT);
 
 
-#
-# Info Gather Pass 2
-#
-$cmd = '/usr/lpp/mmfs/bin/mmlsnsd -m 2>&1';
-print ">> Command: $cmd\n" if(defined $debug);
-open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
-while(<INPUT>) {
-    #	
-    #   Sample input:
-    #
-    #	[root@x36n10 bef]# mmlsnsd -m
-    #	
-    #	 Disk name    NSD volume ID      Device         Node name                Remarks       
-    #	---------------------------------------------------------------------------------------
-    #	 nsd_0        AC100009527FEBFE   /dev/mapper/dcs3860a_lun0 x36n09                   server node
-    #	 nsd_0        AC100009527FEBFE   /dev/mapper/dcs3860a_lun0 x36n10                   server node
-    #	 nsd_0        AC100009527FEBFE   /dev/mapper/dcs3860a_lun0 x36n11                   
-    #	 nsd_0        AC100009527FEBFE   /dev/mapper/dcs3860a_lun0 x36n12                   
-    #	 nsd_1        AC10000A527FEC03   /dev/mapper/dcs3860b_lun1 x36n09                   
-    #	 nsd_1        AC10000A527FEC03   /dev/mapper/dcs3860b_lun1 x36n10                   server node
-    #	 nsd_1        AC10000A527FEC03   /dev/mapper/dcs3860b_lun1 x36n11                   server node
-    #	 nsd_1        AC10000A527FEC03   /dev/mapper/dcs3860b_lun1 x36n12                   
-    #	 nsd_10       AC10000A527FEC30   /dev/mapper/dcs3860a_lun11 x36n09                   
-    #	 nsd_10       AC10000A527FEC30   /dev/mapper/dcs3860a_lun11 x36n10                   server node
-    #	 nsd_10       AC10000A527FEC30   /dev/mapper/dcs3860a_lun11 x36n11                   server node
-    #	 nsd_10       AC10000A527FEC30   /dev/mapper/dcs3860a_lun11 x36n12                   
-    #	 nsd_11       AC10000B527FEC34   /dev/mapper/dcs3860b_lun10 x36n09                   
-    #	 nsd_11       AC10000B527FEC34   /dev/mapper/dcs3860b_lun10 x36n10                   
-    #	 nsd_11       AC10000B527FEC34   /dev/mapper/dcs3860b_lun10 x36n11                   server node
-    #	 nsd_11       AC10000B527FEC34   /dev/mapper/dcs3860b_lun10 x36n12                   server node
-    #	 nsd_12       AC10000B527FEC39   /dev/mapper/dcs3860a_lun12 x36n09                   
-    #	 nsd_12       AC10000B527FEC39   /dev/mapper/dcs3860a_lun12 x36n10                   
-    #	[snip]
-    #
-    print ">> $_" if(defined $debug);
-    if(m/^\s+(\S+)\s+\S+\s+(\S+)\s+(\S+)\s.*server node$/) {
-
-        my $nsd     = $1;
-        my $mpath   = $2;
-        my $server  = $3;
-
-        if( ! defined $mpath_by_nsd{$nsd} and $mpath =~ m#^/dev/#) {
-            $mpath_by_nsd{$nsd}      = $mpath;
-            $server_by_mpath{$mpath} = $server;
+    if($debug) {
+        foreach my $pool (sort keys %disks_per_array_by_pool) {
+            print "\$disks_per_array_by_pool{$pool}: $disks_per_array_by_pool{$pool}\n";
         }
     }
-}
-close(INPUT);
 
-#
-# Info Gather Pass 3
-#
-foreach my $fs (keys %filesystems) {
+
+    if($valid eq 'yes') {
+        return 1;
+    } else {
+        usage();
+        print qq(\n-->  "$disks_per_array" is an invalid value for --disks-per-array.\n\n);
+        exit 1;
+    }
+}
+
+
+sub check_for_fs {
+
+    my $cmd = "mmlsfs $fs >/dev/null 2>&1";
+    if( !system($cmd) ) {
+        # success
+        print qq(Examining file system "$fs"...\n);
+    } else {
+        # fail
+        print "\n";
+        print qq(WARNING:  I can't seem to find file system "$fs".  Please make sure to:\n);
+        print "\n";
+        print "  - check the spelling of the file system name\n";
+        print qq(  - run this command from a node in the GPFS cluster that owns "$fs"\n);
+        print "\n";
+
+        exit 1;
+    }
+}
+
+
+sub detect_gss_servers {
+
+    print "> detect_gss_servers()\n" if(defined $debug);
+
+    my @gss_servers;
+
+    foreach my $server (sort keys %servers) {
+
+        next unless($servers{$server} eq 'suspect');
+
+        my $cmd = qq(ssh $server rpm -q gpfs.gss.firmware >/dev/null 2>&1);
+        print ">> Command: $cmd\n" if(defined $debug);
+        if( !system($cmd) ) {
+            push @gss_servers, $server;
+        }
+    }
+
+    if(@gss_servers) {
+
+        print qq(\n); 
+        print qq(WARNING:\n); 
+        print qq(\n); 
+        print qq(  The following servers for file system "$fs" appear to be GSS servers:\n);
+        print qq(\n); 
+
+        foreach my $server (@gss_servers) {
+            print "    $server\n";
+        }
+
+        print qq(\n); 
+        print qq(  This tool is not necessary for GSS file systems, so I'm exiting\n);
+        print qq(  now without making any changes.\n);
+        print qq(\n); 
+
+        exit 1;
+    }
+}
+
+
+sub get_mmlsnsd_info {
+
+    print "> get_mmlsnsd_info()\n" if(defined $debug);
+    my $cmd = "/usr/lpp/mmfs/bin/mmlsnsd -f $fs -m 2>&1";
+    print ">> Command: $cmd\n" if(defined $debug);
+    open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
+    while(<INPUT>) {
+        #	
+        #   Sample input:
+        #
+        #	[root@x36n10 bef]# mmlsnsd -m
+        #	
+        #	 Disk name    NSD volume ID      Device         Node name                Remarks       
+        #	---------------------------------------------------------------------------------------
+        #	 nsd_0        AC100009527FEBFE   /dev/mapper/dcs3860a_lun0 x36n09                   server node
+        #	 nsd_0        AC100009527FEBFE   /dev/mapper/dcs3860a_lun0 x36n10                   server node
+        #	 nsd_0        AC100009527FEBFE   /dev/mapper/dcs3860a_lun0 x36n11                   
+        #	 nsd_0        AC100009527FEBFE   /dev/mapper/dcs3860a_lun0 x36n12                   
+        #	 nsd_1        AC10000A527FEC03   /dev/mapper/dcs3860b_lun1 x36n09                   
+        #	 nsd_1        AC10000A527FEC03   /dev/mapper/dcs3860b_lun1 x36n10                   server node
+        #	 nsd_1        AC10000A527FEC03   /dev/mapper/dcs3860b_lun1 x36n11                   server node
+        #	 nsd_1        AC10000A527FEC03   /dev/mapper/dcs3860b_lun1 x36n12                   
+        #	 nsd_10       AC10000A527FEC30   /dev/mapper/dcs3860a_lun11 x36n09                   
+        #	 nsd_10       AC10000A527FEC30   /dev/mapper/dcs3860a_lun11 x36n10                   server node
+        #	 nsd_10       AC10000A527FEC30   /dev/mapper/dcs3860a_lun11 x36n11                   server node
+        #	 nsd_10       AC10000A527FEC30   /dev/mapper/dcs3860a_lun11 x36n12                   
+        #	 nsd_11       AC10000B527FEC34   /dev/mapper/dcs3860b_lun10 x36n09                   
+        #	 nsd_11       AC10000B527FEC34   /dev/mapper/dcs3860b_lun10 x36n10                   
+        #	 nsd_11       AC10000B527FEC34   /dev/mapper/dcs3860b_lun10 x36n11                   server node
+        #	 nsd_11       AC10000B527FEC34   /dev/mapper/dcs3860b_lun10 x36n12                   server node
+        #	 nsd_12       AC10000B527FEC39   /dev/mapper/dcs3860a_lun12 x36n09                   
+        #	 nsd_12       AC10000B527FEC39   /dev/mapper/dcs3860a_lun12 x36n10                   
+        #	[snip]
+        #
+        #	[root@flashnsd1 bef]# mmlsnsd -m
+        #    Disk name    NSD volume ID      Device         Node name                Remarks       
+        #   ---------------------------------------------------------------------------------------
+        #    flashctl1ab_lun0 0A46011F53BD6EC5   /dev/mapper/flashctl1ab_lun0 flashnsd1-10g            server node
+        #    flashctl1ab_lun0 0A46011F53BD6EC5   /dev/mapper/flashctl1ab_lun0 flashnsd2-10g            server node
+        #    flashctl1ab_lun1 0A46011F53BD6ECA   /dev/mapper/flashctl1ab_lun1 flashnsd1-10g            server node
+        #    flashctl1ab_lun1 0A46011F53BD6ECA   /dev/mapper/flashctl1ab_lun1 flashnsd2-10g            server node
+        #    flashctl1ab_lun2 0A46012053BD6ECF   /dev/mapper/flashctl1ab_lun2 flashnsd1-10g            server node
+        #    flashctl1ab_lun2 0A46012053BD6ECF   /dev/mapper/flashctl1ab_lun2 flashnsd2-10g            server node
+        #    flashctl1ab_lun3 0A46012053BD6ED4   /dev/mapper/flashctl1ab_lun3 flashnsd1-10g            server node
+        #    flashctl1ab_lun3 0A46012053BD6ED4   /dev/mapper/flashctl1ab_lun3 flashnsd2-10g            server node
+        #    gss1_Data_16M_2p_1 0A460501539A6825   gss1_Data_16M_2p_1 gss1-10g.cluster         server node
+        #    gss1_Data_16M_2p_1 0A460501539A6825   gss1_Data_16M_2p_1 gss2-10g.cluster         server node
+        #    gss1_Data_16M_2p_2 0A460501539A6838   gss1_Data_16M_2p_2 gss1-10g.cluster         server node
+        #    gss1_Data_16M_2p_2 0A460501539A6838   gss1_Data_16M_2p_2 gss2-10g.cluster         server node
+        #    gss1_Data_16M_2p_3 0A460501539A684B   gss1_Data_16M_2p_3 gss1-10g.cluster         server node
+        #    gss1_Data_16M_2p_3 0A460501539A684B   gss1_Data_16M_2p_3 gss2-10g.cluster         server node
+        #    gss1_Data_4M_2p_1 0A460501539A68BC   gss1_Data_4M_2p_1 gss1-10g.cluster         server node
+        #    gss1_Data_4M_2p_1 0A460501539A68BC   gss1_Data_4M_2p_1 gss2-10g.cluster         server node
+        #    gss1_Data_4M_2p_2 0A460501539A68C6   gss1_Data_4M_2p_2 gss1-10g.cluster         server node
+        #    gss1_Data_4M_2p_2 0A460501539A68C6   gss1_Data_4M_2p_2 gss2-10g.cluster         server node
+        #    gss1_Data_4M_2p_3 0A460501539A68D0   gss1_Data_4M_2p_3 gss1-10g.cluster         server node
+        #    gss1_Data_4M_2p_3 0A460501539A68D0   gss1_Data_4M_2p_3 gss2-10g.cluster         server node
+        #   [snip]
+        #
+        print ">> $_" if(defined $debug);
+        if(m/^\s+(\S+)\s+\S+\s+(\S+)\s+(\S+)\s.*server node$/) {
+    
+            my $disk_name   = $1;
+            my $disk_path   = $2;
+            my $server      = $3;
+
+            #
+            #   Note that the GSS NSD devices don't start with /dev/, and therefore
+            #   will not be processed.  We will silently and harmlessly skip over
+            #   such disk devices, mark those servers as suspect, and test them
+            #   later to see if they are in fact GSS nodes. -BEF-
+            #
+            if( $disk_path =~ m#^/dev/# ) {
+                $disk_path_by_disk_name{$disk_name} = $disk_path;
+                $server_by_disk_path{$disk_path} = $server;
+                $servers{$server} = 'nsd';
+            } else {
+                $servers{$server} = 'suspect';
+            }
+        }
+    }
+    close(INPUT);
+
+    return 1;
+}
+
+
+sub get_mmlsfs_info {
+
+    print "> get_mmlsfs_info()\n" if(defined $debug);
     my $cmd = "/usr/lpp/mmfs/bin/mmlsfs $fs 2>&1";
     print ">> Command: $cmd\n" if(defined $debug);
     open(INPUT,"$cmd|") or die("Can't run $cmd for input");
@@ -261,45 +388,48 @@ foreach my $fs (keys %filesystems) {
         #  --mount-priority   0                        Mount priority
         # 
         print ">> $_" if(defined $debug);
+
         if(m/^\s+-B\s+(\d+)\s+/) {
             #  -B                 1048576                  Block size
-            my $blocksize = $1;
-            $blocksize_by_filesystem{$fs} = $blocksize;
+            $block_size = $1;
+
         } elsif(m/^\s+-j\s+(scatter)\s+/) {
             #  -j                 scatter                  Block allocation type
-            my $block_allocation_type = $1;
-            $block_allocation_type_by_filesystem{$fs} = $block_allocation_type;
+            $block_allocation_type = $1;
         }
     }
     close(INPUT);
+
+    return 1;
 }
 
-my $file = $out_file;
-open(FILE,">$file") or die("Couldn't open $file for writing");
-foreach my $nsd (keys %filesystems_by_nsd) {
 
-    my $fs = $filesystems_by_nsd{$nsd};
-    my $bs = $blocksize_by_filesystem{$fs};
-    my $block_allocation_type = $block_allocation_type_by_filesystem{$fs};
+sub create_udev_rules {
 
-    my $mpath;
-    my $server;
-    if( defined $mpath_by_nsd{$nsd} ) {
+    print qq(Creating fresh udev rules for file system "$fs"...\n);
 
-        $mpath = $mpath_by_nsd{$nsd};
-        $server = $server_by_mpath{$mpath};
+    my $file = $out_file;
+    open(FILE,">$file") or die("Couldn't open $file for writing");
 
-        my $max_sectors_kb = calculate_max_sectors_kb($bs);
-        my $read_ahead_kb  = calculate_read_ahead_kb($block_allocation_type, $max_sectors_kb);
-        my $nr_requests    = calculate_nr_requests($disks_per_array);
-        my $queue_depth    = calculate_queue_depth($disks_per_array);
-        my $elevator       = 'noop';
-
-        my $scsi_id = get_scsi_id( $server, $mpath );
+    #
+    # Create LUN specific settings
+    #
+    foreach my $disk_name (keys %disk_path_by_disk_name) {
+    
+        my $disk_path   = $disk_path_by_disk_name{$disk_name};
+        my $server      = $server_by_disk_path{$disk_path};
+    
+        my $max_sectors_kb  = calculate_max_sectors_kb($block_size);
+        my $read_ahead_kb   = calculate_read_ahead_kb($block_allocation_type, $max_sectors_kb);
+        my $nr_requests     = calculate_nr_requests($disk_name);
+        my $queue_depth     = calculate_queue_depth($disk_name);
+        my $elevator        = 'noop';
+    
+        my $scsi_id = get_scsi_id( $server, $disk_path );
         if(defined $scsi_id) {
-
+    
             print FILE qq(#\n);
-            print FILE qq(# NSD: $nsd  PATH: $mpath\n);
+            print FILE qq(# NSD: $disk_name  PATH: $disk_path\n);
             print FILE qq(#\n);
             print FILE qq(#  Individual Devices\n);
             print FILE q(SUBSYSTEM=="block", SUBSYSTEMS=="scsi", PROGRAM=="/lib/udev/scsi_id -g -u -d /dev/%k", RESULT==") . $scsi_id . q(", RUN+="/bin/sh -c ');
@@ -320,52 +450,82 @@ foreach my $nsd (keys %filesystems_by_nsd) {
             print FILE qq('"\n\n);
             
         } else {
-            print "$nsd -- Couldn't not retrieve the scsi_id from $server:$mpath.\n";
+            print "$disk_name -- Couldn't retrieve the scsi_id from $server:$disk_path.\n";
             $ERROR++;
         }
-
-    } else {
-        print "$nsd -- ERROR No path to device found for this NSD.\n";
-        $ERROR++;
     }
 
+    #
+    # Augment with device specific "always appropriate" settings
+    #
+    print FILE << 'EOF';
+# ---------------------------------------------------------------------------
+# The following is excerpted from "Implementing IBM FlashSystem 840" Redbook.
+# ---------------------------------------------------------------------------
+# 
+#   Linux tuning
+#   
+#   The Linux kernel buffer file system writes data before it sends the data to the storage system.
+#   With the FlashSystem 840, better performance can be achieved when the data is not buffered
+#   but directly sent to the FlashSystem 840. When setting the scheduling policy to no operation
+#   (NOOP), the fewest CPU instructions possible are used for each I/O. Setting the scheduler to
+#   NOOP gives the best write performance on Linux systems. You can use the following setting
+#   in most Linux distributions as a boot parameter: elevator=noop.
+#   
+#   Current Linux devices are managed by the device manager Udev. You can define how Udev
+#   will manage devices by adding rules to the /etc/udev/rules.d directory. Example 5-24
+#   shows a rule for the FlashSystem 840.
+#   
+#   Example 5-24 Linux device rules
+#   
+# [root@flashnsd1 ~]# cat 99-IBM-FlashSystem.rules
+#   
+ACTION=="add|change", SUBSYSTEM=="block", ATTRS{device/model}=="FlashSystem", ATTR{queue/scheduler}="noop", ATTR{queue/rq_affinity}="2", ATTR{queue/add_random}="0", ATTR{device/timeout}="5"
+ACTION=="add|change", KERNEL=="dm-*", PROGRAM="/bin/bash -c 'cat /sys/block/$name/slaves/*/device/model | grep FlashSystem'", ATTR{queue/scheduler}="noop", ATTR{queue/rq_affinity}="2", ATTR{queue/add_random}="0"
+#   
+ACTION=="add|change", SUBSYSTEM=="block", ATTRS{device/model}=="FlashSystem-9840", ATTR{queue/scheduler}="noop", ATTR{queue/rq_affinity}="2", ATTR{queue/add_random}="0", ATTR{device/timeout}="10"
+ACTION=="add|change", KERNEL=="dm-*", PROGRAM="/bin/bash -c 'cat /sys/block/$name/slaves/*/device/model | grep FlashSystem-9840'", ATTR{queue/scheduler}="noop", ATTR{queue/rq_affinity}="2", ATTR{queue/add_random}="0"
+EOF
+    
+    close(FILE);
+
+    return 1;
 }
-close(FILE);
 
-if($ERROR == 0) {
-    print "Your new rules can be found here:\n\n  $out_file\n\n";
+sub report_results {
 
-    if(defined $deploy) {
-        distribute_rule($out_file);
-        udev_reread();
+    if($ERROR == 0) {
+
+        print "Your new rules can be found here:\n\n  $out_file\n\n";
+    
+        if(defined $deploy) {
+            distribute_rule($out_file);
+            udev_reread();
+        } else {
+            print "\n";
+            print "Not deploying.  You might want to try --deploy.\n";
+            print "\n";
+            print "See $progname --help for details.\n";
+            print "\n";
+        }
+    
     } else {
         print "\n";
-        print "Not deploying.  You might want to try --deploy.\n";
+        print "  ERROR: Please make sure that all devices, and ideally all\n";
+        print "         NSD servers are fully operational, then try again.\n";
         print "\n";
-        print "See $progname --help for details.\n";
+        print "         Try 'mmlsnsd -m' to verify.\n";
         print "\n";
+        exit 1;
     }
 
-} else {
-    print "\n";
-    print "  ERROR: Please make sure that all devices, and ideally all\n";
-    print "         NSD servers are fully operational, then try again.\n";
-    print "\n";
-    print "         Try 'mmlsnsd -m' to verify.\n";
-    print "\n";
-    exit 1;
+    return 1;
 }
 
-exit 0;
 
-
-########################################################################
-#
-#   BEGIN Subroutines
-#
 sub get_tmp_file {
 
-    my $cmd = "mktemp /tmp/$progname.XXXXXXXXXX";
+    my $cmd = "mktemp /tmp/$progname.99-gpfs-${fs}.rules.XXX";
 
     my $file;
 
@@ -385,12 +545,19 @@ sub distribute_rule {
 
     my $file = shift;
 
-    foreach my $server (sort keys %nsd_server_list) {
+    my $udev_rules_file = $udev_rules_file_base . "-${fs}.rules";
+
+    print "Deploying as $udev_rules_file to:\n";
+    foreach my $server (sort keys %servers) {
+        print "  $server\n";
         my $cmd = "scp -q $file $server:$udev_rules_file";
-        print "Deploying to $server as $udev_rules_file\n";
         print ">> Command: $cmd\n" if(defined $debug);
         !system($cmd) or die("FAILED: $cmd\n");
     }
+    print "\n";
+    print "Done!  Your file system has been tuned and is ready for action.\n";
+    print qq(Perhaps try "test_block_device_settings" on each of your NSD servers\n);
+    print "\n";
 
     return 1;
 }
@@ -405,7 +572,7 @@ sub udev_reread {
     #   RHEL5 and friends:
     #       udevcontrol reload_rules
     #
-    foreach my $server (sort keys %nsd_server_list) {
+    foreach my $server (sort keys %servers) {
         my $cmd = qq(ssh $server 'which udevadm >/dev/null 2>&1  &&  udevadm trigger --subsystem-match=block  ||  udevcontrol reload_rules');
         print ">> Command: $cmd\n" if(defined $debug);
         !system($cmd) or die("FAILED: $cmd\n");
@@ -417,26 +584,32 @@ sub udev_reread {
 sub get_scsi_id {
     
     my $server  = shift;
-    my $mpath   = shift;
-
+    my $disk_path   = shift;
     my $scsi_id;
     
-    my $cmd = "ssh $server /lib/udev/scsi_id -g -u -d $mpath";
+    print "> get_scsi_id()\n" if(defined $debug);
+    my $cmd = "ssh $server /lib/udev/scsi_id -g -u -d $disk_path";
     print ">> Command: $cmd\n" if(defined $debug);
     open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
     while(<INPUT>) {
         # 
         #   Example Input -- this is what we expect the response to normally
         #   look like, but as long as it's a unique string, we don't really 
-        #   care.  We are currently making the assumption (XXX) that it will
-        #   start with a '36' and will have no spaces.  This can be made more 
-        #   general later if necessary.
+        #   care.  
+        #
+        #   DCS3700 style:
+        #
+        #       360080e50002934b80000403b5283dbe6
+        #       360080e50002937b800003f6b5283dbf5
+        #       360080e50002937b800003f8f5283dc3f
         # 
-        #   360080e50002934b80000403b5283dbe6
-        #   360080e50002937b800003f6b5283dbf5
-        #   360080e50002937b800003f8f5283dc3f
-        # 
-        if( m/^(36\S+)/ ) {
+        #   FlashSystems 820 style:
+        #
+        #      20020c24001146a2c
+        #      20020c24000146a2c
+        #      20020c24002146a2c
+        #
+        if( m/^(\S+)/ ) {
             $scsi_id = $1;
             last;
         }
@@ -478,13 +651,13 @@ sub calculate_read_ahead_kb {
 
 sub calculate_max_sectors_kb {
 
-    my $bs = shift;
+    my $block_size = shift;
 
     #
     #   GPFS block size / 4 or 512, whichever is greater.
     #
     #   max_sectors_kb should always be set as high as you can,
-    #   independent of the blocksize.  However, empirical testing
+    #   independent of the block size.  However, empirical testing
     #   indicates lower performance, and in rare cases SCSI underruns,
     #   if this is set too high with certain hardware.
     #
@@ -500,7 +673,7 @@ sub calculate_max_sectors_kb {
     #   value.  Thanks go to Christian Caruthers for his input on this
     #   -BEF-.
     #
-    my $kb = $bs / 1024 / 4;
+    my $kb = $block_size / 1024 / 4;
 
     if( $kb < 512 ) {
         $kb = 512;
@@ -510,9 +683,89 @@ sub calculate_max_sectors_kb {
 }
 
 
+sub get_disk_pool_info {
+
+    print "> get_disk_pool_info()\n" if(defined $debug);
+    my $cmd = "/usr/lpp/mmfs/bin/mmlsdisk $fs 2>&1";
+    print ">> Command: $cmd\n" if(defined $debug);
+    open(INPUT,"$cmd|") or die("Couldn't run $cmd for input.");
+    while(<INPUT>) {
+        #
+        #   [root@flashnsd1 ~]# mmlsdisk tiered
+        #   disk         driver   sector     failure holds    holds                            storage
+        #   name         type       size       group metadata data  status        availability pool
+        #   ------------ -------- ------ ----------- -------- ----- ------------- ------------ ------------
+        #   flashctl1ab_lun0 nsd         512          -1 Yes      Yes   ready         up           system       
+        #   flashctl1ab_lun1 nsd         512          -1 Yes      Yes   ready         up           system       
+        #   flashctl1ab_lun2 nsd         512          -1 Yes      Yes   ready         up           system       
+        #   flashctl1ab_lun3 nsd         512          -1 Yes      Yes   ready         up           system       
+        #   sur_dcs3700a_lun0 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun1 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun2 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun3 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun4 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun5 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun6 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun7 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun8 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun9 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun10 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun11 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun12 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun13 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun14 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun15 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun16 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun17 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun18 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun19 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun20 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun21 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun22 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun23 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun24 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun25 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun26 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun27 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun28 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun29 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun30 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun31 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun32 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun33 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700a_lun34 nsd         512         121 No       Yes   ready         up           Tier2        
+        #   sur_dcs3700b_lun35 nsd         512         121 No       Yes   ready         up           Tier2        
+
+        print ">> $_" if(defined $debug);
+
+        next if(m/^(disk|name|----+)\s/);
+            #
+            #   disk         driver   sector     failure holds    holds                            storage
+            #   name         type       size       group metadata data  status        availability pool
+            #   ------------ -------- ------ ----------- -------- ----- ------------- ------------ ------------
+            #
+
+        if(m/^(\S+)\s+.*\s+(\S+)/) {
+            #  ^^^          ^^^
+            #   |            |
+            #   |            ----< pool
+            #   ----< disk_name
+    
+            my $disk_name   = $1;
+            my $pool        = $2;
+
+            $disk_pool_by_disk_name{$disk_name} = $pool;
+            $disk_pools{$pool} = 1;
+        }
+    }
+
+    return 1;
+}
+
+
 sub calculate_nr_requests {
 
-    my $disks_per_array = shift;
+    my $disk_name = shift;
 
     #
     # nr_requests can be higher than queue_depth without much negative
@@ -529,7 +782,8 @@ sub calculate_nr_requests {
     #       Sven Oehme
     #
 
-    my $nr_requests = $disks_per_array * 32;
+    my $pool = $disk_pool_by_disk_name{$disk_name};
+    my $nr_requests = $disks_per_array_by_pool{$pool} * 32;
 
     return $nr_requests;
 }
@@ -537,7 +791,7 @@ sub calculate_nr_requests {
 
 sub calculate_queue_depth {
 
-    my $disks_per_array = shift;
+    my $disk_name = shift;
 
     #
     # Let's take an 8+2p array (8 data disks, 2 parity disks, AKA RAID6)
@@ -557,7 +811,8 @@ sub calculate_queue_depth {
     #       Sven Oehme
     #
 
-    my $queue_depth = $disks_per_array * 4;
+    my $pool = $disk_pool_by_disk_name{$disk_name};
+    my $queue_depth = $disks_per_array_by_pool{$pool} * 4;
 
     return $queue_depth;
 }
@@ -574,44 +829,82 @@ sub version {
 }
 
 sub usage {
+
+    my $udev_rules_file = $udev_rules_file_base . "-FSNAME.rules";
+
 version();
 print << "EOF";
-Usage:  $progname [OPTION...] --out-file FILE
+Usage:  $progname --filesystem FSNAME [OPTION...]
 
-  WARNING: $progname should be considered BETA code at 
-           this point.  It works well in some environments but the
-           following tuning settings are currently hard coded pending
-           creation of formulas for calculating system specific values.
-           If you have such a formula -- let me know. ;-)  -Brian
-
+    $progname should be considered BETA code at this point.  
+           
     All options can be abbreviated to minimum uniqueness.
 
     This program will examine your environment including GPFS, storage
     servers, disk subsystems, and LUNs, to calculate best practice block
-    device tuning settings.  It will create a single udev rules file
-    with the tuning settings, using one entry for each LUN, and
-    optionally deploy it to each participating storage server.
+    device tuning settings.  It will create one udev rules file per file
+    system with the new tuning settings, using one entry for each LUN,
+    and optionally deploy it to each participating storage server.
+
+    This tool is intended to be run with GPFS 'active' on all the NSD
+    servers serving your specified file system.
+
+    Note that it will skip over and ignore any GSS file systems.  GSS block
+    device settings are tuned directly by the GSS software stack.
     
     --help
 
     --version
 
-    --disks-per-array NN
+    --filesystem FSNAME
+
+        Where FSNAME is the name of the file system whose block devices
+        should be tuned.
+
+
+    --disks-per-array (NN|NN:POOLNAME,[...])
 
         Where NN is the number of disks in each array.  
         
-        Typically, each LUN presented to the OS represents on RAID array
-        in the storage subsystem.  Here are some examples by array type:
+        Often, each LUN presented to the OS represents one RAID array in
+        the storage subsystem.  Here are some examples by array type:
 
-            Value for NN    Array Type
-            ------------    --------------------------------------------
-                 8          8+2p RAID6        (8 data + 2 parity disks)
-                 8          8+3p Reed Solomon (8 data + 3 parity disks)
-                 4          4+1p RAID5        (4 data + 1 parity disk)
+          Value for NN    Array Type
+          ------------    --------------------------------------------
+               8          8+2p RAID6        (8 data + 2 parity disks)
+               8          8+3p Reed Solomon (8 data + 3 parity disks)
+               4          4+1p RAID5        (4 data + 1 parity disk)
+               1          1+1m RAID1        (1 data + 1 mirrored disk)
 
-    --test-run
+        Hint #1:  If all of your disks are in the same kind of array
+        (e.g.: RAID6 with 8 data disks + 2 parity disks), then you can
+        simply use the "NN" format, even if you have multiple file
+        systems and multiple pools.
 
-        Create the rules, but don't deploy them.
+        Hint #2:  If you don't know what all this "pool" stuff is about,
+        then you probably only have one pool (the "system" pool).  Try
+        "mmlspool FSNAME" to have a look if you're curious.
+
+        NN - If only "NN" is specified, then it is assumed that NN
+        represents the number of disks per array across all file systems
+        and living on all pools served by "--servers" (or you only have
+        one pool per file system).
+
+        NN:POOLNAME - The number of disks (NN) per array across all
+        arrays in pool POOLNAME that are part of file system FSNAME.
+
+        Examples:
+
+            --disks-per-array 8
+            --disks-per-array 4:system,8:tier2
+
+        Default: $disks_per_array_default
+
+
+    --test
+
+        Create the rules, but don't deploy them.  This is the default
+        action if --deploy is not specified.
 
 
     --deploy
@@ -631,12 +924,15 @@ Usage:  $progname [OPTION...] --out-file FILE
         The name of your resultant udev rules file.  This file can be
         given any name you like.  
 
-        If you also use the --deploy option, this file will be deployed
-        to your storage servers with the name of $udev_rules_file.
+        If you also use the --deploy option, this file will still be 
+        deployed to your storage servers with the name of:
+        
+            $udev_rules_file
 
         Example:  --out-file /tmp/my_shiny_new_udev_rules_file.conf
 
-        Default:  I'll choose one for you and tell you what I've named it.
+        Default:  I'll choose one for you and tell you what I've named
+        it.
 
 
     Support: 
@@ -648,16 +944,6 @@ Usage:  $progname [OPTION...] --out-file FILE
 
 EOF
     return 1;
-#XXXX    --file-systems FS1[,FS2,FS3,...]
-#
-#        A comma delimited list of file systems whose block devices
-#        should be tuned.
-#        
-#        If no --file-systems entry is specified, then block device
-#        settings for all file systems
-#        will be tuned.
-#        
-#
 }
 
 sub user_is_root {
