@@ -51,11 +51,11 @@ install:
 	mkdir -p                       			${PREFIX}/usr/share/${PKG_NAME}/etc/modprobe.d/
 	install -m 644 etc/modprobe.d/*			${PREFIX}/usr/share/${PKG_NAME}/etc/modprobe.d/
 	
-	mkdir -p                         		${PREFIX}/usr/share/${PKG_NAME}/etc/udev/rules.d/
-	install -m 644 etc/udev/rules.d/*		${PREFIX}/usr/share/${PKG_NAME}/etc/udev/rules.d/
-	
 	mkdir -p                       			${PREFIX}/usr/share/${PKG_NAME}/var/mmfs/etc/
 	install -m 644 var/mmfs/etc/*			${PREFIX}/usr/share/${PKG_NAME}/var/mmfs/etc/
+	
+	mkdir -p                       			${PREFIX}/etc/init.d/
+	install -m 755 etc/init.d/*				${PREFIX}/etc/init.d/
 	
 	mkdir -p ${PREFIX}/usr/share/doc/${PKG_DIR}/
 	echo "See the files in /usr/share/${PKG_NAME}/" > ${PREFIX}/usr/share/doc/${PKG_DIR}/README
