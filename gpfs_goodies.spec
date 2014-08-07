@@ -25,7 +25,7 @@ Includes:
     - tune_block_device_settings
   OpenSM init script for direct connect InfiniBand storage
     - /etc/init.d/opensmd.for_direct_connect_storage
-    - installed inactive
+      (installed inactive)
   HOWTOs
     - GPFS Multi-Cluster Routing HOWTO
   Some half-baked goodies and examples
