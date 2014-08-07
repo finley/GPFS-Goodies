@@ -182,33 +182,128 @@ while(<FILE>) {
 close(FILE);
 
 
-print "friendly_name max_sectors_kb nr_requests read_ahead_kb queue_depth scheduler\n\n";
+my $max_name_length = 13;   # header
+foreach my $friendly_name (keys %devices_by_friendly_name) {
+    my $friendly_name_length = length($friendly_name);
+    if($friendly_name_length > $max_name_length) {
+        $max_name_length = $friendly_name_length;
+    }
+}
+$max_name_length += 1;  # add a two space pad
+
+
+my $header1 = 'friendly_name';
+my $header2 = ' max_sectors_kb  read_ahead_kb queue_depth nr_requests rq_affinity  add_random timeout  scheduler';
+printf("%-${max_name_length}s%s\n", $header1, $header2);
+
+$header1 =~ s/\S/-/g;
+$header2 =~ s/\S/-/g;
+printf("%-${max_name_length}s%s\n", $header1, $header2);
+
+
 foreach my $index_key (sort keys %friendly_name_by_index) {
 
     my $friendly_name = $friendly_name_by_index{$index_key};
 
     my $device = $devices_by_friendly_name{$friendly_name};
 
-    print "$friendly_name";
+    printf("%-${max_name_length}s", $friendly_name);
 
+    #
+    # 14c
+    #
     foreach my $file (
         "/sys/block/$device/queue/max_sectors_kb", 
-        "/sys/block/$device/queue/nr_requests",
         "/sys/block/$device/queue/read_ahead_kb",
-        "/sys/block/$device/device/queue_depth",
-        "/sys/block/$device/queue/scheduler",
-                                                ) {
+        ) {
+
+        my $value;
 
         if( ! -e $file ) {
-            print "  N/A";
-            next;
-        }
-        open(FILE,"<$file") or die("Couldn't read $file");
-        while(<FILE>) {
-            chomp;
-            print "  $_";
+            $value = 'N/A';
+        } else {
+            open(FILE,"<$file") or die("Couldn't read $file");
+            while(<FILE>) {
+                chomp;
+                $value = $_;
+            }
         }
         close(FILE);
+
+        printf("%15s", $value);
+    }
+
+    #
+    # 11c
+    #
+    foreach my $file (
+        "/sys/block/$device/device/queue_depth",
+        "/sys/block/$device/queue/nr_requests",
+        "/sys/block/$device/queue/rq_affinity",
+        "/sys/block/$device/queue/add_random",
+        ) {
+
+        my $value;
+
+        if( ! -e $file ) {
+            $value = 'N/A';
+        } else {
+            open(FILE,"<$file") or die("Couldn't read $file");
+            while(<FILE>) {
+                chomp;
+                $value = $_;
+            }
+        }
+        close(FILE);
+
+        printf("%12s", $value);
+    }
+
+    #
+    # 7c
+    #
+    foreach my $file (
+        "/sys/block/$device/device/timeout",
+        ) {
+
+        my $value;
+
+        if( ! -e $file ) {
+            $value = 'N/A';
+        } else {
+            open(FILE,"<$file") or die("Couldn't read $file");
+            while(<FILE>) {
+                chomp;
+                $value = $_;
+            }
+        }
+        close(FILE);
+
+        printf("%8s", $value);
+    }
+
+    #
+    #   Unknown, but consistent across all entries
+    #
+    foreach my $file (
+        "/sys/block/$device/queue/scheduler",
+        ) {
+
+        my $value;
+
+        if( ! -e $file ) {
+            $value = 'N/A';
+        } else {
+            open(FILE,"<$file") or die("Couldn't read $file");
+            while(<FILE>) {
+                chomp;
+                $value = $_;
+            }
+        }
+        close(FILE);
+
+        my $length = length($value) + 2;
+        printf("%${length}s", $value);
     }
 
     print "\n";
