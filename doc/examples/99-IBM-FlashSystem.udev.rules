@@ -1,0 +1,28 @@
+# ---------------------------------------------------------------------------
+# The following is excerpted from "Implementing IBM FlashSystem 840" Redbook.
+# ---------------------------------------------------------------------------
+# 
+#   Linux tuning
+#   
+#   The Linux kernel buffer file system writes data before it sends the data to the storage system.
+#   With the FlashSystem 840, better performance can be achieved when the data is not buffered
+#   but directly sent to the FlashSystem 840. When setting the scheduling policy to no operation
+#   (NOOP), the fewest CPU instructions possible are used for each I/O. Setting the scheduler to
+#   NOOP gives the best write performance on Linux systems. You can use the following setting
+#   in most Linux distributions as a boot parameter: elevator=noop.
+#   
+#   Current Linux devices are managed by the device manager Udev. You can define how Udev
+#   will manage devices by adding rules to the /etc/udev/rules.d directory. Example 5-24
+#   shows a rule for the FlashSystem 840.
+#   
+#   Example 5-24 Linux device rules
+#   
+# [root@flashnsd1 ~]# cat 99-IBM-FlashSystem.rules
+
+ACTION=="add|change", SUBSYSTEM=="block", ATTRS{device/model}=="FlashSystem", ATTR{queue/scheduler}="noop", ATTR{queue/rq_affinity}="2", ATTR{queue/add_random}="0", ATTR{device/timeout}="5"
+ACTION=="add|change", SUBSYSTEM=="block", ATTRS{device/model}=="FlashSystem-9840", ATTR{queue/scheduler}="noop", ATTR{queue/rq_affinity}="2", ATTR{queue/add_random}="0", ATTR{device/timeout}="10"
+
+ACTION=="add|change", KERNEL=="dm-*", PROGRAM="/bin/bash -c 'cat /sys/block/$name/slaves/*/device/model | grep FlashSystem'", ATTR{queue/scheduler}="noop", ATTR{queue/rq_affinity}="2", ATTR{queue/add_random}="0"
+ACTION=="add|change", KERNEL=="dm-*", PROGRAM="/bin/bash -c 'cat /sys/block/$name/slaves/*/device/model | grep FlashSystem-9840'", ATTR{queue/scheduler}="noop", ATTR{queue/rq_affinity}="2", ATTR{queue/add_random}="0"
+
+
