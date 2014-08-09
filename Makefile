@@ -101,13 +101,13 @@ rpm:	tarball
 
 .PHONY += release
 release:	rpm
-	mkdir -p tmp/
-	cp -i ~/rpmbuild/RPMS/noarch/${PKG_NAME}-${VERSION}-1.noarch.rpm    tmp/
-	cp -i ~/rpmbuild/SRPMS/${PKG_NAME}-${VERSION}-1.src.rpm             tmp/
-	cp -i ${TARBALL}                                                    tmp/
+	mkdir -p ~/src/www.systemimager.org/testing/gpfs_goodies/
+	cp -i ~/rpmbuild/RPMS/noarch/${PKG_NAME}-${VERSION}-1.noarch.rpm    ~/src/www.systemimager.org/testing/gpfs_goodies/
+	cp -i ~/rpmbuild/SRPMS/${PKG_NAME}-${VERSION}-1.src.rpm             ~/src/www.systemimager.org/testing/gpfs_goodies/
+	cp -i ${TARBALL}                                                    ~/src/www.systemimager.org/testing/gpfs_goodies/
 	@echo
 	@echo "Results:"
-	@/bin/ls -1 tmp/*${PKG_NAME}-${VERSION}* | sed 's/^/  /'
+	@/bin/ls -1 ~/src/www.systemimager.org/testing/gpfs_goodies/*${PKG_NAME}-${VERSION}* | sed 's/^/  /'
 
 .PHONY += help
 help:
