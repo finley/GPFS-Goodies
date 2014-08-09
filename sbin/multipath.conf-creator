@@ -858,8 +858,8 @@ version();
 print << "EOF";
 Usage:  $progname [OPTION...] [--auto-detect | subsystem1 subsystem2...]
 
-    Options can be abbreviated to minimum uniqueness.  For example, you could
-    use "-h" or "--h" instead of "--help".
+    Options can be abbreviated to minimum uniqueness.  For example, you 
+    could use "-h" or "--h" instead of "--help".
 
     --help
 
