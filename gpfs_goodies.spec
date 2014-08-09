@@ -47,7 +47,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%config(noreplace) /etc/*
+%config(noreplace) /etc/gpfs_goodies/*
+%config(noreplace) /etc/init.d/*
 %{_prefix}/sbin/*
 %{_prefix}/share/*
 
