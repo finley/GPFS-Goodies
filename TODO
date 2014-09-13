@@ -1,3 +1,6 @@
+- rename package to gpfs-goodies
+    (debian compliant)
+
 - for SMcli capable storage, use "SMcli -d -w" to capture the info, then
   use "SMcli -w $WWID" to invoke the commands.  If multiple controllers
   with the same name, append a number to the end of them:
