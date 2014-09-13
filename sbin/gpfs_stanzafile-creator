@@ -28,6 +28,7 @@ GetOptions(
     "help"                  => \my $help,
     "version"               => \my $version,
     "sg|server-group=s"     => \my @server_groups,
+    "paths=s"               => \my $paths,
     "out-file=s"            => \my $out_file,
     "v|verbose"             => \my $verbose,
 ) or usage() and exit(1);
@@ -52,6 +53,15 @@ if( ! defined $out_file ) {
     $out_file = get_tmp_file();
 }
 
+if( ! defined $paths ) {
+    $paths = 2;
+}
+
+
+########################################################################
+#
+#   BEGIN main
+#
 foreach my $servers (@server_groups) {
     create_stanza_chunk($servers);
 }
@@ -61,6 +71,11 @@ write_stanza_file($out_file);
 print "\nYour new file: $out_file\n\n";
 
 exit 0;
+
+#
+#   END main
+#
+########################################################################
 
 
 ########################################################################
@@ -89,24 +104,24 @@ sub create_stanza_chunk {
 
     # ssh to server(s) and get lun list
             my @disks = (
-                "/dev/mapper/Tahoea_lun0",
-                "/dev/mapper/Tahoeb_lun1",
-                "/dev/mapper/Tahoea_lun2",
-                "/dev/mapper/Tahoeb_lun3",
-                "/dev/mapper/Tahoea_lun4",
-                "/dev/mapper/Tahoeb_lun5",
-                "/dev/mapper/Tahoea_lun6",
-                "/dev/mapper/Tahoeb_lun7",
-                "/dev/mapper/Tahoea_lun8",
-                "/dev/mapper/Tahoeb_lun9",
-                "/dev/mapper/Tahoea_lun10",
-                "/dev/mapper/Tahoeb_lun11",
-                "/dev/mapper/Tahoea_lun12",
-                "/dev/mapper/Tahoeb_lun13",
-                "/dev/mapper/Tahoea_lun14",
-                "/dev/mapper/Tahoeb_lun15",
-                "/dev/mapper/Tahoea_lun16",
-                "/dev/mapper/Tahoeb_lun17",
+                "/dev/mapper/Tahoeab_lun0",
+                "/dev/mapper/Tahoeab_lun1",
+                "/dev/mapper/Tahoeab_lun2",
+                "/dev/mapper/Tahoeab_lun3",
+                "/dev/mapper/Tahoeab_lun4",
+                "/dev/mapper/Tahoeab_lun5",
+                "/dev/mapper/Tahoeab_lun6",
+                "/dev/mapper/Tahoeab_lun7",
+                "/dev/mapper/Tahoeab_lun8",
+                "/dev/mapper/Tahoeab_lun9",
+                "/dev/mapper/Tahoeab_lun10",
+                "/dev/mapper/Tahoeab_lun11",
+                "/dev/mapper/Tahoeab_lun12",
+                "/dev/mapper/Tahoeab_lun13",
+                "/dev/mapper/Tahoeab_lun14",
+                "/dev/mapper/Tahoeab_lun15",
+                "/dev/mapper/Tahoeab_lun16",
+                "/dev/mapper/Tahoeab_lun17",
             );
 
 
@@ -121,6 +136,7 @@ sub create_stanza_chunk {
     }
 
 
+    my $path_count = 0;
     while( %disks_by_raid_controller ) {
 
         foreach my $raid_controller (sort keys %disks_by_raid_controller) {
@@ -128,6 +144,7 @@ sub create_stanza_chunk {
             print "\$raid_controller $raid_controller\n" if($verbose);
 
             my $disk = shift @{$disks_by_raid_controller{$raid_controller}};
+            print "  \$disk $disk\n" if($verbose and $disk);
             if(defined $disk) {
 
                 my $nsdname = basename $disk;
@@ -135,13 +152,22 @@ sub create_stanza_chunk {
 
                 push @output, "%nsd: device=$disk  nsd=$nsdname  servers=$servers\n";
 
+                $path_count++;
+
             } else {
 
                 delete $disks_by_raid_controller{$raid_controller};
             }
         }
 
-        $servers = list_shift($servers);
+        #
+        # Make sure each server is assigned one lun per path each
+        # go-round
+        #
+        if( $path_count >= $paths ) {
+            $servers = list_shift($servers);
+            $path_count = 0;
+        }
     }
 
 
@@ -217,6 +243,16 @@ Usage:  $progname [OPTION...] --servers SERVER[,SERVER,...]
 
         Example:  --sg nsd1,nsd2 --sg nsd3,nsd4 --sg nsd5,nsd6
              or:  --server-group s1,s2,s3 --server-group s4,s5,s6
+
+
+    --paths N
+        
+        Number of paths each server has to each disk.  
+        
+        For example, if each server has 2x cables connected to each disk
+        subsystem, then you would specify 2.  
+
+        Default:  2
 
 
     --out-file FILE
