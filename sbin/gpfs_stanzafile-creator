@@ -12,6 +12,12 @@
 #   2014.07.09 Brian Elliott Finley <bfinley@us.ibm.com> & Lerone Latouche <latouche@us.ibm.com>
 #   - Identified and fixed bug where remote commands were not properly
 #     escaped
+#   2014.09.13 Brian Elliott Finley <bfinley@us.ibm.com>
+#   - Converted to perl
+#   - Added support for arbitrary numbers of servers per building-block
+#     (GPFS currently only supports a max of 8)
+#   - Added intelligence to ensure that LUNs on subsystems that are
+#     truly active-active are balanced across all paths.
 #
 
 use strict;
@@ -102,27 +108,18 @@ sub create_stanza_chunk {
 
     my $servers = shift;
 
-    # ssh to server(s) and get lun list
-            my @disks = (
-                "/dev/mapper/Tahoeab_lun0",
-                "/dev/mapper/Tahoeab_lun1",
-                "/dev/mapper/Tahoeab_lun2",
-                "/dev/mapper/Tahoeab_lun3",
-                "/dev/mapper/Tahoeab_lun4",
-                "/dev/mapper/Tahoeab_lun5",
-                "/dev/mapper/Tahoeab_lun6",
-                "/dev/mapper/Tahoeab_lun7",
-                "/dev/mapper/Tahoeab_lun8",
-                "/dev/mapper/Tahoeab_lun9",
-                "/dev/mapper/Tahoeab_lun10",
-                "/dev/mapper/Tahoeab_lun11",
-                "/dev/mapper/Tahoeab_lun12",
-                "/dev/mapper/Tahoeab_lun13",
-                "/dev/mapper/Tahoeab_lun14",
-                "/dev/mapper/Tahoeab_lun15",
-                "/dev/mapper/Tahoeab_lun16",
-                "/dev/mapper/Tahoeab_lun17",
-            );
+    my @disks;
+
+
+    my ($server, $remainder) = split(/,/, $servers, 2);
+    my $cmd = qq(ssh $server ) . q(ls -1 /dev/mapper/\*);
+
+    open(INPUT,"$cmd|") or die("Couldn't run $cmd for input");
+    while(<INPUT>) {
+        chomp;
+        push @disks, $_ if(m/$disk_regex/);
+    }
+    close(INPUT);
 
 
     foreach my $disk (@disks) {
@@ -169,7 +166,6 @@ sub create_stanza_chunk {
             $path_count = 0;
         }
     }
-
 
     return 1;
 }
