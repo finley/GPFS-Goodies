@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/perl -w
 
 #
-# StanzaFile-creator
+# gpfs_stanzafile-creator
 #
 
 #
@@ -14,78 +14,268 @@
 #     escaped
 #
 
-server1=$1
-server2=$2
+use strict;
+use Getopt::Long;
+use File::Basename;
 
-PROGNAME=$(basename $0)
+my $progname = basename($0);
+my $version_number = '20.8.3';
+my @output;
+my %disks_by_raid_controller;
+my $disk_regex = '(.*[ab])_lun[0-9]+';
 
-if [ -z $server2 ]; then
-    echo "
-Usage: $PROGNAME SERVER1 SERVER2
+GetOptions(
+    "help"                  => \my $help,
+    "version"               => \my $version,
+    "sg|server-group=s"     => \my @server_groups,
+    "out-file=s"            => \my $out_file,
+    "v|verbose"             => \my $verbose,
+) or usage() and exit(1);
 
-    Where SERVER1 and SERVER2 are the node names for your two NSD
-    servers as they appear in the 'Admin node name' column in the
-    'mmlscluster' output.
+if ( defined $help ) {
+    usage();
+    exit 0;
+}
+
+if ( defined $version ) {
+    version();
+    exit 0;
+}
+
+if( ! @server_groups ) {
+    usage();
+    print "--> Please try --server-group\n\n";
+    exit 1;
+}
+
+if( ! defined $out_file ) {
+    $out_file = get_tmp_file();
+}
+
+foreach my $servers (@server_groups) {
+    create_stanza_chunk($servers);
+}
+
+write_stanza_file($out_file);
+
+print "\nYour new file: $out_file\n\n";
+
+exit 0;
 
 
-    Details:
+########################################################################
+#
+#   BEGIN subroutines
+#
+sub write_stanza_file {
 
-    This script will auto-create a GPFS StanzaFile (written to STDOUT)
-    that should be considered an example of how you can appropriately
-    balance your disk devices across your NSD servers for best
+    my $file = shift;
+
+    open(FILE,">$file") or die("Couldn't open $file for writing");
+    print FILE "#\n";
+    print FILE "#  Created by $progname\n";
+    print FILE "#\n";
+    print FILE "\n";
+    print FILE @output;
+    close(FILE);
+
+    return 1;
+}
+
+
+sub create_stanza_chunk {
+
+    my $servers = shift;
+
+    # ssh to server(s) and get lun list
+            my @disks = (
+                "/dev/mapper/Tahoea_lun0",
+                "/dev/mapper/Tahoeb_lun1",
+                "/dev/mapper/Tahoea_lun2",
+                "/dev/mapper/Tahoeb_lun3",
+                "/dev/mapper/Tahoea_lun4",
+                "/dev/mapper/Tahoeb_lun5",
+                "/dev/mapper/Tahoea_lun6",
+                "/dev/mapper/Tahoeb_lun7",
+                "/dev/mapper/Tahoea_lun8",
+                "/dev/mapper/Tahoeb_lun9",
+                "/dev/mapper/Tahoea_lun10",
+                "/dev/mapper/Tahoeb_lun11",
+                "/dev/mapper/Tahoea_lun12",
+                "/dev/mapper/Tahoeb_lun13",
+                "/dev/mapper/Tahoea_lun14",
+                "/dev/mapper/Tahoeb_lun15",
+                "/dev/mapper/Tahoea_lun16",
+                "/dev/mapper/Tahoeb_lun17",
+            );
+
+
+    foreach my $disk (@disks) {
+    
+        my $nsdname = basename $disk;
+        $nsdname =~ m/$disk_regex/;
+
+        my $raid_controller = $1;
+
+        push @{$disks_by_raid_controller{$raid_controller}}, $disk;
+    }
+
+
+    while( %disks_by_raid_controller ) {
+
+        foreach my $raid_controller (sort keys %disks_by_raid_controller) {
+
+            print "\$raid_controller $raid_controller\n" if($verbose);
+
+            my $disk = shift @{$disks_by_raid_controller{$raid_controller}};
+            if(defined $disk) {
+
+                my $nsdname = basename $disk;
+                $nsdname =~ m/$disk_regex/;
+
+                push @output, "%nsd: device=$disk  nsd=$nsdname  servers=$servers\n";
+
+            } else {
+
+                delete $disks_by_raid_controller{$raid_controller};
+            }
+        }
+
+        $servers = list_shift($servers);
+    }
+
+
+    return 1;
+}
+
+
+sub list_shift {
+
+    my $servers = shift;
+
+    my ($firstling, $remainder) = split(/,/, $servers, 2);
+
+    # And the first shall be last...
+    return "$remainder,$firstling";
+}
+
+
+sub usage {
+version();
+print << "EOF";
+Description:
+
+    $progname will auto-create a GPFS StanzaFile that will appropriately
+    balance NSD device access across your NSD servers for best
     performance.  
     
-    It may be used as-is in many cases.
+    The resultant StanzaFile can be used as-is with the mmcrnsd command,
+    and should provide balanced NSD device access from clients (good
+    performance) if the following assumptions are true:
 
-    You'll want to re-direct the output to a file for use with the
-    mmcrnsd command:
+        That each group of NSD servers specified with each
+        --server-group argument:
+           
+        a) have access to all of the same shared disk devices
 
-        $PROGNAME SERVER1 SERVER2 > SERVER1-SERVER2.StanzaFile
+        b) have been prepared for multipath use with the GPFS Goodies
+           multipath.conf-creator tool
+
+    If the assumptions above are not true for your environment, you may
+    need to hand edit the StanzaFile before use.  If you find you need
+    to do this, please email the author(s) with before and after copies
+    of your StanzaFile, and any other relevant details, and we will try
+    to improve the tool to handle your situation in a future release.
     
-    WARNING:  This script should work as-is for a GPFS building block
-    that:
-
-        a) includes two NSD servers
-        b) that are both multipathed to the same storage subsystem
-        c) that have been prepared for use with the GPFS Goodies
-           multipath.conf-creator tool.
-
-    Please review your StanzaFile for appropriateness before using, and
-    you may need to modify this script or use an alternate method for
-    use with different building block configurations.
-
     If you are satisfied with the StanzaFile you've created, you can use
     mmcrnsd to initialize the disks (see "man mmcrnsd" for more details):
 
-        mmcrnsd -F SERVER1-SERVER2.StanzaFile
-
+        mmcrnsd -F GPFS_Goodies.StanzaFile
 
     Have fun!  -Brian Finley
 
-"
-    exit 1
-fi
+
+Usage:  $progname [OPTION...] --servers SERVER[,SERVER,...]
+
+    Options can be abbreviated to minimum uniqueness.  For example, you 
+    could use "-h" or "--h" instead of "--help".
+
+    --help
+
+    --version
+
+    -sg, --server-group SERVER[,SERVER,...]
+
+        A comma delimited list of servers that are all connected to the
+        same multi-pathed disk subsystem(s) (a building block).  Make
+        sure that you use the names of the servers as they appear in the
+        'Admin node name' column of the output from the 'mmlscluster'
+        command.
+
+        May be specified multiple times if you have multiple building
+        blocks.
+
+        Example:  --sg nsd1,nsd2 --sg nsd3,nsd4 --sg nsd5,nsd6
+             or:  --server-group s1,s2,s3 --server-group s4,s5,s6
 
 
-CONTROLLER_REGEX='[ab]_lun[0-9]+'
+    --out-file FILE
 
-count=1
-for lun in $(ssh $server1 ls -1 /dev/mapper/* | egrep $CONTROLLER_REGEX | awk -F'lun' '{print $2" "$1"lun"$2}' | sort -n | awk '{print $NF}')
-do 
-	NsdName=$(basename $lun)
-	if [ $count -le 2 ]; then
-		servers=$server1,$server2
-	else
-		servers=$server2,$server1
-	fi
-	echo %nsd: device=$lun  nsd=$NsdName  servers=$servers
+        Where FILE is the name you want to use for your shiny new
+        multipath.conf file.
 
-	if [ $count -eq 4 ]; then
-		count=1
-	else
-		count=$(( $count + 1 ))
-	fi
-done
+        Default:  I'll choose one for you and tell you what I've named it.
+
+        Example:  --out-file /tmp/$progname.StanzaFile
 
 
+    Support: 
+    
+        This software is provided as-is, with no express or implied
+        support.  However, the author would love to receive your
+        patches.  Please contact Brian E. Finley <bfinley\@us.ibm.com>
+        with patches and/or suggestions.
+
+        To request support for an additional storage subsystem, please
+        email the output from 'lsscsi' to <bfinley\@us.ibm.com>.  Emails
+        that have an actual storage subsystem attached (or at least
+        remote access to one) are likely to get the most attention. ;-)
+
+
+EOF
+    return 1;
+}
+
+sub get_tmp_file {
+
+    my $file;
+
+    my $template_base = '/tmp/gpfs_goodies.StanzaFile';
+    my $cmd = qq(mktemp $template_base.XXX);
+
+    open(INPUT,"$cmd|") or die("Couldn't run $cmd for input");
+    while(<INPUT>) {
+        if( m#^($template_base.*)# ) {
+            $file = $1;
+        }
+    }
+    close(INPUT);
+
+    return $file;
+}
+
+sub version {
+    print qq(\n);
+    print qq($progname v$version_number\n);
+    print qq(\n);
+    print qq(    Part of the "gpfs_goodies" package\n);
+    print qq(\n);
+
+    return 1;
+}
+
+#
+#   END subroutines
+#
+########################################################################
 
