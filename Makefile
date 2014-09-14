@@ -9,16 +9,16 @@
 
 package 	:= gpfs_goodies
 
-MAJOR_VER 	:= $(shell git describe --tags | sed -e 's/^v//' -e 's/-.*//')
+MAJOR_VER 	:= $(shell git describe --tags | sed -e 's/^v//' -e 's/[.-].*//')
 MAJOR_VER   ?= 0
 
-MINOR_VER	:= $(shell git describe --tags | sed -e 's/^v[0-9]*-//' -e 's/-.*//')
+MINOR_VER	:= $(shell git describe --tags | sed -e 's/^v[0-9]*[.-]//' -e 's/[.-].*//')
 MINOR_VER   ?= 0
 
-PATCH_VER	:= $(shell git describe --tags | sed -e 's/^v[0-9]*-[0-9]*-//' -e 's/-.*//')
+PATCH_VER	:= $(shell git describe --tags | sed -e 's/^v[0-9]*[.-][0-9]*[.-]//' -e 's/[.-].*//')
 PATCH_VER   ?= 0
 
-AUTO_VER	:= $(shell git describe --tags | sed -e 's/^v[0-9]*-[0-9]*-[0-9]*-//' -e 's/-.*//')
+AUTO_VER	:= $(shell git describe --tags | sed -e 's/^v[0-9]*[.-][0-9]*[.-][0-9]*[.-]//' -e 's/[.-].*//')
 AUTO_VER    ?= 0
 
 # In case we have made commits (AUTO_VER) since updating a PATCH_VER in
