@@ -96,6 +96,9 @@ tarball:
 	# Tar it up
 	cd ${TMPDIR} && tar -cvjf ${TARBALL} ${PKG_DIR}
 
+.PHONY += rpms
+rpms:	rpm
+
 .PHONY += rpm
 rpm:	tarball
 	rpmbuild -ta ${TARBALL}
