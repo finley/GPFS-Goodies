@@ -30,9 +30,11 @@ VERSION     := ${MAJOR_VER}.${MINOR_VER}.${PATCH_VER}
 TMPDIR 		:= $(shell mktemp -d)
 SPECFILE 	:= $(shell mktemp)
 PKG_DIR     := ${package}-${VERSION}
-TARBALL		:= $(TOPDIR)/tmp/${PKG_DIR}.tar.bz2
 
 TOPDIR 		:= $(CURDIR)
+rpmbuild    = ~/rpmbuild
+
+TARBALL		:= $(TOPDIR)/tmp/${PKG_DIR}.tar.bz2
 
 .PHONY += all
 all: tarball
@@ -64,6 +66,8 @@ install:
 
 .PHONY += tarball
 tarball:
+	
+	mkdir -p $(TOPDIR)/tmp/
 	
 	#
 	# Make a copy of the repo
@@ -104,6 +108,8 @@ rpms:	rpm
 .PHONY += rpm
 rpm:	tarball
 	rpmbuild -ta ${TARBALL}
+	/bin/cp -i ${rpmbuild}/RPMS/*/${package}-$(VERSION)-*.rpm   $(TOPDIR)/tmp/
+	/bin/cp -i ${rpmbuild}/SRPMS/${package}-$(VERSION)-*.rpm	$(TOPDIR)/tmp/
 
 .PHONY: release
 release:
@@ -148,5 +154,8 @@ help:
 	@echo "  all"
 	@echo "  install"
 
+.PHONY: clean
+clean:
+	rm -fr $(TOPDIR)/tmp/
 
 #   vi: set ts=4 noet ai tw=0:
