@@ -7,7 +7,7 @@
 #   - put user docs, etc all in one place
 #
 
-PKG_NAME 	:= gpfs_goodies
+package 	:= gpfs_goodies
 
 MAJOR_VER 	:= $(shell git describe --tags | sed -e 's/^v//' -e 's/-.*//')
 MAJOR_VER   ?= 0
@@ -29,7 +29,7 @@ VERSION     := ${MAJOR_VER}.${MINOR_VER}.${PATCH_VER}
 
 TMPDIR 		:= $(shell mktemp -d)
 SPECFILE 	:= $(shell mktemp)
-PKG_DIR     := ${PKG_NAME}-${VERSION}
+PKG_DIR     := ${package}-${VERSION}
 TARBALL		:= /tmp/${PKG_DIR}.tar.bz2
 
 .PHONY += all
@@ -43,22 +43,22 @@ install:
 	mkdir -p                ${PREFIX}/etc/gpfs_goodies/multipath.conf-creator_config_chunks/
 	install -m 755 etc/gpfs_goodies/multipath.conf-creator_config_chunks/*    ${PREFIX}/etc/gpfs_goodies/multipath.conf-creator_config_chunks/
 	
-	mkdir -p            			        ${PREFIX}/usr/share/${PKG_NAME}/
-	rsync -av doc/* 						${PREFIX}/usr/share/${PKG_NAME}/
-	find ${PREFIX}/usr/share/${PKG_NAME}/ -type d -exec chmod 755 '{}' \;
-	find ${PREFIX}/usr/share/${PKG_NAME}/ -type f -exec chmod 644 '{}' \;
+	mkdir -p            			        ${PREFIX}/usr/share/${package}/
+	rsync -av doc/* 						${PREFIX}/usr/share/${package}/
+	find ${PREFIX}/usr/share/${package}/ -type d -exec chmod 755 '{}' \;
+	find ${PREFIX}/usr/share/${package}/ -type f -exec chmod 644 '{}' \;
 	
-	mkdir -p                       			${PREFIX}/usr/share/${PKG_NAME}/etc/modprobe.d/
-	install -m 644 etc/modprobe.d/*			${PREFIX}/usr/share/${PKG_NAME}/etc/modprobe.d/
+	mkdir -p                       			${PREFIX}/usr/share/${package}/etc/modprobe.d/
+	install -m 644 etc/modprobe.d/*			${PREFIX}/usr/share/${package}/etc/modprobe.d/
 	
-	mkdir -p                       			${PREFIX}/usr/share/${PKG_NAME}/var/mmfs/etc/
-	install -m 644 var/mmfs/etc/*			${PREFIX}/usr/share/${PKG_NAME}/var/mmfs/etc/
+	mkdir -p                       			${PREFIX}/usr/share/${package}/var/mmfs/etc/
+	install -m 644 var/mmfs/etc/*			${PREFIX}/usr/share/${package}/var/mmfs/etc/
 	
 	mkdir -p                       			${PREFIX}/etc/init.d/
 	install -m 755 etc/init.d/*				${PREFIX}/etc/init.d/
 	
 	mkdir -p ${PREFIX}/usr/share/doc/${PKG_DIR}/
-	echo "See the files in /usr/share/${PKG_NAME}/" > ${PREFIX}/usr/share/doc/${PKG_DIR}/README
+	echo "See the files in /usr/share/${package}/" > ${PREFIX}/usr/share/doc/${PKG_DIR}/README
 
 .PHONY += tarball
 tarball:
@@ -85,11 +85,12 @@ tarball:
 	
 	#
 	# Version the Files
-	perl -pi -e "s/__VERSION__/${VERSION}/g"  					        ${TMPDIR}/${PKG_DIR}/${PKG_NAME}.spec
+	perl -pi -e "s/__VERSION__/${VERSION}/g"  					        ${TMPDIR}/${PKG_DIR}/${package}.spec
 	perl -pi -e "s/^VERSION=.*/VERSION=${VERSION}/g"                    ${TMPDIR}/${PKG_DIR}/sbin/gpfs_goodies
 	perl -pi -e "s/^VERSION=.*/VERSION=${VERSION}/g"  				    ${TMPDIR}/${PKG_DIR}/sbin/brians_own_hot-add_script
 	perl -pi -e "s/version_number = .*/version_number = '${VERSION}';/g"  ${TMPDIR}/${PKG_DIR}/sbin/multipath.conf-creator
 	perl -pi -e "s/version_number = .*/version_number = '${VERSION}';/g"  ${TMPDIR}/${PKG_DIR}/sbin/tune_block_device_settings
+	perl -pi -e "s/version_number = .*/version_number = '${VERSION}';/g"  ${TMPDIR}/${PKG_DIR}/sbin/gpfs_stanzafile-creator
 	
 	#
 	# Tar it up
@@ -99,15 +100,39 @@ tarball:
 rpm:	tarball
 	rpmbuild -ta ${TARBALL}
 
-.PHONY += release
-release:	rpm
-	mkdir -p ~/src/www.systemimager.org/testing/gpfs_goodies/
-	cp -i ~/rpmbuild/RPMS/noarch/${PKG_NAME}-${VERSION}-1.noarch.rpm    ~/src/www.systemimager.org/testing/gpfs_goodies/
-	cp -i ~/rpmbuild/SRPMS/${PKG_NAME}-${VERSION}-1.src.rpm             ~/src/www.systemimager.org/testing/gpfs_goodies/
-	cp -i ${TARBALL}                                                    ~/src/www.systemimager.org/testing/gpfs_goodies/
+.PHONY: release
+release:
+	@echo "Please try 'make test_release' or 'make stable_release'"
+
+.PHONY: test_release
+test_release:  rpms
+	@echo 
+	@echo "I'm about to upload the following files to:"
+	@echo "  ~/src/www.systemimager.org/testing/${package}/"
+	@echo "-----------------------------------------------------------------------"
+	@/bin/ls -1 $(TOPDIR)/tmp/${package}[-_]$(VERSION)*.*
 	@echo
-	@echo "Results:"
-	@/bin/ls -1 ~/src/www.systemimager.org/testing/gpfs_goodies/*${PKG_NAME}-${VERSION}* | sed 's/^/  /'
+	@echo "Hit <Enter> to continue..."
+	@read i
+	rsync -av --progress $(TOPDIR)/tmp/${package}[-_]$(VERSION)*.* ~/src/www.systemimager.org/testing/${package}/
+	@echo
+	@echo "Now run:   cd ~/src/www.systemimager.org/ && make upload"
+	@echo
+
+.PHONY: stable_release
+stable_release:  rpms
+	@echo 
+	@echo "I'm about to upload the following files to:"
+	@echo "  ~/src/www.systemimager.org/stable/${package}/"
+	@echo "-----------------------------------------------------------------------"
+	@/bin/ls -1 $(TOPDIR)/tmp/${package}[-_]$(VERSION)*.*
+	@echo
+	@echo "Hit <Enter> to continue..."
+	@read i
+	rsync -av --progress $(TOPDIR)/tmp/${package}[-_]$(VERSION)*.* ~/src/www.systemimager.org/stable/${package}/
+	@echo
+	@echo "Now run:   cd ~/src/www.systemimager.org/ && make upload"
+	@echo
 
 .PHONY += help
 help:
@@ -117,3 +142,6 @@ help:
 	@echo "  tarball"
 	@echo "  all"
 	@echo "  install"
+
+
+#   vi: set ts=4 noet ai tw=0:
