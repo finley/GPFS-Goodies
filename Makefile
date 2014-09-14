@@ -30,7 +30,9 @@ VERSION     := ${MAJOR_VER}.${MINOR_VER}.${PATCH_VER}
 TMPDIR 		:= $(shell mktemp -d)
 SPECFILE 	:= $(shell mktemp)
 PKG_DIR     := ${package}-${VERSION}
-TARBALL		:= /tmp/${PKG_DIR}.tar.bz2
+TARBALL		:= $(TOPDIR)/tmp/${PKG_DIR}.tar.bz2
+
+TOPDIR 		:= $(CURDIR)
 
 .PHONY += all
 all: tarball
