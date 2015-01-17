@@ -1,4 +1,4 @@
- The "GPFS Goodies" package includes:
+The "GPFS Goodies" package includes:
 
     brians_own_hot-add_script
 
@@ -42,56 +42,68 @@
  
 New and Improved! 
 
-    Now supports FlashStorage as well as SMClient compatible storage! (v20.8.4 and newer)
+    Now supports FlashStorage as well as SMClient compatible storage!
+    (v20.8.4 and newer)
 
  
 Download
 
-    The latest version can be found here:  http://snurl.com/gpfs_goodies_download
+    The latest version can be found here:
+    http://snurl.com/gpfs_goodies_download
 
  
-Example output from the "gpfs_goodies" command:
+Example output from GPFS Goodies commands:
 
-[root@box ~]# gpfs_goodies 
+    gpfs_goodies
 
-gpfs_goodies v20.8.2
-
- 
-Please try one of the following commands.  It's OK -- they're all safe,
-and won't do anything but show help information if run with either no
-arguments, or with --help or -h as an argument.
-
-    multipath.conf-creator
-
-        Create and optionally deploy a multipath configuration
-        appropriate for your LUNs and storage servers.
-
-    brians_own_hot-add_script
-
-        Hot delete any devices that don't have disk devices associated
-        with them (stale LUNs), and hot-add any new devices.
-
-    test_block_device_settings
-
-        This program will summarize key block device settings that
-        impact the performance when accessing your disk subsystems.  It
-        makes no changes to your system, and is safe to run on live
-        production systems.
-
-    tune_block_device_settings
+        [root@box ~]# gpfs_goodies
         
-        This program will examine your environment including GPFS,
-        storage servers, disk subsystems, and LUNs, to calculate best
-        practice block device tuning settings.  It will create a single
-        udev rules file with the tuning settings, using one entry for
-        each LUN, and optionally deploy it to each participating storage
-        server.
-
-
-    Be sure to take a look at the HOWTO and other docs in:
-
-        /usr/share/gpfs_goodies
- 
+        gpfs_goodies v20.9.5
+        
+        Please try one of the following commands.  They're listed in the order
+        of their typical use, from start to finish.  It's OK -- they're all
+        safe, and won't do anything but show help information if run with either
+        no arguments, or with --help or -h as an argument.
+        
+            brians_own_hot-add_script
+        
+                Hot delete any devices that don't have disk devices associated
+                with them (stale LUNs), and hot-add any new devices.
+        
+            multipath.conf-creator
+        
+                Create and optionally deploy a multipath configuration
+                appropriate for your LUNs and storage servers.
+        
+            gpfs_stanzafile-creator
+        
+                This script will auto-create a GPFS StanzaFile (written to
+                STDOUT) that should be considered an example of how you can
+                appropriately balance your disk devices across your NSD servers
+                for best performance.  It may be used as-is in many cases.
+        
+            test_block_device_settings
+        
+                This program will summarize key block device settings that
+                impact the performance when accessing your disk subsystems.  It
+                makes no changes to your system, and is safe to run on live
+                production systems.
+        
+            tune_block_device_settings
+                
+                This program will examine your environment including GPFS,
+                storage servers, disk subsystems, and LUNs, to calculate best
+                practice block device tuning settings.  It will create a single
+                udev rules file with the tuning settings, using one entry for
+                each LUN, and optionally deploy it to each participating storage
+                server.
+        
+        
+            Be sure to take a look at the HOWTO as well as other docs, examples,
+            and half-baked goodies in:
+        
+                /usr/share/gpfs_goodies
+        
 
  
  
