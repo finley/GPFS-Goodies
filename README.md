@@ -48,8 +48,18 @@ New and Improved!
  
 Download
 
-    The latest version can be found here:
     http://snurl.com/gpfs_goodies_download
+
+
+Project Page
+
+    https://github.com/finley/GPFS-Goodies
+
+ 
+Contributions
+
+    If you'd like to contribute, please send email to 
+    Brian Finley <bfinley@lenovo.com>.
 
  
 Example output from GPFS Goodies commands:
