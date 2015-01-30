@@ -6,7 +6,7 @@ Source: %{name}-%{version}.tar.bz2
 BuildRoot: /tmp/%{name}-buildroot
 BuildArchitectures: noarch
 Requires: lsscsi >= 0.21, expect
-License: EPL
+License: Apache License, Version 2.0
 
 
 %description
