@@ -107,7 +107,7 @@ rpms:	rpm
 
 .PHONY += rpm
 rpm:	tarball
-	rpmbuild -ta ${TARBALL}
+	rpmbuild -ta --sign ${TARBALL}
 	/bin/cp -i ${rpmbuild}/RPMS/*/${package}-$(VERSION)-*.rpm   $(TOPDIR)/tmp/
 	/bin/cp -i ${rpmbuild}/SRPMS/${package}-$(VERSION)-*.rpm	$(TOPDIR)/tmp/
 
