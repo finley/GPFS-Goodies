@@ -1,3 +1,14 @@
+New and Improved! 
+
+    Now supports FlashStorage as well as SMClient compatible storage!
+    (v20.8.4 and newer)
+
+ 
+Download
+
+    http://snurl.com/gpfs_goodies_download
+
+
 The "GPFS Goodies" package includes:
 
     brians_own_hot-add_script
@@ -40,17 +51,6 @@ The "GPFS Goodies" package includes:
         /usr/share/gpfs_goodies
 
  
-New and Improved! 
-
-    Now supports FlashStorage as well as SMClient compatible storage!
-    (v20.8.4 and newer)
-
- 
-Download
-
-    http://snurl.com/gpfs_goodies_download
-
-
 Project Page
 
     https://github.com/finley/GPFS-Goodies
