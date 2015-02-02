@@ -1,12 +1,12 @@
 #!/usr/bin/perl -w
 
 #
-# 2012.09.19 Brian Elliott Finley <bfinley@us.ibm.com>
+# 2012.09.19 Brian Elliott Finley <bfinley@lenovo.com>
 #   - The core of this I coopted from the command line from Scott
 #     Denham.  Thanks, Scott!
-# 2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
+# 2013.11.07 Brian Elliott Finley <bfinley@lenovo.com>
 #   - Turned into perl
-# 2013.12.10 Brian Elliott Finley <bfinley@us.ibm.com>
+# 2013.12.10 Brian Elliott Finley <bfinley@lenovo.com>
 #   - Added the --test option
 #
 
@@ -354,7 +354,7 @@ Usage:  $progname [OPTION...]
     
         This software is provided as-is, with no express or implied
         support.  However, the author would love to receive your
-        patches.  Please contact Brian E. Finley <bfinley\@us.ibm.com>
+        patches.  Please contact Brian E. Finley <bfinley\@lenovo.com>
         with patches and/or suggestions.
 
 

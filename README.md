@@ -168,7 +168,7 @@ Example output from GPFS Goodies commands:
             
                 This software is provided as-is, with no express or implied
                 support.  However, the author would love to receive your
-                patches.  Please contact Brian E. Finley <bfinley@us.ibm.com>
+                patches.  Please contact Brian E. Finley <bfinley@lenovo.com>
                 with patches and/or suggestions.
         
         
@@ -257,11 +257,11 @@ Example output from GPFS Goodies commands:
             
                 This software is provided as-is, with no express or implied
                 support.  However, the author would love to receive your
-                patches.  Please contact Brian E. Finley <bfinley@us.ibm.com>
+                patches.  Please contact Brian E. Finley <bfinley@lenovo.com>
                 with patches and/or suggestions.
         
                 To request support for an additional storage subsystem, please
-                email the output from 'lsscsi' to <bfinley@us.ibm.com>.  Emails
+                email the output from 'lsscsi' to <bfinley@lenovo.com>.  Emails
                 that have an actual storage subsystem attached (or at least
                 remote access to one) are likely to get the most attention. ;-)
         
@@ -357,11 +357,11 @@ Example output from GPFS Goodies commands:
             
                 This software is provided as-is, with no express or implied
                 support.  However, the author would love to receive your
-                patches.  Please contact Brian E. Finley <bfinley@us.ibm.com>
+                patches.  Please contact Brian E. Finley <bfinley@lenovo.com>
                 with patches and/or suggestions.
         
                 To request support for an additional storage subsystem, please
-                email the output from 'lsscsi' to <bfinley@us.ibm.com>.  Emails
+                email the output from 'lsscsi' to <bfinley@lenovo.com>.  Emails
                 that have an actual storage subsystem attached (or at least
                 remote access to one) are likely to get the most attention. ;-)
         
@@ -402,7 +402,7 @@ Example output from GPFS Goodies commands:
             
                 This software is provided as-is, with no express or implied
                 support.  However, the author would love to receive your
-                patches.  Please contact Brian E. Finley <bfinley@us.ibm.com>
+                patches.  Please contact Brian E. Finley <bfinley@lenovo.com>
                 with patches and/or suggestions.
         
         
@@ -522,7 +522,7 @@ Example output from GPFS Goodies commands:
             
                 This software is provided as-is, with no express or implied
                 support.  However, the author would love to receive your
-                patches.  Please contact Brian E. Finley <bfinley@us.ibm.com>
+                patches.  Please contact Brian E. Finley <bfinley@lenovo.com>
                 with patches and/or suggestions.
         
         

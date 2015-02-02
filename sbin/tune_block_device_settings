@@ -27,13 +27,13 @@
 #
 
 #
-#   2013.11.10 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2013.11.10 Brian Elliott Finley <bfinley@lenovo.com>
 #   - created
-#   2013.11.18 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2013.11.18 Brian Elliott Finley <bfinley@lenovo.com>
 #   - add initial default tuning settings
-#   2014.01.03 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2014.01.03 Brian Elliott Finley <bfinley@lenovo.com>
 #   - minor refinements after testing on Ray Paden's test cluster
-#   2014.08.06 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2014.08.06 Brian Elliott Finley <bfinley@lenovo.com>
 #   - handle tiered file systems, and other file systems with multiple 
 #     pools gracefully
 #   - detect GSS file systems and exit with no action taken
@@ -939,7 +939,7 @@ Usage:  $progname --filesystem FSNAME [OPTION...]
     
         This software is provided as-is, with no express or implied
         support.  However, the author would love to receive your
-        patches.  Please contact Brian E. Finley <bfinley\@us.ibm.com>
+        patches.  Please contact Brian E. Finley <bfinley\@lenovo.com>
         with patches and/or suggestions.
 
 EOF

@@ -5,32 +5,32 @@
 #
 
 #
-#   Originally created by: Jarrod Johnson <jbjohnso@us.ibm.com> as "getluns.pl"
+#   Originally created by: Jarrod Johnson <jjohnson2@lenovo.com> as "getluns.pl"
 #   
-#   2012.10.16 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2012.10.16 Brian Elliott Finley <bfinley@lenovo.com>
 #   - added invocation options and help output
-#   2012.10.18 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2012.10.18 Brian Elliott Finley <bfinley@lenovo.com>
 #   - added additional info in resultant configuration
-#   2013.02.14 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2013.02.14 Brian Elliott Finley <bfinley@lenovo.com>
 #   - added blacklist feature
-#   2013.06.14 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2013.06.14 Brian Elliott Finley <bfinley@lenovo.com>
 #   - modify blacklist to use vendor/product info instead of disk name
-#   2013.07.18 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2013.07.18 Brian Elliott Finley <bfinley@lenovo.com>
 #   - add section entries for DCS3700 and DS35xx subsystems
 #   - handle case where subsystem name has spaces
 #   - handle case where SMCli or subsystem doesn't return a "lun number"
-#   2013.09.22 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2013.09.22 Brian Elliott Finley <bfinley@lenovo.com>
 #   - add --version output
-#   2013.11.06 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2013.11.06 Brian Elliott Finley <bfinley@lenovo.com>
 #   - use proper grammar for plural and singular controller(s)
 #   - improve regex used to identify controller name
 #   - incorporate numerous additional controllers in the multipath.conf
 #     devices section
-#   2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2013.11.07 Brian Elliott Finley <bfinley@lenovo.com>
 #   - test for existence of SMcli
-#   2013.11.19 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2013.11.19 Brian Elliott Finley <bfinley@lenovo.com>
 #   - improve --help verbiage
-#   2014.07.14 Brian Elliott Finley <bfinley@us.ibm.com> & Christian Caruthers <christian.caruthers@us.ibm.com>
+#   2014.07.14 Brian Elliott Finley <bfinley@lenovo.com> & Christian Caruthers <ccaruthers@lenovo.com>
 #   - Identify and fix bug in handling device names that include hyphens
 #
 
@@ -929,11 +929,11 @@ Usage:  $progname [OPTION...] [--auto-detect | subsystem1 subsystem2...]
     
         This software is provided as-is, with no express or implied
         support.  However, the author would love to receive your
-        patches.  Please contact Brian E. Finley <bfinley\@us.ibm.com>
+        patches.  Please contact Brian E. Finley <bfinley\@lenovo.com>
         with patches and/or suggestions.
 
         To request support for an additional storage subsystem, please
-        email the output from 'lsscsi' to <bfinley\@us.ibm.com>.  Emails
+        email the output from 'lsscsi' to <bfinley\@lenovo.com>.  Emails
         that have an actual storage subsystem attached (or at least
         remote access to one) are likely to get the most attention. ;-)
 

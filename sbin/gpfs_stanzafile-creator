@@ -5,14 +5,14 @@
 #
 
 #
-#   2014.05.23 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2014.05.23 Brian Elliott Finley <bfinley@lenovo.com>
 #   - Created for demo at Edge2014
-#   2014.07.01 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2014.07.01 Brian Elliott Finley <bfinley@lenovo.com>
 #   - Improved help output and options validation
-#   2014.07.09 Brian Elliott Finley <bfinley@us.ibm.com> & Lerone Latouche <latouche@us.ibm.com>
+#   2014.07.09 Brian Elliott Finley <bfinley@lenovo.com> & Lerone Latouche <llatouche@lenovo.com>
 #   - Identified and fixed bug where remote commands were not properly
 #     escaped
-#   2014.09.13 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2014.09.13 Brian Elliott Finley <bfinley@lenovo.com>
 #   - Converted to perl
 #   - Added support for arbitrary numbers of servers per building-block
 #     (GPFS currently only supports a max of 8)
@@ -265,11 +265,11 @@ Usage:  $progname [OPTION...] --servers SERVER[,SERVER,...]
     
         This software is provided as-is, with no express or implied
         support.  However, the author would love to receive your
-        patches.  Please contact Brian E. Finley <bfinley\@us.ibm.com>
+        patches.  Please contact Brian E. Finley <bfinley\@lenovo.com>
         with patches and/or suggestions.
 
         To request support for an additional storage subsystem, please
-        email the output from 'lsscsi' to <bfinley\@us.ibm.com>.  Emails
+        email the output from 'lsscsi' to <bfinley\@lenovo.com>.  Emails
         that have an actual storage subsystem attached (or at least
         remote access to one) are likely to get the most attention. ;-)
 

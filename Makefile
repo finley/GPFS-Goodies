@@ -1,7 +1,7 @@
 #
-# 	2013.10.11 Brian Finley <bfinley@us.ibm.com>
+# 	2013.10.11 Brian Finley <bfinley@lenovo.com>
 #	- improve version handling
-# 	2013.11.07 Brian Finley <bfinley@us.ibm.com>
+# 	2013.11.07 Brian Finley <bfinley@lenovo.com>
 #	- include ./var/*
 #   - better handling of version setting in included progs
 #   - put user docs, etc all in one place

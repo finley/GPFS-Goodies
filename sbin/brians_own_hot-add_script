@@ -7,13 +7,13 @@
 #
 
 #
-#   2012.06.28 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2012.06.28 Brian Elliott Finley <bfinley@lenovo.com>
 #   - created
-#   2013.09.27 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2013.09.27 Brian Elliott Finley <bfinley@lenovo.com>
 #   - add --help, --status, and --yes options
-#   2013.11.07 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2013.11.07 Brian Elliott Finley <bfinley@lenovo.com>
 #   - added version
-#   2013.11.10 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2013.11.10 Brian Elliott Finley <bfinley@lenovo.com>
 #   - genericize to no be limited to specific controller models
 #   - improve status output to list per-controller type counts
 #
@@ -85,7 +85,7 @@ cat <<"EOF"
     
         This software is provided as-is, with no express or implied
         support.  However, the author would love to receive your
-        patches.  Please contact Brian E. Finley <bfinley@us.ibm.com>
+        patches.  Please contact Brian E. Finley <bfinley@lenovo.com>
         with patches and/or suggestions.
 
 
