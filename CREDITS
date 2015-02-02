@@ -1,0 +1,22 @@
+N: Brian Elliott Finley
+E: bfinley@lenovo.com
+E: brian@thefinleys.com
+D: creator
+D: upstream maintainer
+
+N: Jarrod Johnson
+E: jjohnson2@lenovo.com
+D: 2nd generation multipath.conf-creator engine: getluns.pl
+
+N: Lerone Latouche
+E: llatouche@lenovo.com
+D: opensmd.for_direct_connect_storage patches/tweaks
+
+N: Christian Caruthers
+E: ccaruthers@lenovo.com
+D: patches & bug fixes
+
+N: Ray Paden
+E: rpaden@lenovo.com
+D: Critical testing, feedback, guidance, and tuning advice
+
