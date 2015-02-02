@@ -1,11 +1,11 @@
 #!/bin/bash
 
 #
-#   2014.01.24 Brian Elliott Finley <bfinley@us.ibm.com>
+#   2014.01.24 Brian Elliott Finley <bfinley@lenovo.com>
 #   - Modified to handle multiple instances on specific ports, say for
 #     example use with a direct connect IB disk subsystem.  Currently
 #     hard coded to work with all ports on mlx4_1 and mlx4_2.
-#   2014.06.17 Lerone Latouche <latouche@us.ibm.com> (w/minor tweaks by Brian)
+#   2014.06.17 Lerone Latouche <llatouche@lenovo.com> (w/minor tweaks by Brian)
 #   - Add a sleep after start of each opensm instance
 #   - Add comments on required srptools package
 #
@@ -330,7 +330,7 @@ case $ACTION in
             OPTIONS="--guid $GUID --pidfile $PID_FILE"
             start
 	
-	################# latouche @ us.ibm.com ################
+	################# llatouche @ lenovo.com ################
 	# Load the IB SRP kernel module and initiate/connect IB SRP storage devices	
         sleep 5
         # srp_discover
