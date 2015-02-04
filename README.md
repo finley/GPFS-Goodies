@@ -1,5 +1,5 @@
 Please see the wiki:
 
-    https://github.com/finley/GPFS-Goodies/wiki
+* [GPFS Goodies Wiki](https://github.com/finley/GPFS-Goodies/wiki)
 
 
