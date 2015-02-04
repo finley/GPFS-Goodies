@@ -9,6 +9,12 @@ Download
     http://snurl.com/gpfs_goodies_download
 
 
+Videos
+
+    Hot Adding LUNs: http://youtu.be/NBMq8YvYjL4
+
+
+
 The "GPFS Goodies" package includes:
 
     brians_own_hot-add_script
