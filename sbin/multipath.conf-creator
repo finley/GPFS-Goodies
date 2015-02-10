@@ -32,6 +32,9 @@
 #   - improve --help verbiage
 #   2014.07.14 Brian Elliott Finley <bfinley@lenovo.com> & Christian Caruthers <ccaruthers@lenovo.com>
 #   - Identify and fix bug in handling device names that include hyphens
+#   2015.02.10 Brian Elliott Finley <bfinley@lenovo.com> & Lerone Latouche <llatouche@lenovo.com>
+#   - Lerone identified a bug in the handling of SMcli API system names
+#   - Brian fixed the bug
 #
 
 
@@ -176,17 +179,20 @@ sub get_subsystem_info {
 
     my $subsystem = shift;
 
-    print qq(  Detecting API for "$subsystem") if($verbose);
-    my $api = detect_subsystem_api("$subsystem");
-    print " -> $api\n" if($verbose);
-
     print qq(  Querying "$subsystem"\n);
+    print qq(  -> Detecting API:  );
+    my ($api, $assigned_name) = detect_subsystem_api("$subsystem");
+    print qq($api\n);
+    $assigned_name = $subsystem unless($assigned_name);
+    print qq(  -> Subsystem Name: $assigned_name\n);
+    print qq(  -> Detecting LUNs\n);
     if($api eq 'SMcli') {
-        get_subsystem_info_via_SMcli("$subsystem");
+        get_subsystem_info_via_SMcli("$assigned_name");
     }
     elsif($api eq 'IBM FlashSystem') {
-        get_subsystem_info_via_IBM_FlashSystem("$subsystem");
+        get_subsystem_info_via_IBM_FlashSystem("$assigned_name");
     }
+    print qq(\n);
 
     return 1;
 }
@@ -196,8 +202,21 @@ sub detect_subsystem_api {
 
     my $subsystem = shift;
 
+    my $cmd;
+
     if($auto_detect) { return 'SMcli'; }
 
+    #
+    # See if it's an SMcli device.  If it is, update the subsystem name, and
+    # return SMcli.
+    my $assigned_name = test_for_host_in_smcli_list($subsystem);
+    if($assigned_name) {
+        $subsystem = $assigned_name;
+        return 'SMcli', $assigned_name;
+    }
+
+    #
+    # See if it has a resolvable hostname 
     my $ip = hostname2ip($subsystem);
     if(! $ip) {
 
@@ -210,10 +229,21 @@ sub detect_subsystem_api {
         exit 1;
     }
 
-    my $cmd;
-    $cmd = "ping -c 1 $ip >/dev/null 2>&1";
-    !system($cmd) or die("Couldn't run command: $cmd");
+    #
+    # See if it is pingable
+    if( ! test_for_host_is_pingable($ip) ) {
 
+        usage();
+        print "  WARNING:  I couldn't ping IP address $ip for $subsystem\n";
+        print "\n";
+        print "    Hint --> Are you sure that system is online?\n";
+        print "\n";
+
+        exit 1;
+    }
+
+    #
+    # See if we can detect the model based on the MAC address
     $cmd = "ip neigh";
     open(INPUT,"$cmd|") or die("Couldn't run $cmd for input");
     while(<INPUT>) {
@@ -744,10 +774,7 @@ close(FILE);
 #
 ########################################################################
 
-print "\n";
-print "  done!\n";
-print "\n\n";
-print "You can find your fresh multipath.conf file here:\n";
+print "Done!  You can find your fresh multipath.conf file here:\n";
 print "\n";
 print "  $out_file\n";
 print "\n";
@@ -1009,6 +1036,40 @@ sub hostname2ip
        my $ip = (gethostbyname(shift))[4] || "";
        return $ip ? inet_ntoa( $ip ) : undef;
 }
+
+
+sub test_for_host_in_smcli_list {
+
+    my $subsystem = shift;
+
+    my $cmd = "SMcli -d -v";
+    open(INPUT,"$cmd|") or die("Couldn't run $cmd for input");
+    while(<INPUT>) {
+        if(m/(^|\s)($subsystem)(\s|$)/) {
+            my ($assigned_name) = split;
+                # we can use SMcli, but let's set the subsystem name to the one
+                # SMcli expects to see with "-n".
+            return $assigned_name;
+        }
+    }
+    close(INPUT);
+
+    return undef;
+}
+
+
+sub test_for_host_is_pingable {
+
+    my $ip = shift;
+
+    my $cmd = "ping -c 1 $ip >/dev/null 2>&1";
+    if( !system($cmd) ) {
+        return 1;
+    }
+
+    return undef;
+}
+
 
 #
 #   END Subroutines
