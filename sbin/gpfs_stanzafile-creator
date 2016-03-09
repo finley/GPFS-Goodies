@@ -25,7 +25,7 @@ use Getopt::Long;
 use File::Basename;
 
 my $progname = basename($0);
-my $version_number = '20.8.3';
+my $version_number = '20.9.5';
 my @output;
 my %disks_by_raid_controller;
 my $disk_regex = '(.*[ab])_lun[0-9]+';
@@ -94,7 +94,7 @@ sub write_stanza_file {
 
     open(FILE,">$file") or die("Couldn't open $file for writing");
     print FILE "#\n";
-    print FILE "#  Created by $progname\n";
+    print FILE "#  Created by $progname v$version_number\n";
     print FILE "#\n";
     print FILE "\n";
     print FILE @output;
@@ -108,21 +108,26 @@ sub create_stanza_chunk {
 
     my $servers = shift;
 
-    my @disks;
-
+    my %disks;
 
     my ($server, $remainder) = split(/,/, $servers, 2);
     my $cmd = qq(ssh $server ) . q(ls -1 /dev/mapper/\*);
 
+    my $disk;
     open(INPUT,"$cmd|") or die("Couldn't run $cmd for input");
     while(<INPUT>) {
         chomp;
-        push @disks, $_ if(m/$disk_regex/);
+        if(m/$disk_regex/) {
+            $disk = $_;
+            my $lun = $1 if( $disk =~ m/lun(\d+)/);
+            $disks{$lun} = $disk;
+        }
     }
     close(INPUT);
 
+    foreach my $lun (sort numerically (keys %disks)) {
 
-    foreach my $disk (@disks) {
+        my $disk = $disks{$lun};
     
         my $nsdname = basename $disk;
         $nsdname =~ m/$disk_regex/;
@@ -305,6 +310,35 @@ sub version {
 
     return 1;
 }
+
+# Description:
+# Modify a sort so that 10 comes after 2.  
+# Standard sort: (sort $numbers);               # 1,10,2,3,4,5,6,7,8,9
+# Numerically:   (sort numerically $numbers);   # 1,2,3,4,5,6,7,8,9,10
+#
+# Usage:
+# foreach my $line (sort numerically (keys ( %{hash} )))
+#
+sub numerically {
+    $a <=> $b;
+}
+
+sub multisort {
+    my ($a1, $a2, $a3) = split(/\s+/, $a);
+    my ($b1, $b2, $b3) = split(/\s+/, $b);
+
+    # Stringwise compare field 2 (element name)
+    # then numeric field 1 (priority)
+    # then stringwise field 3 (bundle)
+    $a2 cmp $b2
+        ||
+    $b1 <=> $a1
+        ||
+    $a3 cmp $b3
+}
+
+
+
 
 #
 #   END subroutines
